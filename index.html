@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SavannahIQ — Kenya Agriculture Intelligence</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;9..144,600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1610;--surface:#111d14;--s2:#162019;--border:#1e3326;
+  --green:#3ddc6f;--gdim:#1a3d26;
+  --text:#c8dcc8;--muted:#9ec89e;
+  --red:#e04030;--orange:#e07820;--good:#28b858;
+  --mono:'DM Mono',monospace;--serif:'Fraunces',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden}
+.wrap{display:flex;flex-direction:column;height:100vh}
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.logo{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--green);letter-spacing:-.5px;white-space:nowrap}
+.logo em{color:var(--muted);font-weight:300;font-style:italic}
+.kpis{display:flex;gap:8px;flex:1}
+.kpi{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 12px}
+.kpi-v{font-family:var(--serif);font-size:18px;font-weight:600;line-height:1}
+.kpi-l{font-size:9px;color:var(--muted);margin-top:1px}
+.live{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--green);white-space:nowrap}
+.dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.body{display:flex;flex:1;overflow:hidden;min-height:0}
+.left{width:224px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.left-scroll{flex:1;overflow-y:auto;padding:10px 12px}
+.left-scroll::-webkit-scrollbar{width:2px}
+.left-scroll::-webkit-scrollbar-thumb{background:var(--border)}
+.stitle{font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;margin-top:10px}
+.stitle:first-child{margin-top:0}
+.vtoggle{display:flex;gap:4px;margin-bottom:2px}
+.vtbtn{flex:1;font-family:var(--mono);font-size:10px;padding:5px 0;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+.vtbtn.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
+.csel{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:10px;padding:5px 7px;cursor:pointer;margin-bottom:8px}
+.csel option{background:var(--surface)}
+.pills{display:flex;flex-direction:column;gap:4px}
+.pill{font-size:10px;padding:6px 8px;border-radius:5px;border:1px solid var(--border);cursor:pointer;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:space-between}
+.pill:hover{border-color:var(--muted);color:var(--text)}
+.pill.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
+.ptag{font-size:8px;padding:1px 5px;border-radius:3px}
+.ccard{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px;margin-top:10px}
+.ccard-name{font-size:13px;font-weight:500;color:var(--green);margin-bottom:1px}
+.ccard-meta{font-size:9px;color:var(--muted);margin-bottom:6px}
+.ccard-score{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1;margin-bottom:1px}
+.ccard-lbl{font-size:8px;color:var(--muted);margin-bottom:8px}
+.ipc-badge{float:right;font-size:8px;padding:2px 6px;border-radius:3px;font-weight:500}
+.pixbar{height:10px;border-radius:3px;overflow:hidden;display:flex;margin:0 0 3px}
+.pixbar-seg{height:100%}
+.pixleg{display:flex;gap:8px;flex-wrap:wrap}
+.pl{font-size:8px;color:var(--muted);display:flex;align-items:center;gap:3px}
+.pl-sq{width:7px;height:7px;border-radius:1px}
+.right{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column}
+#map{flex:1;background:var(--bg)}
+.map-foot{display:flex;gap:12px;align-items:center;padding:5px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+.leg{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted)}
+.leg-sq{width:10px;height:10px;border-radius:2px}
+#map-sub{margin-left:auto;font-size:9px;color:var(--muted)}
+.bottom{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;height:132px}
+.panel{padding:10px 12px;border-right:1px solid var(--border);overflow:hidden}
+.panel:last-child{border-right:none}
+.phdr{font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.irow{display:flex;align-items:center;gap:6px;font-size:9px;margin-bottom:3px;opacity:.4;transition:opacity .2s}
+.irow.active{opacity:1}
+.irow-name{width:96px;color:var(--muted);flex-shrink:0}
+.irow-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.irow-fill{height:100%;border-radius:2px;transition:width .5s}
+.irow-val{width:50px;text-align:right;font-size:9px;font-weight:500}
+.crow{display:flex;align-items:center;gap:6px;font-size:9px;margin-bottom:3px}
+.crow-name{width:96px;color:var(--muted);flex-shrink:0}
+.crow-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.crow-fill{height:100%;background:var(--gdim);border-radius:2px;transition:width .5s}
+.crow-val{width:65px;text-align:right;font-size:9px;color:var(--muted)}
+.aline{font-size:9px;line-height:1.55;padding:4px 8px;border-radius:3px;border-left:2px solid;margin-bottom:4px}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div>
+    <div class="logo">Savannah<em>IQ</em></div>
+    <div style="font-size:9px;color:var(--muted);letter-spacing:.8px">KENYA AGRICULTURE INTELLIGENCE &nbsp;·&nbsp; <span class="live" style="display:inline-flex"><span class="dot"></span>&nbsp;LIVE</span></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-v" id="kpi-critical" style="color:var(--red)">—</div><div class="kpi-l">Critical counties</div></div>
+    <div class="kpi"><div class="kpi-v" id="kpi-moderate" style="color:var(--orange)">—</div><div class="kpi-l">Moderate risk</div></div>
+    <div class="kpi"><div class="kpi-v" id="kpi-stable" style="color:var(--good)">—</div><div class="kpi-l">Stable counties</div></div>
+    <div class="kpi"><div class="kpi-v" id="kpi-maize" style="color:var(--text)">—</div><div class="kpi-l">Maize hectares</div></div>
+    <div class="kpi"><div class="kpi-v" id="kpi-fallow" style="color:var(--text)">—</div><div class="kpi-l">Fallow land (ha)</div></div>
+  </div>
+  <div style="font-size:9px;color:var(--muted);text-align:right;white-space:nowrap">
+    <div id="hdr-date">—</div>
+    <div>Sentinel-2 · 90-day composite</div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="left">
+    <div class="left-scroll">
+      <div class="stitle">View</div>
+      <div class="vtoggle">
+        <button class="vtbtn active" id="btn-nat" onclick="setView('national')">National</button>
+        <button class="vtbtn" id="btn-cty" onclick="setView('county')">County</button>
+      </div>
+      <div class="stitle">County</div>
+      <select class="csel" id="csel" onchange="onSelChange(this.value)">
+        <option value="">— All 47 counties —</option>
+      </select>
+      <div class="stitle">Index layer</div>
+      <div class="pills">
+        <div class="pill active" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
+        <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
+        <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
+        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall anomaly <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
+        <div class="pill" data-idx="soil" onclick="setIdx('soil',this)">Soil moisture <span class="ptag" style="background:#102030;color:#6ac0e0">HYDRO</span></div>
+        <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#1a2a10;color:#a0d860">CLASS</span></div>
+      </div>
+      <div id="ccard-wrap"></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div id="map"></div>
+    <div class="map-foot">
+      <div class="leg"><div class="leg-sq" style="background:var(--red)"></div><span id="leg-crit">Score ≥70 · Critical</span></div>
+      <div class="leg"><div class="leg-sq" style="background:var(--orange)"></div><span id="leg-mod">40–69 · Moderate</span></div>
+      <div class="leg"><div class="leg-sq" style="background:var(--good)"></div><span id="leg-good">Score &lt;40 · Stable</span></div>
+      <div id="map-sub">National · all 47 counties · click to select</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom">
+  <div class="panel"><div class="phdr" id="p1-hdr">Index breakdown</div><div id="p1-body"></div></div>
+  <div class="panel"><div class="phdr" id="p2-hdr">Crop intelligence</div><div id="p2-body"></div></div>
+  <div class="panel"><div class="phdr">AI advisor</div><div id="p3-body"></div></div>
+</div>
+
+</div>
+
+<script>
+const TILE_BASE   = 'https://raw.githubusercontent.com/TabithaChelagat/SavannahIQ/main/tiles';
+const DATA_URL    = 'https://raw.githubusercontent.com/TabithaChelagat/SavannahIQ/main/data/savannahiq_data.json';
+const GEOJSON_URL = 'https://raw.githubusercontent.com/TabithaChelagat/SavannahIQ/main/kenya.geojson';
+
+let SIQ, CD, map, activeIdx='drought', activeView='national', activeCounty=null;
+
+const LEGENDS = {
+  drought:  {crit:'Score ≥70 · Critical',        mod:'40–69 · Moderate',            good:'Score <40 · Stable'},
+  ndvi:     {crit:'NDVI <0.30 · Severe veg loss', mod:'0.30–0.50 · Stressed canopy', good:'NDVI >0.50 · Healthy'},
+  lst:      {crit:'LST >+2°C · Heat stress',      mod:'+0.5–2°C · Above normal',     good:'<+0.5°C · Near normal'},
+  rainfall: {crit:'Deficit >20% · Severe',        mod:'5–20% deficit',               good:'<5% deficit · Normal'},
+  soil:     {crit:'<0.15 m³/m³ · Critically dry', mod:'0.15–0.25 · Low moisture',    good:'>0.25 · Adequate'},
+  crops:    {crit:'Sorghum / dryland dominant',   mod:'Maize dominant',              good:'Tea / perennial dominant'},
+};
+
+function updateLegend(idx){
+  const lg = LEGENDS[idx]||LEGENDS.drought;
+  document.getElementById('leg-crit').textContent = lg.crit;
+  document.getElementById('leg-mod').textContent  = lg.mod;
+  document.getElementById('leg-good').textContent = lg.good;
+}
+
+function loadKPIs(){
+  const n = SIQ.national;
+  document.getElementById('kpi-critical').textContent = n.critical_counties;
+  document.getElementById('kpi-moderate').textContent = n.moderate_counties;
+  document.getElementById('kpi-stable').textContent   = n.stable_counties;
+  document.getElementById('kpi-maize').textContent    = (n.total_maize_ha/1e6).toFixed(1)+'M';
+  document.getElementById('kpi-fallow').textContent   = (n.total_fallow_ha/1e6).toFixed(1)+'M';
+  document.getElementById('hdr-date').textContent     = SIQ.generated;
+}
+
+function initMap(geojson){
+  map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        'carto': {
+          type: 'raster',
+          tiles: ['https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png'],
+          tileSize: 256,
+          attribution: '© CartoDB'
+        }
+      },
+      layers: [{id:'carto-base',type:'raster',source:'carto'}]
+    },
+    center: [37.9, 0.5],
+    zoom: 6,
+    minZoom: 5,
+    maxZoom: 14
+  });
+
+  map.on('load', function(){
+    // Raster tile layer — real satellite classification
+    map.addSource('siq-tiles', {
+      type: 'raster',
+      tiles: [TILE_BASE+'/drought/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      bounds: [33.9, -4.7, 41.9, 5.0]
+    });
+    map.addLayer({
+      id: 'siq-tiles',
+      type: 'raster',
+      source: 'siq-tiles',
+      paint: {'raster-opacity': 0.85}
+    });
+
+    // County boundaries
+    map.addSource('counties', {type:'geojson', data: geojson});
+
+    // Invisible fill for click detection
+    map.addLayer({
+      id: 'county-fill',
+      type: 'fill',
+      source: 'counties',
+      paint: {'fill-color':'rgba(0,0,0,0)','fill-opacity':0.01}
+    });
+
+    // White county borders
+    map.addLayer({
+      id: 'county-borders',
+      type: 'line',
+      source: 'counties',
+      paint: {'line-color':'#ffffff','line-width':0.8,'line-opacity':0.7}
+    });
+
+    // Green highlight for selected county
+    map.addLayer({
+      id: 'county-highlight',
+      type: 'line',
+      source: 'counties',
+      paint: {'line-color':'#7dda8f','line-width':2.5,'line-opacity':1},
+      filter: ['==','COUNTY_NAM','']
+    });
+
+    // Tooltip
+    const tooltip = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      className: 'siq-tooltip'
+    });
+
+    map.on('mousemove','county-fill', function(e){
+      const name = e.features[0].properties.COUNTY_NAM;
+      const c = CD[name];
+      if(!c) return;
+      map.getCanvas().style.cursor = 'pointer';
+      tooltip.setLngLat(e.lngLat)
+        .setHTML(`<b style="color:#7dda8f">${name}</b><br>Drought: ${c.drought} · IPC ${c.ipc}<br>${activeIdx}: ${getIdxVal(c,activeIdx)}`)
+        .addTo(map);
+    });
+    map.on('mouseleave','county-fill', function(){
+      map.getCanvas().style.cursor = '';
+      tooltip.remove();
+    });
+
+    map.on('click','county-fill', function(e){
+      const name = e.features[0].properties.COUNTY_NAM;
+      if(activeCounty===name){ setView('national'); return; }
+      selectCounty(name);
+    });
+  });
+}
+
+function swapTileLayer(idx){
+  if(!map || !map.getSource('siq-tiles')) return;
+  map.getSource('siq-tiles').setTiles(
+    [TILE_BASE+'/'+idx+'/{z}/{x}/{y}.png']
+  );
+}
+
+function getIdxVal(c, idx){
+  if(idx==='drought')  return c.drought+'/100';
+  if(idx==='ndvi')     return c.ndvi.toFixed(2);
+  if(idx==='lst')      return (c.lst>=0?'+':'')+c.lst.toFixed(1)+'°C';
+  if(idx==='rainfall') return (c.rain>=0?'+':'')+c.rain+'%';
+  if(idx==='soil')     return c.soil.toFixed(3)+' m³/m³';
+  if(idx==='crops')    return 'see breakdown';
+  return '—';
+}
+
+function getCol(c, k){
+  if(k==='drought')  return c.drought>=70?'var(--red)':c.drought>=40?'var(--orange)':'var(--good)';
+  if(k==='ndvi')     return c.ndvi<0.3?'var(--red)':c.ndvi<0.5?'var(--orange)':'var(--good)';
+  if(k==='lst')      return c.lst>2?'var(--red)':c.lst>0.5?'var(--orange)':'var(--good)';
+  if(k==='rainfall'||k==='rain') return c.rain<-20?'var(--red)':c.rain<-5?'var(--orange)':'var(--good)';
+  if(k==='soil')     return c.soil<0.15?'var(--red)':c.soil<0.25?'var(--orange)':'var(--good)';
+  return 'var(--good)';
+}
+
+function setIdx(idx, el){
+  activeIdx = idx;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  swapTileLayer(idx);
+  updateLegend(idx);
+  if(activeCounty) updateBottomCounty(activeCounty);
+  else updateBottomNational();
+  document.getElementById('map-sub').textContent = activeView==='national'
+    ? 'Showing: '+idx+' · all 47 counties'
+    : 'County: '+activeCounty+' · '+idx;
+}
+
+function selectCounty(name){
+  activeCounty = name;
+  activeView   = 'county';
+  document.getElementById('btn-nat').classList.remove('active');
+  document.getElementById('btn-cty').classList.add('active');
+  document.getElementById('csel').value = name;
+  if(map.getLayer('county-highlight'))
+    map.setFilter('county-highlight',['==','COUNTY_NAM',name]);
+  const feat = window._geojson.features.find(f=>f.properties.COUNTY_NAM===name);
+  if(feat){
+    const bounds = new maplibregl.LngLatBounds();
+    const addCoords = coords => coords.forEach(c=>
+      Array.isArray(c[0]) ? addCoords(c) : bounds.extend(c)
+    );
+    addCoords(feat.geometry.coordinates);
+    map.fitBounds(bounds, {padding:60, duration:650, maxZoom:11});
+  }
+  updateCountyCard(name);
+  updateBottomCounty(name);
+  document.getElementById('map-sub').textContent = 'County: '+name+' · '+activeIdx+' · click again to deselect';
+}
+
+function setView(v){
+  activeView = v;
+  document.getElementById('btn-nat').classList.toggle('active', v==='national');
+  document.getElementById('btn-cty').classList.toggle('active', v==='county');
+  if(v==='national'){
+    activeCounty = null;
+    document.getElementById('csel').value = '';
+    document.getElementById('ccard-wrap').innerHTML = '';
+    if(map && map.getLayer('county-highlight'))
+      map.setFilter('county-highlight',['==','COUNTY_NAM','']);
+    map.flyTo({center:[37.9,0.5], zoom:6, duration:650});
+    updateBottomNational();
+    document.getElementById('map-sub').textContent = 'National · all 47 counties · click to select';
+  }
+}
+
+function onSelChange(val){
+  if(!val){ setView('national'); return; }
+  selectCounty(val);
+}
+
+function updateCountyCard(name){
+  const c = CD[name];
+  if(!c) return;
+  const col    = c.drought>=70?'var(--red)':c.drought>=40?'var(--orange)':'var(--good)';
+  const ipcBg  = c.ipc>=3?'#4a1010':c.ipc===2?'#3a2810':'#0e2818';
+  const ipcCol = c.ipc>=3?'var(--red)':c.ipc===2?'var(--orange)':'var(--good)';
+  document.getElementById('ccard-wrap').innerHTML = `
+    <div class="ccard">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="ccard-name">${name}</div>
+        <div class="ipc-badge" style="background:${ipcBg};color:${ipcCol}">IPC ${c.ipc}</div>
+      </div>
+      <div class="ccard-meta">${c.date}</div>
+      <div class="ccard-score" style="color:${col}">${c.drought}</div>
+      <div class="ccard-lbl">drought score · ${activeIdx} active</div>
+      <div class="pixbar">
+        <div class="pixbar-seg" style="width:${c.pct_critical}%;background:var(--red)"></div>
+        <div class="pixbar-seg" style="width:${c.pct_moderate}%;background:var(--orange)"></div>
+        <div class="pixbar-seg" style="width:${c.pct_good}%;background:var(--good)"></div>
+      </div>
+      <div class="pixleg">
+        <div class="pl"><div class="pl-sq" style="background:var(--red)"></div>${c.pct_critical}% crit.</div>
+        <div class="pl"><div class="pl-sq" style="background:var(--orange)"></div>${c.pct_moderate}% mod.</div>
+        <div class="pl"><div class="pl-sq" style="background:var(--good)"></div>${c.pct_good}% good</div>
+      </div>
+    </div>`;
+}
+
+function updateBottomCounty(name){
+  const c = CD[name];
+  if(!c) return;
+
+  // Index breakdown
+  const idxDefs = [
+    {k:'drought',  l:'Drought score',  v:c.drought+'/100',                         pct:c.drought},
+    {k:'ndvi',     l:'NDVI',           v:c.ndvi.toFixed(2),                         pct:Math.round(c.ndvi*100)},
+    {k:'lst',      l:'LST anomaly',    v:(c.lst>=0?'+':'')+c.lst.toFixed(1)+'°C',  pct:Math.min(100,Math.abs(c.lst)*20)},
+    {k:'rainfall', l:'Rainfall anom.', v:(c.rain>=0?'+':'')+c.rain+'%',            pct:Math.min(100,Math.abs(c.rain)*2)},
+    {k:'soil',     l:'Soil moisture',  v:c.soil.toFixed(3)+' m³/m³',               pct:Math.round(c.soil*200)},
+  ];
+  document.getElementById('p1-hdr').textContent = 'Index breakdown · '+name;
+  document.getElementById('p1-body').innerHTML = idxDefs.map(d=>
+    `<div class="irow${d.k===activeIdx?' active':''}">
+      <div class="irow-name">${d.l}</div>
+      <div class="irow-bar"><div class="irow-fill" style="width:${d.pct}%;background:${getCol(c,d.k)}"></div></div>
+      <div class="irow-val" style="color:${getCol(c,d.k)}">${d.v}</div>
+    </div>`).join('');
+
+  // Crop intelligence
+  const totalHa = c.maize_ha+c.tea_ha+c.sorghum_ha+c.sugarcane_ha+c.fallow_ha;
+  const crops = [
+    {n:'Maize',        ha:c.maize_ha},
+    {n:'Tea / Coffee', ha:c.tea_ha},
+    {n:'Sorghum',      ha:c.sorghum_ha},
+    {n:'Sugarcane',    ha:c.sugarcane_ha},
+    {n:'Fallow land',  ha:c.fallow_ha},
+  ].sort((a,b)=>b.ha-a.ha);
+  document.getElementById('p2-hdr').textContent = 'Crop intelligence · '+name;
+  document.getElementById('p2-body').innerHTML = crops.map(cr=>{
+    const pct   = totalHa>0?Math.round(cr.ha/totalHa*100):0;
+    const haFmt = cr.ha>=1000?(cr.ha/1000).toFixed(1)+'K ha':cr.ha+' ha';
+    return `<div class="crow">
+      <div class="crow-name">${cr.n}</div>
+      <div class="crow-bar"><div class="crow-fill" style="width:${pct}%"></div></div>
+      <div class="crow-val">${haFmt} · ${pct}%</div>
+    </div>`;
+  }).join('');
+
+  // AI Advisor
+  const idxCol = getCol(c, activeIdx==='rainfall'?'rainfall':activeIdx);
+  let idxLine = '';
+  if(activeIdx==='drought'){
+    const lvl = c.drought>=70?'critical — water access failure likely':c.drought>=40?'moderate — crop stress developing':'low — within seasonal norms';
+    idxLine = `Drought score <b>${c.drought}/100</b>: ${lvl}. Composite of NDVI (${c.ndvi.toFixed(2)}), soil (${c.soil.toFixed(3)}), rainfall (${c.rain>=0?'+':''}${c.rain}%) and LST (${c.lst>=0?'+':''}${c.lst.toFixed(1)}°C).`;
+  } else if(activeIdx==='ndvi'){
+    const s = c.ndvi<0.3?'severe vegetation stress':c.ndvi<0.5?'moderate stress — reduced photosynthesis':'healthy canopy';
+    idxLine = `NDVI <b>${c.ndvi.toFixed(2)}</b>: ${s}. Soil ${c.soil.toFixed(3)} m³/m³${c.soil<0.2?' — root-zone critically dry':''}. Rainfall ${c.rain>=0?'+':''}${c.rain}%.`;
+  } else if(activeIdx==='lst'){
+    const s = c.lst>2?'critically elevated — high evapotranspiration':c.lst>0.5?'above normal — increasing water demand':'near-normal — heat stress minimal';
+    idxLine = `LST anomaly <b>${c.lst>=0?'+':''}${c.lst.toFixed(1)}°C</b>: ${s}. NDVI ${c.ndvi.toFixed(2)} reflects cumulative thermal impact.`;
+  } else if(activeIdx==='rainfall'){
+    const s = c.rain<-20?`severe deficit (${c.rain}%)`:c.rain<-5?`below normal (${c.rain}%)`:`near-normal or surplus (${c.rain>=0?'+':''}${c.rain}%)`;
+    idxLine = `Rainfall anomaly <b>${c.rain>=0?'+':''}${c.rain}%</b>: ${s}. Soil response: ${c.soil.toFixed(3)} m³/m³. NDVI ${c.ndvi.toFixed(2)}.`;
+  } else if(activeIdx==='soil'){
+    const s = c.soil<0.15?'critically dry — plants on residual reserves':c.soil<0.25?'low — approaching stress threshold':'adequate moisture';
+    idxLine = `Soil moisture <b>${c.soil.toFixed(3)} m³/m³</b>: ${s}. LST ${c.lst>=0?'+':''}${c.lst.toFixed(1)}°C accelerating evapotranspiration. NDVI ${c.ndvi.toFixed(2)}.`;
+  } else if(activeIdx==='crops'){
+    idxLine = `Dominant: <b>${crops[0].n}</b> (${(crops[0].ha/1000).toFixed(0)}K ha). Fallow / unutilized: ${(c.fallow_ha/1000).toFixed(0)}K ha — potential arable land.`;
+  }
+  const actionLine = c.drought>=70
+    ? `<b>${name}</b> IPC Phase ${c.ipc}. Escalate to county government. Coordinate NDMA food relief for ${crops[0].n} farmers.`
+    : c.drought>=40
+    ? `<b>${name}</b> moderate stress. Advise drought-tolerant varieties for ${crops[0].n}. Next satellite pass in 5 days.`
+    : `<b>${name}</b> stable. ${crops[0].n} phenology on schedule. No immediate intervention required.`;
+
+  document.getElementById('p3-body').innerHTML =
+    `<div class="aline" style="border-color:${idxCol};background:#0c1a10;font-size:9px;line-height:1.55">${idxLine}</div>`+
+    `<div class="aline" style="border-color:${c.drought>=70?'var(--red)':c.drought>=40?'var(--orange)':'var(--good)'};background:#091408;font-size:9px;line-height:1.55">${actionLine}</div>`;
+}
+
+function updateBottomNational(){
+  const n = SIQ.national;
+  document.getElementById('p1-hdr').textContent = 'National index summary';
+  const rows = [
+    {l:'Avg drought score', v:n.avg_drought+'/100',    pct:n.avg_drought},
+    {l:'Avg NDVI',          v:n.avg_ndvi.toFixed(2),   pct:Math.round(n.avg_ndvi*100)},
+    {l:'Critical counties', v:n.critical_counties+'/47',pct:Math.round(n.critical_counties/47*100)},
+    {l:'Moderate counties', v:n.moderate_counties+'/47',pct:Math.round(n.moderate_counties/47*100)},
+    {l:'Stable counties',   v:n.stable_counties+'/47',  pct:Math.round(n.stable_counties/47*100)},
+  ];
+  document.getElementById('p1-body').innerHTML = rows.map(r=>
+    `<div class="irow active">
+      <div class="irow-name">${r.l}</div>
+      <div class="irow-bar"><div class="irow-fill" style="width:${r.pct}%;background:var(--orange)"></div></div>
+      <div class="irow-val">${r.v}</div>
+    </div>`).join('');
+
+  document.getElementById('p2-hdr').textContent = 'National crop summary';
+  const cropRows = [
+    {n:'Maize',        ha:n.total_maize_ha},
+    {n:'Tea / Coffee', ha:n.total_tea_ha},
+    {n:'Fallow land',  ha:n.total_fallow_ha},
+  ];
+  const maxHa = Math.max(...cropRows.map(r=>r.ha));
+  document.getElementById('p2-body').innerHTML = cropRows.map(r=>
+    `<div class="crow">
+      <div class="crow-name">${r.n}</div>
+      <div class="crow-bar"><div class="crow-fill" style="width:${Math.round(r.ha/maxHa*100)}%"></div></div>
+      <div class="crow-val">${(r.ha/1e6).toFixed(2)}M ha</div>
+    </div>`).join('');
+
+  const natIdx = {
+    drought:  `${n.moderate_counties} counties moderate stress. No critical counties currently. North/NE Kenya highest risk — Garissa, Wajir, Isiolo scoring 45–49.`,
+    ndvi:     `National avg NDVI ${n.avg_ndvi.toFixed(2)}. Western highlands >0.65. Arid North below 0.35 — vegetation stress persists despite long rains.`,
+    lst:      `LST anomalies negative across most of Kenya — long rains cooling. Western counties −5 to −8°C below seasonal average.`,
+    rainfall: `Long rains active. Nairobi, Kiambu above normal. North-East recording deficits of 10–20%.`,
+    soil:     `Soil moisture recovering with long rains. Coast and North-East still below 0.20 m³/m³. Western Kenya at 0.35–0.45.`,
+    crops:    `${(n.total_maize_ha/1e6).toFixed(1)}M ha maize. ${(n.total_tea_ha/1e6).toFixed(1)}M ha tea/coffee. ${(n.total_fallow_ha/1e6).toFixed(1)}M ha fallow — unutilized arable potential.`,
+  };
+  document.getElementById('p3-body').innerHTML =
+    `<div class="aline" style="border-color:var(--orange);background:#0c1a10;font-size:9px;line-height:1.55">${natIdx[activeIdx]||natIdx.drought}</div>`+
+    `<div class="aline" style="border-color:var(--good);background:#091408;font-size:9px;line-height:1.55">6 counties need monitoring: <b>Garissa, Wajir, Isiolo, Mandera, Marsabit, Kilifi</b>. All others stable — long rains recovery on track.</div>`;
+}
+
+// Boot
+Promise.all([
+  fetch(DATA_URL).then(r=>r.json()),
+  fetch(GEOJSON_URL).then(r=>r.json())
+]).then(([data, geojson])=>{
+  SIQ = data;
+  CD  = {};
+  SIQ.counties.forEach(c => CD[c.county] = c);
+  window._geojson = geojson;
+
+  // Populate dropdown sorted by drought score
+  const sel = document.getElementById('csel');
+  [...SIQ.counties].sort((a,b)=>b.drought-a.drought).forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value = c.county;
+    opt.textContent = c.county+' ('+c.drought+')';
+    sel.appendChild(opt);
+  });
+
+  loadKPIs();
+  updateLegend('drought');
+  updateBottomNational();
+  initMap(geojson);
+}).catch(err=>{
+  console.error('Boot error:', err);
+  document.getElementById('map-sub').textContent = 'Error loading data — check console';
+});
+</script>
+</body>
+</html>
