@@ -79,6 +79,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 .crow-val{width:65px;text-align:right;font-size:9px;color:var(--muted)}
 .aline{font-size:9px;line-height:1.55;padding:4px 8px;border-radius:3px;border-left:2px solid;margin-bottom:4px}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
+.crop-legend{margin-top:8px;display:none}
+.crop-legend.visible{display:block}
+.cl-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:9px;color:var(--muted);cursor:pointer;border-radius:3px;padding:3px 5px;transition:background .15s}
+.cl-row:hover{background:var(--s2)}
+.cl-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.cl-name{flex:1}
+.cl-ha{color:var(--muted);font-size:8px}
 </style>
 </head>
 <body>
@@ -122,6 +129,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall anomaly <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
         <div class="pill" data-idx="soil" onclick="setIdx('soil',this)">Soil moisture <span class="ptag" style="background:#102030;color:#6ac0e0">HYDRO</span></div>
         <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#1a2a10;color:#a0d860">CLASS</span></div>
+      </div>
+      <!-- Crop legend — visible only when crop pill active -->
+      <div class="crop-legend" id="crop-legend">
+        <div class="stitle">Crop classes</div>
+        <div id="crop-legend-rows"></div>
       </div>
       <div id="ccard-wrap"></div>
     </div>
@@ -185,20 +197,34 @@ function initMap(geojson){
     style: {
       version: 8,
       sources: {
-        'carto': {
+        'satellite': {
           type: 'raster',
-          tiles: ['https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png'],
+          tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
           tileSize: 256,
-          attribution: '© CartoDB'
+          attribution: '© Esri'
+        },
+        'labels': {
+          type: 'raster',
+          tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],
+          tileSize: 256
         }
       },
-      layers: [{id:'carto-base',type:'raster',source:'carto'}]
+      layers: [
+        {id:'satellite-base',type:'raster',source:'satellite'},
+        {id:'labels-layer',type:'raster',source:'labels',paint:{'raster-opacity':0.6}}
+      ]
     },
     center: [37.9, 0.5],
     zoom: 6,
     minZoom: 5,
-    maxZoom: 14
+    maxZoom: 14,
+    pitchWithRotate: false,
+    dragRotate: false
   });
+
+  // Disable all rotation on touch and mouse
+  map.dragRotate.disable();
+  map.touchZoomRotate.disableRotation();
 
   map.on('load', function(){
     // Raster tile layer — real satellite classification
@@ -212,7 +238,7 @@ function initMap(geojson){
       id: 'siq-tiles',
       type: 'raster',
       source: 'siq-tiles',
-      paint: {'raster-opacity': 0.85}
+      paint: {'raster-opacity': 0.65}
     });
 
     // County boundaries
@@ -241,6 +267,18 @@ function initMap(geojson){
       source: 'counties',
       paint: {'line-color':'#7dda8f','line-width':2.5,'line-opacity':1},
       filter: ['==','COUNTY_NAM','']
+    });
+
+    // Mask layer — darkens all counties except selected one
+    map.addLayer({
+      id: 'county-mask',
+      type: 'fill',
+      source: 'counties',
+      paint: {
+        'fill-color': '#000000',
+        'fill-opacity': 0
+      },
+      filter: ['!=','COUNTY_NAM','']
     });
 
     // Tooltip
@@ -309,6 +347,37 @@ function setIdx(idx, el){
   document.getElementById('map-sub').textContent = activeView==='national'
     ? 'Showing: '+idx+' · all 47 counties'
     : 'County: '+activeCounty+' · '+idx;
+  // Show/hide crop legend
+  updateCropLegend(idx);
+}
+
+const CROP_CLASSES = [
+  {cls:1, color:'#c8a46e', name:'Bare / fallow',       ha_key:'fallow_ha'},
+  {cls:2, color:'#d4c87a', name:'Rangeland',            ha_key:null},
+  {cls:3, color:'#e07820', name:'Sorghum / millet',     ha_key:'sorghum_ha'},
+  {cls:4, color:'#f5e642', name:'Maize',                ha_key:'maize_ha'},
+  {cls:5, color:'#4ec8e0', name:'Sugarcane / rice',     ha_key:'sugarcane_ha'},
+  {cls:6, color:'#2d6e28', name:'Tea / coffee',         ha_key:'tea_ha'},
+  {cls:7, color:'#1a4a10', name:'Forest',               ha_key:null},
+];
+
+function updateCropLegend(idx){
+  const legEl = document.getElementById('crop-legend');
+  if(idx !== 'crops'){ legEl.classList.remove('visible'); return; }
+  legEl.classList.add('visible');
+  // Get national ha totals for display
+  const n = SIQ ? SIQ.national : null;
+  const rows = document.getElementById('crop-legend-rows');
+  rows.innerHTML = CROP_CLASSES.map(c => {
+    let haStr = '';
+    if(n && c.ha_key && n[c.ha_key]) haStr = ' · '+(n[c.ha_key]/1e6).toFixed(1)+'M ha';
+    else if(n && c.ha_key === 'fallow_ha') haStr = ' · '+(n.total_fallow_ha/1e6).toFixed(1)+'M ha';
+    return `<div class="cl-row">
+      <div class="cl-sq" style="background:${c.color}"></div>
+      <div class="cl-name">${c.name}</div>
+      <div class="cl-ha">${haStr}</div>
+    </div>`;
+  }).join('');
 }
 
 function selectCounty(name){
@@ -319,6 +388,11 @@ function selectCounty(name){
   document.getElementById('csel').value = name;
   if(map.getLayer('county-highlight'))
     map.setFilter('county-highlight',['==','COUNTY_NAM',name]);
+  // Activate mask — darken everything except selected county
+  if(map.getLayer('county-mask')){
+    map.setFilter('county-mask',['!=','COUNTY_NAM',name]);
+    map.setPaintProperty('county-mask','fill-opacity',0.72);
+  }
   const feat = window._geojson.features.find(f=>f.properties.COUNTY_NAM===name);
   if(feat){
     const bounds = new maplibregl.LngLatBounds();
@@ -343,6 +417,9 @@ function setView(v){
     document.getElementById('ccard-wrap').innerHTML = '';
     if(map && map.getLayer('county-highlight'))
       map.setFilter('county-highlight',['==','COUNTY_NAM','']);
+    // Remove mask
+    if(map && map.getLayer('county-mask'))
+      map.setPaintProperty('county-mask','fill-opacity',0);
     map.flyTo({center:[37.9,0.5], zoom:6, duration:650});
     updateBottomNational();
     document.getElementById('map-sub').textContent = 'National · all 47 counties · click to select';
