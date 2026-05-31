@@ -123,7 +123,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       </select>
       <div class="stitle">Index layer</div>
       <div class="pills">
-        <div class="pill active" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
+        <div class="pill" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
         <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
         <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall anomaly <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
@@ -142,9 +142,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   <div class="right">
     <div id="map"></div>
     <div class="map-foot">
-      <div class="leg"><div class="leg-sq" style="background:var(--red)"></div><span id="leg-crit">Score ≥70 · Critical</span></div>
-      <div class="leg"><div class="leg-sq" style="background:var(--orange)"></div><span id="leg-mod">40–69 · Moderate</span></div>
-      <div class="leg"><div class="leg-sq" style="background:var(--good)"></div><span id="leg-good">Score &lt;40 · Stable</span></div>
+      <div class="leg"><div class="leg-sq" style="background:#397d49"></div><span id="leg-crit">Trees</span></div>
+      <div class="leg"><div class="leg-sq" style="background:#e49635"></div><span id="leg-mod">Crops</span></div>
+      <div class="leg"><div class="leg-sq" style="background:#c4281b"></div><span id="leg-good">Built / urban</span></div>
+      <div class="leg"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Water</span></div>
+      <div class="leg"><div class="leg-sq" style="background:#88b053"></div><span style="font-size:9px;color:var(--muted)">Grass</span></div>
+      <div class="leg"><div class="leg-sq" style="background:#a59b8f"></div><span style="font-size:9px;color:var(--muted)">Bare</span></div>
       <div id="map-sub">National · all 47 counties · click to select</div>
     </div>
   </div>
@@ -159,11 +162,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 </div>
 
 <script>
-const TILE_BASE   = 'https://raw.githubusercontent.com/TabithaChelagat/SavannahIQ/main/tiles';
+const CLOUD_RUN   = 'https://savannahiq-tiles-s2hw4vo26q-ew.a.run.app';
 const DATA_URL    = 'https://raw.githubusercontent.com/TabithaChelagat/SavannahIQ/main/data/savannahiq_data.json';
 const GEOJSON_URL = 'https://raw.githubusercontent.com/TabithaChelagat/SavannahIQ/main/kenya.geojson';
 
-let SIQ, CD, map, activeIdx='drought', activeView='national', activeCounty=null;
+// Tile URLs — populated from Cloud Run on boot
+// No static fallback — live GEE tiles only
+let SIQ, CD, map, activeIdx='lulc', activeView='national', activeCounty=null;
+let TILE_URLS = {};
+let tilesReady = false;
 
 const LEGENDS = {
   drought:  {crit:'Score ≥70 · Critical',        mod:'40–69 · Moderate',            good:'Score <40 · Stable'},
@@ -171,14 +178,22 @@ const LEGENDS = {
   lst:      {crit:'LST >+2°C · Heat stress',      mod:'+0.5–2°C · Above normal',     good:'<+0.5°C · Near normal'},
   rainfall: {crit:'Deficit >20% · Severe',        mod:'5–20% deficit',               good:'<5% deficit · Normal'},
   soil:     {crit:'<0.15 m³/m³ · Critically dry', mod:'0.15–0.25 · Low moisture',    good:'>0.25 · Adequate'},
+  lulc:     {crit:'Built / bare ground',              mod:'Shrub / grass / flooded',       good:'Crops / trees / water'},
   crops:    {crit:'Sorghum / dryland dominant',   mod:'Maize dominant',              good:'Tea / perennial dominant'},
 };
 
 function updateLegend(idx){
-  const lg = LEGENDS[idx]||LEGENDS.drought;
-  document.getElementById('leg-crit').textContent = lg.crit;
-  document.getElementById('leg-mod').textContent  = lg.mod;
-  document.getElementById('leg-good').textContent = lg.good;
+  if(idx === 'lulc'){
+    // LULC has multi-class legend — footer already shows it
+    document.getElementById('leg-crit').textContent = 'Trees';
+    document.getElementById('leg-mod').textContent  = 'Crops';
+    document.getElementById('leg-good').textContent = 'Built / urban';
+  } else {
+    const lg = LEGENDS[idx]||LEGENDS.drought;
+    document.getElementById('leg-crit').textContent = lg.crit;
+    document.getElementById('leg-mod').textContent  = lg.mod;
+    document.getElementById('leg-good').textContent = lg.good;
+  }
 }
 
 function loadKPIs(){
@@ -228,9 +243,10 @@ function initMap(geojson){
 
   map.on('load', function(){
     // Raster tile layer — real satellite classification
+    // Start with empty tiles — filled when Cloud Run responds
     map.addSource('siq-tiles', {
       type: 'raster',
-      tiles: [TILE_BASE+'/drought/{z}/{x}/{y}.png'],
+      tiles: ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='],
       tileSize: 256,
       bounds: [33.9, -4.7, 41.9, 5.0]
     });
@@ -311,10 +327,10 @@ function initMap(geojson){
 }
 
 function swapTileLayer(idx){
-  if(!map || !map.getSource('siq-tiles')) return;
-  map.getSource('siq-tiles').setTiles(
-    [TILE_BASE+'/'+idx+'/{z}/{x}/{y}.png']
-  );
+  if(!map || !map.getSource('siq-tiles') || !tilesReady) return;
+  const url = TILE_URLS[idx];
+  if(!url) return;
+  map.getSource('siq-tiles').setTiles([url]);
 }
 
 function getIdxVal(c, idx){
@@ -563,6 +579,7 @@ function updateBottomNational(){
     </div>`).join('');
 
   const natIdx = {
+    lulc:     `Dynamic World land cover — Kenya 2024. Crops (orange): ${(n.total_maize_ha/1e6).toFixed(1)}M ha classified farmland. Select an index to analyse stress within each land class.`,
     drought:  `${n.moderate_counties} counties moderate stress. No critical counties currently. North/NE Kenya highest risk — Garissa, Wajir, Isiolo scoring 45–49.`,
     ndvi:     `National avg NDVI ${n.avg_ndvi.toFixed(2)}. Western highlands >0.65. Arid North below 0.35 — vegetation stress persists despite long rains.`,
     lst:      `LST anomalies negative across most of Kenya — long rains cooling. Western counties −5 to −8°C below seasonal average.`,
@@ -575,33 +592,61 @@ function updateBottomNational(){
     `<div class="aline" style="border-color:var(--good);background:#091408;font-size:9px;line-height:1.55">6 counties need monitoring: <b>Garissa, Wajir, Isiolo, Mandera, Marsabit, Kilifi</b>. All others stable — long rains recovery on track.</div>`;
 }
 
-// Boot
-Promise.all([
-  fetch(DATA_URL).then(r=>r.json()),
-  fetch(GEOJSON_URL).then(r=>r.json())
-]).then(([data, geojson])=>{
-  SIQ = data;
-  CD  = {};
-  SIQ.counties.forEach(c => CD[c.county] = c);
-  window._geojson = geojson;
+// Boot — fetch tile URLs from Cloud Run, data+geojson from GitHub
+async function boot() {
+  try {
+    // Fetch live tile URLs from Cloud Run
+    document.getElementById('map-sub').textContent = 'Loading live satellite data...';
+    try {
+      const tileResp = await fetch(CLOUD_RUN + '/tiles');
+      const tileData = await tileResp.json();
+      if(tileData.status === 'ok' && tileData.tiles) {
+        Object.assign(TILE_URLS, tileData.tiles);
+        tilesReady = true;
+        // Apply lulc as default first view
+        if(map && map.getSource('siq-tiles')) {
+          map.getSource('siq-tiles').setTiles([TILE_URLS['lulc']]);
+        }
+        document.getElementById('map-sub').textContent =
+          'Live 10m · Dynamic World · ' + new Date().toLocaleDateString() + ' · click county to explore';
+      }
+    } catch(err) {
+      console.error('Cloud Run unavailable:', err);
+      document.getElementById('map-sub').textContent = 'Tile server unavailable — try refreshing';
+    }
 
-  // Populate dropdown sorted by drought score
-  const sel = document.getElementById('csel');
-  [...SIQ.counties].sort((a,b)=>b.drought-a.drought).forEach(c=>{
-    const opt = document.createElement('option');
-    opt.value = c.county;
-    opt.textContent = c.county+' ('+c.drought+')';
-    sel.appendChild(opt);
-  });
+    // Fetch data and geojson in parallel
+    const [data, geojson] = await Promise.all([
+      fetch(DATA_URL).then(r=>r.json()),
+      fetch(GEOJSON_URL).then(r=>r.json())
+    ]);
 
-  loadKPIs();
-  updateLegend('drought');
-  updateBottomNational();
-  initMap(geojson);
-}).catch(err=>{
-  console.error('Boot error:', err);
-  document.getElementById('map-sub').textContent = 'Error loading data — check console';
-});
+    SIQ = data;
+    CD  = {};
+    SIQ.counties.forEach(c => CD[c.county] = c);
+    window._geojson = geojson;
+
+    // Populate dropdown sorted by drought score
+    const sel = document.getElementById('csel');
+    [...SIQ.counties].sort((a,b)=>b.drought-a.drought).forEach(c=>{
+      const opt = document.createElement('option');
+      opt.value = c.county;
+      opt.textContent = c.county+' ('+c.drought+')';
+      sel.appendChild(opt);
+    });
+
+    loadKPIs();
+    updateLegend('drought');
+    updateBottomNational();
+    initMap(geojson);
+
+  } catch(err) {
+    console.error('Boot error:', err);
+    document.getElementById('map-sub').textContent = 'Error loading data — check console';
+  }
+}
+
+boot();
 </script>
 </body>
 </html>
