@@ -247,14 +247,13 @@ function initMap(geojson){
     map.addSource('siq-tiles', {
       type: 'raster',
       tiles: ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='],
-      tileSize: 256,
-      bounds: [33.9, -4.7, 41.9, 5.0]
+      tileSize: 256
     });
     map.addLayer({
       id: 'siq-tiles',
       type: 'raster',
       source: 'siq-tiles',
-      paint: {'raster-opacity': 0.92}
+      paint: {'raster-opacity': 0.92, 'raster-fade-duration': 0}
     });
 
     // County boundaries
