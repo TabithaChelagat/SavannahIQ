@@ -254,7 +254,7 @@ function initMap(geojson){
       id: 'siq-tiles',
       type: 'raster',
       source: 'siq-tiles',
-      paint: {'raster-opacity': 0.65}
+      paint: {'raster-opacity': 0.92}
     });
 
     // County boundaries
@@ -328,8 +328,12 @@ function initMap(geojson){
 
 function swapTileLayer(idx){
   if(!map || !map.getSource('siq-tiles') || !tilesReady) return;
-  const url = TILE_URLS[idx];
+  const key = idx === 'crops' ? 'lulc' : idx;
+  const url = TILE_URLS[key];
   if(!url) return;
+  // Classification layers get full opacity; continuous index layers semi-transparent
+  const opacity = (idx === 'lulc' || idx === 'crops') ? 0.92 : 0.72;
+  map.setPaintProperty('siq-tiles', 'raster-opacity', opacity);
   map.getSource('siq-tiles').setTiles([url]);
 }
 
@@ -605,6 +609,7 @@ async function boot() {
         tilesReady = true;
         // Apply lulc as default first view
         if(map && map.getSource('siq-tiles')) {
+          map.setPaintProperty('siq-tiles', 'raster-opacity', 0.92);
           map.getSource('siq-tiles').setTiles([TILE_URLS['lulc']]);
         }
         document.getElementById('map-sub').textContent =
