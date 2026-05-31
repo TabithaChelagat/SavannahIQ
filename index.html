@@ -123,6 +123,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       </select>
       <div class="stitle">Index layer</div>
       <div class="pills">
+        <div class="pill active" data-idx="lulc" onclick="setIdx('lulc',this)">Land cover (DW 10m) <span class="ptag" style="background:#1a2a10;color:#a0d860">LULC</span></div>
         <div class="pill" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
         <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
@@ -142,12 +143,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   <div class="right">
     <div id="map"></div>
     <div class="map-foot">
-      <div class="leg"><div class="leg-sq" style="background:#397d49"></div><span id="leg-crit">Trees</span></div>
-      <div class="leg"><div class="leg-sq" style="background:#e49635"></div><span id="leg-mod">Crops</span></div>
-      <div class="leg"><div class="leg-sq" style="background:#c4281b"></div><span id="leg-good">Built / urban</span></div>
-      <div class="leg"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Water</span></div>
-      <div class="leg"><div class="leg-sq" style="background:#88b053"></div><span style="font-size:9px;color:var(--muted)">Grass</span></div>
-      <div class="leg"><div class="leg-sq" style="background:#a59b8f"></div><span style="font-size:9px;color:var(--muted)">Bare</span></div>
+      <!-- DW 9-class legend — shown for lulc/crops -->
+      <div id="leg-dw" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="leg"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Water</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#397d49"></div><span style="font-size:9px;color:var(--muted)">Trees</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#88b053"></div><span style="font-size:9px;color:var(--muted)">Grass</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#7a87c6"></div><span style="font-size:9px;color:var(--muted)">Flooded veg</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#e49635"></div><span style="font-size:9px;color:var(--muted)">Crops</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#dfc35a"></div><span style="font-size:9px;color:var(--muted)">Shrub/scrub</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#c4281b"></div><span style="font-size:9px;color:var(--muted)">Built</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#a59b8f"></div><span style="font-size:9px;color:var(--muted)">Bare</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#b39fe1"></div><span style="font-size:9px;color:var(--muted)">Snow/ice</span></div>
+      </div>
+      <!-- Index legend — shown for drought/ndvi/lst/rainfall/soil -->
+      <div id="leg-idx" style="display:none;gap:8px;align-items:center">
+        <div class="leg"><div class="leg-sq" id="leg-sq-crit" style="background:#e04030"></div><span id="leg-crit"></span></div>
+        <div class="leg"><div class="leg-sq" id="leg-sq-mod" style="background:#e07820"></div><span id="leg-mod"></span></div>
+        <div class="leg"><div class="leg-sq" id="leg-sq-good" style="background:#28b858"></div><span id="leg-good"></span></div>
+      </div>
       <div id="map-sub">National · all 47 counties · click to select</div>
     </div>
   </div>
@@ -183,12 +196,10 @@ const LEGENDS = {
 };
 
 function updateLegend(idx){
-  if(idx === 'lulc'){
-    // LULC has multi-class legend — footer already shows it
-    document.getElementById('leg-crit').textContent = 'Trees';
-    document.getElementById('leg-mod').textContent  = 'Crops';
-    document.getElementById('leg-good').textContent = 'Built / urban';
-  } else {
+  const isDW = (idx === 'lulc' || idx === 'crops');
+  document.getElementById('leg-dw').style.display  = isDW ? 'flex' : 'none';
+  document.getElementById('leg-idx').style.display = isDW ? 'none' : 'flex';
+  if(!isDW){
     const lg = LEGENDS[idx]||LEGENDS.drought;
     document.getElementById('leg-crit').textContent = lg.crit;
     document.getElementById('leg-mod').textContent  = lg.mod;
@@ -242,6 +253,8 @@ function initMap(geojson){
   map.touchZoomRotate.disableRotation();
 
   map.on('load', function(){
+    // If tiles already loaded before map was ready, apply now
+    setTimeout(applyLulcWhenReady, 100);
     // Raster tile layer — real satellite classification
     // Start with empty tiles — filled when Cloud Run responds
     map.addSource('siq-tiles', {
@@ -342,7 +355,7 @@ function getIdxVal(c, idx){
   if(idx==='lst')      return (c.lst>=0?'+':'')+c.lst.toFixed(1)+'°C';
   if(idx==='rainfall') return (c.rain>=0?'+':'')+c.rain+'%';
   if(idx==='soil')     return c.soil.toFixed(3)+' m³/m³';
-  if(idx==='crops')    return 'see breakdown';
+  if(idx==='crops' || idx==='lulc') return 'see breakdown';
   return '—';
 }
 
@@ -370,19 +383,23 @@ function setIdx(idx, el){
   updateCropLegend(idx);
 }
 
-const CROP_CLASSES = [
-  {cls:1, color:'#c8a46e', name:'Bare / fallow',       ha_key:'fallow_ha'},
-  {cls:2, color:'#d4c87a', name:'Rangeland',            ha_key:null},
-  {cls:3, color:'#e07820', name:'Sorghum / millet',     ha_key:'sorghum_ha'},
-  {cls:4, color:'#f5e642', name:'Maize',                ha_key:'maize_ha'},
-  {cls:5, color:'#4ec8e0', name:'Sugarcane / rice',     ha_key:'sugarcane_ha'},
-  {cls:6, color:'#2d6e28', name:'Tea / coffee',         ha_key:'tea_ha'},
-  {cls:7, color:'#1a4a10', name:'Forest',               ha_key:null},
+// DW palette: 0=Water 1=Trees 2=Grass 3=Flooded 4=Crops 5=Shrub 6=Built 7=Bare 8=Snow
+const DW_CLASSES = [
+  {cls:0, color:'#419bdf', name:'Water',        ha_key:null},
+  {cls:1, color:'#397d49', name:'Trees',        ha_key:null},
+  {cls:2, color:'#88b053', name:'Grass',        ha_key:null},
+  {cls:3, color:'#7a87c6', name:'Flooded veg',  ha_key:null},
+  {cls:4, color:'#e49635', name:'Crops',        ha_key:'total_maize_ha'},
+  {cls:5, color:'#dfc35a', name:'Shrub/scrub',  ha_key:null},
+  {cls:6, color:'#c4281b', name:'Built / urban',ha_key:null},
+  {cls:7, color:'#a59b8f', name:'Bare',         ha_key:null},
+  {cls:8, color:'#b39fe1', name:'Snow / ice',   ha_key:null},
 ];
+const CROP_CLASSES = DW_CLASSES;
 
 function updateCropLegend(idx){
   const legEl = document.getElementById('crop-legend');
-  if(idx !== 'crops'){ legEl.classList.remove('visible'); return; }
+  if(idx !== 'crops' && idx !== 'lulc'){ legEl.classList.remove('visible'); return; }
   legEl.classList.add('visible');
   // Get national ha totals for display
   const n = SIQ ? SIQ.national : null;
@@ -595,6 +612,15 @@ function updateBottomNational(){
     `<div class="aline" style="border-color:var(--good);background:#091408;font-size:9px;line-height:1.55">6 counties need monitoring: <b>Garissa, Wajir, Isiolo, Mandera, Marsabit, Kilifi</b>. All others stable — long rains recovery on track.</div>`;
 }
 
+// Apply lulc tiles once both map and tile URLs are ready
+function applyLulcWhenReady() {
+  if(!map || !map.getSource('siq-tiles') || !tilesReady) return;
+  map.setPaintProperty('siq-tiles', 'raster-opacity', 0.92);
+  map.getSource('siq-tiles').setTiles([TILE_URLS['lulc']]);
+  document.getElementById('map-sub').textContent =
+    'Live 10m · Dynamic World · ' + new Date().toLocaleDateString() + ' · click county to explore';
+}
+
 // Boot — fetch tile URLs from Cloud Run, data+geojson from GitHub
 async function boot() {
   try {
@@ -606,13 +632,7 @@ async function boot() {
       if(tileData.status === 'ok' && tileData.tiles) {
         Object.assign(TILE_URLS, tileData.tiles);
         tilesReady = true;
-        // Apply lulc as default first view
-        if(map && map.getSource('siq-tiles')) {
-          map.setPaintProperty('siq-tiles', 'raster-opacity', 0.92);
-          map.getSource('siq-tiles').setTiles([TILE_URLS['lulc']]);
-        }
-        document.getElementById('map-sub').textContent =
-          'Live 10m · Dynamic World · ' + new Date().toLocaleDateString() + ' · click county to explore';
+        applyLulcWhenReady();
       }
     } catch(err) {
       console.error('Cloud Run unavailable:', err);
@@ -640,7 +660,7 @@ async function boot() {
     });
 
     loadKPIs();
-    updateLegend('drought');
+    updateLegend('lulc');
     updateBottomNational();
     initMap(geojson);
 
