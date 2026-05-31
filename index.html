@@ -124,12 +124,32 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       <div class="stitle">Index layer</div>
       <div class="pills">
         <div class="pill active" data-idx="lulc" onclick="setIdx('lulc',this)">Land cover (DW 10m) <span class="ptag" style="background:#1a2a10;color:#a0d860">LULC</span></div>
+        <select class="csel" id="dw-filter" onchange="onDWFilter(this.value)" style="margin-top:4px;margin-bottom:2px">
+          <option value="">— All land classes —</option>
+          <option value="0">Water</option>
+          <option value="1">Trees</option>
+          <option value="2">Grass</option>
+          <option value="3">Flooded veg</option>
+          <option value="4">Crops</option>
+          <option value="5">Shrub / scrub</option>
+          <option value="6">Built / urban</option>
+          <option value="7">Bare</option>
+          <option value="8">Snow / ice</option>
+        </select>
         <div class="pill" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
         <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
-        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall anomaly <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
+        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall % <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
         <div class="pill" data-idx="soil" onclick="setIdx('soil',this)">Soil moisture <span class="ptag" style="background:#102030;color:#6ac0e0">HYDRO</span></div>
         <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#1a2a10;color:#a0d860">CLASS</span></div>
+        <select class="csel" id="crop-filter" onchange="onCropFilter(this.value)" style="margin-top:4px;margin-bottom:2px;display:none">
+          <option value="">— All crop types —</option>
+          <option value="maize">Maize</option>
+          <option value="tea">Tea / Coffee</option>
+          <option value="sorghum">Sorghum / Millet</option>
+          <option value="sugarcane">Sugarcane / Rice</option>
+          <option value="fallow">Bare / Fallow</option>
+        </select>
       </div>
       <!-- Crop legend — visible only when crop pill active -->
       <div class="crop-legend" id="crop-legend">
@@ -156,10 +176,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <div class="leg"><div class="leg-sq" style="background:#b39fe1"></div><span style="font-size:9px;color:var(--muted)">Snow/ice</span></div>
       </div>
       <!-- Index legend — shown for drought/ndvi/lst/rainfall/soil -->
-      <div id="leg-idx" style="display:none;gap:8px;align-items:center">
-        <div class="leg"><div class="leg-sq" id="leg-sq-crit" style="background:#e04030"></div><span id="leg-crit"></span></div>
-        <div class="leg"><div class="leg-sq" id="leg-sq-mod" style="background:#e07820"></div><span id="leg-mod"></span></div>
-        <div class="leg"><div class="leg-sq" id="leg-sq-good" style="background:#28b858"></div><span id="leg-good"></span></div>
+      <div id="leg-idx" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="leg"><div class="leg-sq" style="background:#e04030"></div><span id="leg-crit" style="color:#e04030;font-weight:600"></span></div>
+        <div class="leg"><div class="leg-sq" style="background:#e07820"></div><span id="leg-mod" style="color:#e07820;font-weight:600"></span></div>
+        <div class="leg"><div class="leg-sq" style="background:#28b858"></div><span id="leg-good" style="color:#28b858;font-weight:600"></span></div>
       </div>
       <div id="map-sub">National · all 47 counties · click to select</div>
     </div>
@@ -186,13 +206,11 @@ let TILE_URLS = {};
 let tilesReady = false;
 
 const LEGENDS = {
-  drought:  {crit:'Score ≥70 · Critical',        mod:'40–69 · Moderate',            good:'Score <40 · Stable'},
-  ndvi:     {crit:'NDVI <0.30 · Severe veg loss', mod:'0.30–0.50 · Stressed canopy', good:'NDVI >0.50 · Healthy'},
-  lst:      {crit:'LST >+2°C · Heat stress',      mod:'+0.5–2°C · Above normal',     good:'<+0.5°C · Near normal'},
-  rainfall: {crit:'Deficit >20% · Severe',        mod:'5–20% deficit',               good:'<5% deficit · Normal'},
-  soil:     {crit:'<0.15 m³/m³ · Critically dry', mod:'0.15–0.25 · Low moisture',    good:'>0.25 · Adequate'},
-  lulc:     {crit:'Built / bare ground',              mod:'Shrub / grass / flooded',       good:'Crops / trees / water'},
-  crops:    {crit:'Sorghum / dryland dominant',   mod:'Maize dominant',              good:'Tea / perennial dominant'},
+  drought:  {crit:'≥70 · Critical',          mod:'40–69 · Moderate',        good:'<40 · Stable'},
+  ndvi:     {crit:'<0.30 · Severe stress',   mod:'0.30–0.50 · Moderate',    good:'>0.50 · Healthy'},
+  lst:      {crit:'>+2°C · Heat stress',     mod:'+0.5–2°C · Above normal', good:'<+0.5°C · Normal'},
+  rainfall: {crit:'<−20% · Severe deficit',  mod:'−5 to −20% · Below normal',good:'>−5% · Normal / surplus'},
+  soil:     {crit:'<0.15 · Critically dry',  mod:'0.15–0.25 · Low',         good:'>0.25 · Adequate'},
 };
 
 function updateLegend(idx){
@@ -200,7 +218,12 @@ function updateLegend(idx){
   document.getElementById('leg-dw').style.display  = isDW ? 'flex' : 'none';
   document.getElementById('leg-idx').style.display = isDW ? 'none' : 'flex';
   if(!isDW){
-    const lg = LEGENDS[idx]||LEGENDS.drought;
+    const lg = LEGENDS[idx] || LEGENDS.drought;
+    // NDVI: low=bad(red), high=good(green) — palette already e04030→28b858
+    // LST: high anomaly=bad(red), low=good(green)
+    // Rainfall: deficit=bad(red), surplus=good(green)
+    // Soil: dry=bad(red), wet=good(green)
+    // Drought: high score=bad(red), low=good(green)
     document.getElementById('leg-crit').textContent = lg.crit;
     document.getElementById('leg-mod').textContent  = lg.mod;
     document.getElementById('leg-good').textContent = lg.good;
@@ -340,13 +363,25 @@ function initMap(geojson){
 
 function swapTileLayer(idx){
   if(!map || !map.getSource('siq-tiles') || !tilesReady) return;
-  const key = idx === 'crops' ? 'lulc' : idx;
+  const key = (idx === 'crops' || idx === 'lulc') ? 'lulc' : idx;
   const url = TILE_URLS[key];
   if(!url) return;
-  // Classification layers get full opacity; continuous index layers semi-transparent
-  const opacity = (idx === 'lulc' || idx === 'crops') ? 0.92 : 0.72;
+  const opacity = (idx === 'lulc' || idx === 'crops') ? 0.92 : 0.75;
   map.setPaintProperty('siq-tiles', 'raster-opacity', opacity);
   map.getSource('siq-tiles').setTiles([url]);
+  // Update map-sub label
+  const labels = {
+    lulc:'Live 10m · Dynamic World · ',
+    crops:'Live 10m · Crop types · ',
+    drought:'Showing: drought · ',
+    ndvi:'Showing: NDVI · ',
+    lst:'Showing: LST · ',
+    rainfall:'Showing: Rainfall % · ',
+    soil:'Showing: Soil moisture · ',
+  };
+  const county = activeView==='national' ? 'all 47 counties' : (activeCounty||'');
+  document.getElementById('map-sub').textContent =
+    (labels[idx]||'') + new Date().toLocaleDateString() + ' · ' + county + ' · click to explore';
 }
 
 function getIdxVal(c, idx){
@@ -385,35 +420,73 @@ function setIdx(idx, el){
 
 // DW palette: 0=Water 1=Trees 2=Grass 3=Flooded 4=Crops 5=Shrub 6=Built 7=Bare 8=Snow
 const DW_CLASSES = [
-  {cls:0, color:'#419bdf', name:'Water',        ha_key:null},
-  {cls:1, color:'#397d49', name:'Trees',        ha_key:null},
-  {cls:2, color:'#88b053', name:'Grass',        ha_key:null},
-  {cls:3, color:'#7a87c6', name:'Flooded veg',  ha_key:null},
-  {cls:4, color:'#e49635', name:'Crops',        ha_key:'total_maize_ha'},
-  {cls:5, color:'#dfc35a', name:'Shrub/scrub',  ha_key:null},
-  {cls:6, color:'#c4281b', name:'Built / urban',ha_key:null},
-  {cls:7, color:'#a59b8f', name:'Bare',         ha_key:null},
-  {cls:8, color:'#b39fe1', name:'Snow / ice',   ha_key:null},
+  {cls:0, color:'#419bdf', name:'Water'},
+  {cls:1, color:'#397d49', name:'Trees'},
+  {cls:2, color:'#88b053', name:'Grass'},
+  {cls:3, color:'#7a87c6', name:'Flooded veg'},
+  {cls:4, color:'#e49635', name:'Crops'},
+  {cls:5, color:'#dfc35a', name:'Shrub/scrub'},
+  {cls:6, color:'#c4281b', name:'Built / urban'},
+  {cls:7, color:'#a59b8f', name:'Bare'},
+  {cls:8, color:'#b39fe1', name:'Snow / ice'},
 ];
-const CROP_CLASSES = DW_CLASSES;
+
+// Crop classifier — only agricultural classes
+const CROP_CLASSES = [
+  {color:'#f5e642', name:'Maize',           ha_key:'total_maize_ha'},
+  {color:'#2d6e28', name:'Tea / Coffee',    ha_key:'total_tea_ha'},
+  {color:'#e07820', name:'Sorghum/Millet',  ha_key:null},
+  {color:'#4ec8e0', name:'Sugarcane/Rice',  ha_key:null},
+  {color:'#c8a46e', name:'Bare / Fallow',   ha_key:'total_fallow_ha'},
+];
+
+// Active DW filter class (null = all)
+let activeDWClass = null;
+let activeCropFilter = null;
 
 function updateCropLegend(idx){
   const legEl = document.getElementById('crop-legend');
-  if(idx !== 'crops' && idx !== 'lulc'){ legEl.classList.remove('visible'); return; }
+  const cropFilter = document.getElementById('crop-filter');
+  if(idx !== 'crops' && idx !== 'lulc'){
+    legEl.classList.remove('visible');
+    if(cropFilter) cropFilter.style.display = 'none';
+    return;
+  }
   legEl.classList.add('visible');
-  // Get national ha totals for display
+  if(cropFilter) cropFilter.style.display = idx === 'crops' ? 'block' : 'none';
   const n = SIQ ? SIQ.national : null;
+  const classes = idx === 'crops' ? CROP_CLASSES : DW_CLASSES;
   const rows = document.getElementById('crop-legend-rows');
-  rows.innerHTML = CROP_CLASSES.map(c => {
+  rows.innerHTML = classes.map(c => {
     let haStr = '';
-    if(n && c.ha_key && n[c.ha_key]) haStr = ' · '+(n[c.ha_key]/1e6).toFixed(1)+'M ha';
-    else if(n && c.ha_key === 'fallow_ha') haStr = ' · '+(n.total_fallow_ha/1e6).toFixed(1)+'M ha';
+    if(n && c.ha_key && n[c.ha_key]) haStr = (n[c.ha_key]/1e6).toFixed(1)+'M ha';
     return `<div class="cl-row">
       <div class="cl-sq" style="background:${c.color}"></div>
       <div class="cl-name">${c.name}</div>
       <div class="cl-ha">${haStr}</div>
     </div>`;
   }).join('');
+}
+
+function onDWFilter(val){
+  activeDWClass = val === '' ? null : parseInt(val);
+  if(!map || !map.getLayer('county-fill')) return;
+  // Use fill-color expression to dim non-selected class
+  // Since we can't filter raster tiles, we overlay a dimming vector layer per class
+  // For now highlight selected in legend
+  document.querySelectorAll('#dw-filter option').forEach(o=>{
+    o.style.fontWeight = o.value === val ? 'bold' : 'normal';
+  });
+  // Apply lulc tile — class filtering noted for future vector implementation
+  if(tilesReady) swapTileLayer('lulc');
+}
+
+function onCropFilter(val){
+  activeCropFilter = val === '' ? null : val;
+  // Highlight selected crop in legend
+  document.querySelectorAll('.cl-row').forEach(r=>{
+    r.style.opacity = (!val || r.dataset.crop === val) ? '1' : '0.3';
+  });
 }
 
 function selectCounty(name){
