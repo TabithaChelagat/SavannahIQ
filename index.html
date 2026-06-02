@@ -125,7 +125,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <div class="pill" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
         <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
-        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall (30d mm) <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
+        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall (45d mm) <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
         <div class="pill" data-idx="soil" onclick="setIdx('soil',this)">Soil moisture <span class="ptag" style="background:#102030;color:#6ac0e0">HYDRO</span></div>
         <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#1a2a10;color:#a0d860">CLASS</span></div>
         <select class="csel" id="crop-filter" onchange="onCropFilter(this.value)" style="margin-top:4px;margin-bottom:2px;display:none">
@@ -207,7 +207,7 @@ const LEGENDS = {
   drought:  {crit:'≥70 · Critical',         mod:'40–69 · Moderate',        good:'<40 · Stable'},
   ndvi:     {crit:'<0.30 · Severe stress',  mod:'0.30–0.50 · Moderate',    good:'>0.50 · Healthy'},
   lst:      {crit:'>+2°C · Heat stress',    mod:'+0.5–2°C · Above normal', good:'<+0.5°C · Normal'},
-  rainfall: {crit:'<30mm · Very dry',       mod:'30–80mm · Below normal',  good:'>80mm · Good rains'},
+  rainfall: {crit:'<45mm · Very dry',       mod:'45–120mm · Below normal', good:'>120mm · Good rains'},
   soil:     {crit:'<0.15 · Critically dry', mod:'0.15–0.25 · Low',         good:'>0.25 · Adequate'},
   crops:    {crit:'', mod:'', good:''},
 };
