@@ -100,8 +100,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
     <div class="kpi"><div class="kpi-v" id="kpi-critical" style="color:var(--red)">—</div><div class="kpi-l">Critical counties</div></div>
     <div class="kpi"><div class="kpi-v" id="kpi-moderate" style="color:var(--orange)">—</div><div class="kpi-l">Moderate risk</div></div>
     <div class="kpi"><div class="kpi-v" id="kpi-stable" style="color:var(--good)">—</div><div class="kpi-l">Stable counties</div></div>
-    <div class="kpi"><div class="kpi-v" id="kpi-maize" style="color:var(--text)">—</div><div class="kpi-l">Maize hectares</div></div>
-    <div class="kpi"><div class="kpi-v" id="kpi-fallow" style="color:var(--text)">—</div><div class="kpi-l">Fallow land (ha)</div></div>
   </div>
   <div style="font-size:9px;color:var(--muted);text-align:right;white-space:nowrap">
     <div id="hdr-date">—</div>
@@ -124,18 +122,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       <div class="stitle">Index layer</div>
       <div class="pills">
         <div class="pill active" data-idx="lulc" onclick="setIdx('lulc',this)">Land cover (DW 10m) <span class="ptag" style="background:#1a2a10;color:#a0d860">LULC</span></div>
-        <select class="csel" id="dw-filter" onchange="onDWFilter(this.value)" style="margin-top:4px;margin-bottom:2px">
-          <option value="">— All land classes —</option>
-          <option value="0">Water</option>
-          <option value="1">Trees</option>
-          <option value="2">Grass</option>
-          <option value="3">Flooded veg</option>
-          <option value="4">Crops</option>
-          <option value="5">Shrub / scrub</option>
-          <option value="6">Built / urban</option>
-          <option value="7">Bare</option>
-          <option value="8">Snow / ice</option>
-        </select>
         <div class="pill" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
         <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
@@ -177,11 +163,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       </div>
       <!-- Crops legend — shown for crops pill -->
       <div id="leg-crops" style="display:none;gap:6px;align-items:center;flex-wrap:wrap">
-        <div class="leg"><div class="leg-sq" style="background:#2d6e28"></div><span style="font-size:9px;color:var(--muted)">Tea/Coffee</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#f5e642"></div><span style="font-size:9px;color:var(--muted)">Maize</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#e07820"></div><span style="font-size:9px;color:var(--muted)">Sorghum</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#4ec8e0"></div><span style="font-size:9px;color:var(--muted)">Sugarcane</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#c8a46e"></div><span style="font-size:9px;color:var(--muted)">Fallow</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#a59b8f"></div><span style="font-size:9px;color:var(--muted)">Fallow/bare</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#e04030"></div><span style="font-size:9px;color:var(--muted)">Very sparse</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#e07820"></div><span style="font-size:9px;color:var(--muted)">Dryland cereals</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#f5e642"></div><span style="font-size:9px;color:var(--muted)">Maize early</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#a0d860"></div><span style="font-size:9px;color:var(--muted)">Maize mid/wheat</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#4ec8e0"></div><span style="font-size:9px;color:var(--muted)">Maize peak/beans</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Sugarcane/rice</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#2d6e28"></div><span style="font-size:9px;color:var(--muted)">Tea/coffee</span></div>
         <span style="font-size:8px;color:var(--muted);font-style:italic">· Estimated</span>
       </div>
       <!-- Index legend — shown for drought/ndvi/lst/rainfall/soil -->
@@ -243,8 +232,6 @@ function loadKPIs(){
   document.getElementById('kpi-critical').textContent = n.critical_counties;
   document.getElementById('kpi-moderate').textContent = n.moderate_counties;
   document.getElementById('kpi-stable').textContent   = n.stable_counties;
-  document.getElementById('kpi-maize').textContent    = (n.total_maize_ha/1e6).toFixed(1)+'M';
-  document.getElementById('kpi-fallow').textContent   = (n.total_fallow_ha/1e6).toFixed(1)+'M';
   document.getElementById('hdr-date').textContent     = SIQ.generated;
 }
 
@@ -438,13 +425,16 @@ const DW_CLASSES = [
   {cls:8, color:'#b39fe1', name:'Snow / ice'},
 ];
 
-// Estimated crop classification — DW class 4 + NDVI + elevation
+// Estimated crop classification — 8 NDVI classes within DW class 4
 const CROP_CLASSES = [
-  {color:'#2d6e28', name:'Tea / Coffee',   ha_key:'tea_ha',      note:'Highland >1500m'},
-  {color:'#f5e642', name:'Maize',          ha_key:'maize_ha',    note:'Mid-elevation 900–1500m'},
-  {color:'#e07820', name:'Sorghum/Millet', ha_key:'sorghum_ha',  note:'Lowland <900m'},
-  {color:'#4ec8e0', name:'Sugarcane/Rice', ha_key:'sugarcane_ha',note:'Near water'},
-  {color:'#c8a46e', name:'Fallow',         ha_key:'fallow_ha',   note:'Low NDVI cropland'},
+  {color:'#a59b8f', name:'Fallow / bare',          ha_key:'fallow_ha',   note:'NDVI <0.15'},
+  {color:'#e04030', name:'Very sparse / stressed',  ha_key:null,          note:'NDVI 0.15–0.25'},
+  {color:'#e07820', name:'Dryland cereals',         ha_key:'sorghum_ha',  note:'NDVI 0.25–0.35'},
+  {color:'#f5e642', name:'Maize early / stressed',  ha_key:null,          note:'NDVI 0.35–0.45'},
+  {color:'#a0d860', name:'Maize mid / wheat',       ha_key:'maize_ha',    note:'NDVI 0.45–0.55'},
+  {color:'#4ec8e0', name:'Maize peak / beans',      ha_key:null,          note:'NDVI 0.55–0.65'},
+  {color:'#419bdf', name:'Sugarcane / rice',        ha_key:'sugarcane_ha',note:'NDVI 0.65–0.75'},
+  {color:'#2d6e28', name:'Tea / coffee / perennial',ha_key:'tea_ha',      note:'NDVI >0.75'},
 ];
 
 // Active DW filter class (null = all)
@@ -464,37 +454,22 @@ function updateCropLegend(idx){
   const n = SIQ ? SIQ.national : null;
   const classes = idx === 'crops' ? CROP_CLASSES : DW_CLASSES;
   const rows = document.getElementById('crop-legend-rows');
-  rows.innerHTML = classes.map(c => {
-    let haStr = '';
-    if(n && c.ha_key && n[c.ha_key]) haStr = (n[c.ha_key]/1e6).toFixed(1)+'M ha';
-    return `<div class="cl-row">
+  rows.innerHTML = classes.map((c,i) => {
+    const detail = c.note
+      ? `<span style="color:var(--muted);font-size:8px">${c.note}</span>`
+      : (c.ha_key && n && n[c.ha_key] ? (n[c.ha_key]/1e6).toFixed(1)+'M ha' : '');
+    return `<div class="cl-row" data-cls="${i}">
       <div class="cl-sq" style="background:${c.color}"></div>
       <div class="cl-name">${c.name}</div>
-      <div class="cl-ha">${haStr}</div>
+      <div class="cl-ha">${detail}</div>
     </div>`;
   }).join('');
+  if(idx === 'crops'){
+    rows.innerHTML += '<div style="font-size:8px;color:var(--muted);margin-top:6px;font-style:italic">Estimated · methodology improving</div>';
+  }
 }
 
-function onDWFilter(val){
-  activeDWClass = val === '' ? null : parseInt(val);
-  if(!map || !map.getLayer('county-fill')) return;
-  // Use fill-color expression to dim non-selected class
-  // Since we can't filter raster tiles, we overlay a dimming vector layer per class
-  // For now highlight selected in legend
-  document.querySelectorAll('#dw-filter option').forEach(o=>{
-    o.style.fontWeight = o.value === val ? 'bold' : 'normal';
-  });
-  // Apply lulc tile — class filtering noted for future vector implementation
-  if(tilesReady) swapTileLayer('lulc');
-}
 
-function onCropFilter(val){
-  activeCropFilter = val === '' ? null : val;
-  // Highlight selected crop in legend
-  document.querySelectorAll('.cl-row').forEach(r=>{
-    r.style.opacity = (!val || r.dataset.crop === val) ? '1' : '0.3';
-  });
-}
 
 function selectCounty(name){
   activeCounty = name;
@@ -695,6 +670,8 @@ function updateBottomNational(){
 // Apply lulc tiles once both map and tile URLs are ready
 function applyLulcWhenReady() {
   if(!map || !map.getSource('siq-tiles') || !tilesReady) return;
+  // Only apply lulc if user hasn't already selected a different layer
+  if(activeIdx !== 'lulc') return;
   map.setPaintProperty('siq-tiles', 'raster-opacity', 0.92);
   map.getSource('siq-tiles').setTiles([TILE_URLS['lulc']]);
   document.getElementById('map-sub').textContent =
