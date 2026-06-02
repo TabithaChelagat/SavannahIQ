@@ -139,7 +139,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <div class="pill" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
         <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
-        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall % <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
+        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall (30d mm) <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
         <div class="pill" data-idx="soil" onclick="setIdx('soil',this)">Soil moisture <span class="ptag" style="background:#102030;color:#6ac0e0">HYDRO</span></div>
         <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#1a2a10;color:#a0d860">CLASS</span></div>
         <select class="csel" id="crop-filter" onchange="onCropFilter(this.value)" style="margin-top:4px;margin-bottom:2px;display:none">
@@ -163,17 +163,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   <div class="right">
     <div id="map"></div>
     <div class="map-foot">
-      <!-- DW 9-class legend — shown for lulc/crops -->
-      <div id="leg-dw" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div class="leg"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Water</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#397d49"></div><span style="font-size:9px;color:var(--muted)">Trees</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#88b053"></div><span style="font-size:9px;color:var(--muted)">Grass</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#7a87c6"></div><span style="font-size:9px;color:var(--muted)">Flooded veg</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#e49635"></div><span style="font-size:9px;color:var(--muted)">Crops</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#dfc35a"></div><span style="font-size:9px;color:var(--muted)">Shrub/scrub</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#c4281b"></div><span style="font-size:9px;color:var(--muted)">Built</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#a59b8f"></div><span style="font-size:9px;color:var(--muted)">Bare</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#b39fe1"></div><span style="font-size:9px;color:var(--muted)">Snow/ice</span></div>
+      <!-- DW 9-class legend — shown for lulc -->
+      <div id="leg-dw" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('0')"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Water</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('1')"><div class="leg-sq" style="background:#397d49"></div><span style="font-size:9px;color:var(--muted)">Trees</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('2')"><div class="leg-sq" style="background:#88b053"></div><span style="font-size:9px;color:var(--muted)">Grass</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('3')"><div class="leg-sq" style="background:#7a87c6"></div><span style="font-size:9px;color:var(--muted)">Flooded</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('4')"><div class="leg-sq" style="background:#e49635"></div><span style="font-size:9px;color:var(--muted)">Crops</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('5')"><div class="leg-sq" style="background:#dfc35a"></div><span style="font-size:9px;color:var(--muted)">Shrub</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('6')"><div class="leg-sq" style="background:#c4281b"></div><span style="font-size:9px;color:var(--muted)">Built</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('7')"><div class="leg-sq" style="background:#a59b8f"></div><span style="font-size:9px;color:var(--muted)">Bare</span></div>
+        <div class="leg" style="cursor:pointer" onclick="onDWFilter('')"><div class="leg-sq" style="background:#333;border:1px solid #555"></div><span style="font-size:9px;color:var(--muted)">All</span></div>
+      </div>
+      <!-- Crops legend — shown for crops pill -->
+      <div id="leg-crops" style="display:none;gap:6px;align-items:center;flex-wrap:wrap">
+        <div class="leg"><div class="leg-sq" style="background:#2d6e28"></div><span style="font-size:9px;color:var(--muted)">Tea/Coffee</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#f5e642"></div><span style="font-size:9px;color:var(--muted)">Maize</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#e07820"></div><span style="font-size:9px;color:var(--muted)">Sorghum</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#4ec8e0"></div><span style="font-size:9px;color:var(--muted)">Sugarcane</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#c8a46e"></div><span style="font-size:9px;color:var(--muted)">Fallow</span></div>
+        <span style="font-size:8px;color:var(--muted);font-style:italic">· Estimated</span>
       </div>
       <!-- Index legend — shown for drought/ndvi/lst/rainfall/soil -->
       <div id="leg-idx" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
@@ -206,24 +215,23 @@ let TILE_URLS = {};
 let tilesReady = false;
 
 const LEGENDS = {
-  drought:  {crit:'≥70 · Critical',          mod:'40–69 · Moderate',        good:'<40 · Stable'},
-  ndvi:     {crit:'<0.30 · Severe stress',   mod:'0.30–0.50 · Moderate',    good:'>0.50 · Healthy'},
-  lst:      {crit:'>+2°C · Heat stress',     mod:'+0.5–2°C · Above normal', good:'<+0.5°C · Normal'},
-  rainfall: {crit:'<−20% · Severe deficit',  mod:'−5 to −20% · Below normal',good:'>−5% · Normal / surplus'},
-  soil:     {crit:'<0.15 · Critically dry',  mod:'0.15–0.25 · Low',         good:'>0.25 · Adequate'},
+  drought:  {crit:'≥70 · Critical',         mod:'40–69 · Moderate',        good:'<40 · Stable'},
+  ndvi:     {crit:'<0.30 · Severe stress',  mod:'0.30–0.50 · Moderate',    good:'>0.50 · Healthy'},
+  lst:      {crit:'>+2°C · Heat stress',    mod:'+0.5–2°C · Above normal', good:'<+0.5°C · Normal'},
+  rainfall: {crit:'<30mm · Very dry',       mod:'30–80mm · Below normal',  good:'>80mm · Good rains'},
+  soil:     {crit:'<0.15 · Critically dry', mod:'0.15–0.25 · Low',         good:'>0.25 · Adequate'},
+  crops:    {crit:'', mod:'', good:''},
 };
 
 function updateLegend(idx){
-  const isDW = (idx === 'lulc' || idx === 'crops');
-  document.getElementById('leg-dw').style.display  = isDW ? 'flex' : 'none';
-  document.getElementById('leg-idx').style.display = isDW ? 'none' : 'flex';
-  if(!isDW){
+  const isLulc  = idx === 'lulc';
+  const isCrops = idx === 'crops';
+  const isIdx   = !isLulc && !isCrops;
+  document.getElementById('leg-dw').style.display    = isLulc  ? 'flex'  : 'none';
+  document.getElementById('leg-crops').style.display = isCrops ? 'flex'  : 'none';
+  document.getElementById('leg-idx').style.display   = isIdx   ? 'flex'  : 'none';
+  if(isIdx){
     const lg = LEGENDS[idx] || LEGENDS.drought;
-    // NDVI: low=bad(red), high=good(green) — palette already e04030→28b858
-    // LST: high anomaly=bad(red), low=good(green)
-    // Rainfall: deficit=bad(red), surplus=good(green)
-    // Soil: dry=bad(red), wet=good(green)
-    // Drought: high score=bad(red), low=good(green)
     document.getElementById('leg-crit').textContent = lg.crit;
     document.getElementById('leg-mod').textContent  = lg.mod;
     document.getElementById('leg-good').textContent = lg.good;
@@ -363,21 +371,20 @@ function initMap(geojson){
 
 function swapTileLayer(idx){
   if(!map || !map.getSource('siq-tiles') || !tilesReady) return;
-  const key = (idx === 'crops' || idx === 'lulc') ? 'lulc' : idx;
-  const url = TILE_URLS[key];
+  const key = idx === 'crops' ? 'crops_classified' : idx;
+  const url = TILE_URLS[key] || TILE_URLS[idx];
   if(!url) return;
   const opacity = (idx === 'lulc' || idx === 'crops') ? 0.92 : 0.75;
   map.setPaintProperty('siq-tiles', 'raster-opacity', opacity);
   map.getSource('siq-tiles').setTiles([url]);
-  // Update map-sub label
   const labels = {
-    lulc:'Live 10m · Dynamic World · ',
-    crops:'Live 10m · Crop types · ',
-    drought:'Showing: drought · ',
-    ndvi:'Showing: NDVI · ',
-    lst:'Showing: LST · ',
-    rainfall:'Showing: Rainfall % · ',
-    soil:'Showing: Soil moisture · ',
+    lulc:    'Live 10m · Dynamic World · ',
+    crops:   'Live 10m · Estimated crop types · ',
+    drought: 'Showing: drought · ',
+    ndvi:    'Showing: NDVI · ',
+    lst:     'Showing: LST · ',
+    rainfall:'Showing: Rainfall 30d mm · ',
+    soil:    'Showing: Soil moisture · ',
   };
   const county = activeView==='national' ? 'all 47 counties' : (activeCounty||'');
   document.getElementById('map-sub').textContent =
@@ -431,13 +438,13 @@ const DW_CLASSES = [
   {cls:8, color:'#b39fe1', name:'Snow / ice'},
 ];
 
-// Crop classifier — only agricultural classes
+// Estimated crop classification — DW class 4 + NDVI + elevation
 const CROP_CLASSES = [
-  {color:'#f5e642', name:'Maize',           ha_key:'total_maize_ha'},
-  {color:'#2d6e28', name:'Tea / Coffee',    ha_key:'total_tea_ha'},
-  {color:'#e07820', name:'Sorghum/Millet',  ha_key:null},
-  {color:'#4ec8e0', name:'Sugarcane/Rice',  ha_key:null},
-  {color:'#c8a46e', name:'Bare / Fallow',   ha_key:'total_fallow_ha'},
+  {color:'#2d6e28', name:'Tea / Coffee',   ha_key:'tea_ha',      note:'Highland >1500m'},
+  {color:'#f5e642', name:'Maize',          ha_key:'maize_ha',    note:'Mid-elevation 900–1500m'},
+  {color:'#e07820', name:'Sorghum/Millet', ha_key:'sorghum_ha',  note:'Lowland <900m'},
+  {color:'#4ec8e0', name:'Sugarcane/Rice', ha_key:'sugarcane_ha',note:'Near water'},
+  {color:'#c8a46e', name:'Fallow',         ha_key:'fallow_ha',   note:'Low NDVI cropland'},
 ];
 
 // Active DW filter class (null = all)
