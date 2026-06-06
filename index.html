@@ -1142,13 +1142,13 @@
       We are actively seeking partners, funders and collaborators who share the vision of open land intelligence for Africa. Whether you're a government agency, international organisation, researcher or funder — reach out.
     </p>
   </div>
-  <div class="cta-form">
+  <form class="cta-form" action="https://formspree.io/f/xvznzyza" method="POST" id="contact-form">
     <div class="form-row">
-      <input type="text" class="form-input" placeholder="Name">
-      <input type="text" class="form-input" placeholder="Organisation">
+      <input type="text" name="name" class="form-input" placeholder="Name" required>
+      <input type="text" name="organisation" class="form-input" placeholder="Organisation" required>
     </div>
-    <input type="email" class="form-input" placeholder="Email">
-    <select class="form-select">
+    <input type="email" name="email" class="form-input" placeholder="Email" required>
+    <select name="type" class="form-select" required>
       <option value="" disabled selected>I am a...</option>
       <option>Government agency</option>
       <option>International organisation (FAO / WFP / USAID)</option>
@@ -1158,10 +1158,39 @@
       <option>Private sector</option>
       <option>Other</option>
     </select>
-    <textarea class="form-input" placeholder="Tell us about your interest in SavannahIQ" rows="3" style="resize:vertical"></textarea>
-    <button class="form-submit">Send message →</button>
-    <p class="form-note">Or email directly: <span style="color:var(--green)">afrimapai@gmail.com</span></p>
-  </div>
+    <textarea name="message" class="form-input" placeholder="Tell us about your interest in SavannahIQ" rows="3" style="resize:vertical" required></textarea>
+    <button type="submit" class="form-submit" id="form-btn">Send message →</button>
+    <div id="form-success" style="display:none;font-family:Space Mono,monospace;font-size:11px;color:var(--green);padding:12px;border:1px solid rgba(40,184,88,0.3);background:rgba(40,184,88,0.05)">
+      ✓ Message sent! We'll be in touch at savannahiq.africa@gmail.com
+    </div>
+    <p class="form-note">Or email directly: <span style="color:var(--green)">savannahiq.africa@gmail.com</span></p>
+  </form>
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const btn = document.getElementById('form-btn');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      try {
+        const resp = await fetch('https://formspree.io/f/xvznzyza', {
+          method: 'POST',
+          body: new FormData(this),
+          headers: {'Accept': 'application/json'}
+        });
+        if(resp.ok){
+          this.reset();
+          document.getElementById('form-success').style.display = 'block';
+          btn.style.display = 'none';
+        } else {
+          btn.textContent = 'Error — try again';
+          btn.disabled = false;
+        }
+      } catch(err){
+        btn.textContent = 'Error — try again';
+        btn.disabled = false;
+      }
+    });
+  </script>
 </section>
 
 <!-- FOOTER -->
