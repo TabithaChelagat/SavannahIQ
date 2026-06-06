@@ -151,7 +151,36 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   </div>
 
   <div class="right">
-    <div id="map"></div>
+    <div id="map">
+  <div id="map-loading" style="
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    z-index:10;
+    display:flex;flex-direction:column;
+    align-items:center;gap:12px;
+    pointer-events:none;
+  ">
+    <div style="
+      width:36px;height:36px;
+      border:2px solid #1a2a1a;
+      border-top:2px solid #28b858;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+    "></div>
+    <div style="
+      font-family:Space Mono,monospace;
+      font-size:10px;
+      color:#556655;
+      text-transform:uppercase;
+      letter-spacing:0.15em;
+      text-align:center;
+      line-height:1.6;
+    ">Loading satellite data<br><span id="loading-status">Connecting to GEE...</span></div>
+  </div>
+</div>
+<style>
+@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+</style>
     <div class="map-foot">
       <!-- DW 9-class legend — shown for lulc -->
       <div id="leg-dw" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -950,12 +979,14 @@ async function changeSnapshot(dir){
 // Apply lulc tiles once both map and tile URLs are ready
 function applyLulcWhenReady() {
   if(!map || !map.getSource('siq-tiles') || !tilesReady) return;
-  // Only apply lulc if user hasn't already selected a different layer
   if(activeIdx !== 'lulc') return;
   map.setPaintProperty('siq-tiles', 'raster-opacity', 0.92);
   map.getSource('siq-tiles').setTiles([TILE_URLS['lulc']]);
   document.getElementById('map-sub').textContent =
     'Live 10m · Dynamic World · ' + new Date().toLocaleDateString() + ' · click county to explore';
+  // Hide loading overlay
+  const loader = document.getElementById('map-loading');
+  if(loader) loader.style.display = 'none';
 }
 
 // Boot — fetch tile URLs from Cloud Run, data+geojson from GitHub
@@ -963,6 +994,8 @@ async function boot() {
   try {
     // Fetch live tile URLs from Cloud Run
     document.getElementById('map-sub').textContent = 'Loading live satellite data...';
+      const loadStatus = document.getElementById('loading-status');
+      if(loadStatus) loadStatus.textContent = 'Computing GEE layers...';
     try {
       const tileResp = await fetch(CLOUD_RUN + '/tiles');
       const tileData = await tileResp.json();
