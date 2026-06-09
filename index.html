@@ -99,7 +99,7 @@
   .hero {
     min-height: 100vh;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     position: relative;
     overflow: hidden;
   }
@@ -108,7 +108,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 120px 48px 80px;
+    padding: 160px 48px 100px; max-width: 800px;
     position: relative;
     z-index: 2;
   }
@@ -148,7 +148,7 @@
   .hero-sub {
     font-size: 15px;
     line-height: 1.7;
-    color: var(--muted);
+    color: var(--white);
     max-width: 420px;
     margin-bottom: 48px;
   }
@@ -173,7 +173,7 @@
 
   .stat-label {
     font-size: 10px;
-    color: var(--muted);
+    color: var(--white);
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
@@ -367,7 +367,7 @@
   .section-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(42px, 5vw, 72px);
-    color: var(--white);
+    color: var(--sand);
     line-height: 1;
     margin-bottom: 24px;
     letter-spacing: 0.02em;
@@ -376,7 +376,7 @@
   /* PROBLEM */
   .problem-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 80px;
     align-items: center;
     padding: 120px 48px;
@@ -387,7 +387,7 @@
   .problem-text p {
     font-size: 17px;
     line-height: 1.8;
-    color: var(--muted);
+    color: var(--white);
     margin-bottom: 20px;
   }
 
@@ -442,7 +442,7 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
-  .timeline-text { font-size: 14px; color: var(--text); line-height: 1.5; }
+  .timeline-text { font-size: 14px; color: var(--white); line-height: 1.5; }
 
   /* LAYERS */
   .layers-section {
@@ -507,14 +507,14 @@
   .layer-name {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 28px;
-    color: var(--white);
+    color: var(--sand);
     margin-bottom: 8px;
     letter-spacing: 0.05em;
   }
 
   .layer-desc {
     font-size: 13px;
-    color: var(--muted);
+    color: var(--white);
     line-height: 1.6;
     margin-bottom: 16px;
   }
@@ -522,7 +522,7 @@
   .layer-source {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
-    color: var(--muted);
+    color: #889988;
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
@@ -568,7 +568,7 @@
 
   .audience-desc {
     font-size: 13px;
-    color: var(--muted);
+    color: var(--white);
     line-height: 1.6;
   }
 
@@ -591,7 +591,7 @@
   .tech-label {
     font-family: 'Space Mono', monospace;
     font-size: 10px;
-    color: var(--muted);
+    color: #99bb99;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     white-space: nowrap;
@@ -613,11 +613,11 @@
   .tech-item {
     font-family: 'Space Mono', monospace;
     font-size: 11px;
-    color: var(--muted);
+    color: #99bb99;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 6px 12px;
-    border: 1px solid var(--dim);
+    border: 1px solid #2a3a2a;
     transition: all 0.2s;
   }
 
@@ -658,7 +658,7 @@
   .vision-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(48px, 7vw, 96px);
-    color: var(--white);
+    color: var(--sand);
     line-height: 1;
     margin-bottom: 32px;
     letter-spacing: 0.02em;
@@ -668,7 +668,7 @@
 
   .vision-text {
     font-size: 16px;
-    color: var(--muted);
+    color: var(--white);
     max-width: 560px;
     margin: 0 auto 48px;
     line-height: 1.8;
@@ -709,7 +709,7 @@
     padding: 120px 48px;
     border-top: 1px solid var(--dim);
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 80px;
     max-width: 1400px;
     margin: 0 auto;
@@ -719,7 +719,7 @@
   .cta-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(42px, 5vw, 72px);
-    color: var(--white);
+    color: var(--sand);
     line-height: 1;
     letter-spacing: 0.02em;
   }
@@ -734,7 +734,7 @@
 
   .form-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
   }
 
@@ -851,8 +851,8 @@
     .hero-right { display: none; }
     .hero-left { padding: 100px 24px 60px; }
     .problem-grid { grid-template-columns: 1fr; gap: 48px; padding: 80px 24px; }
-    .layers-grid { grid-template-columns: 1fr 1fr; padding: 0 24px; }
-    .audience-grid { grid-template-columns: 1fr 1fr; }
+    .layers-grid { grid-template-columns: 1fr; padding: 0 24px; }
+    .audience-grid { grid-template-columns: 1fr; }
     .cta-section { grid-template-columns: 1fr; gap: 48px; }
     .section { padding: 80px 24px; }
     .layers-section { padding: 80px 24px; }
@@ -913,39 +913,7 @@
     </div>
   </div>
 
-  <div class="hero-right">
-    <div class="hero-map">
-      <div class="satellite-grid"></div>
-      <div class="kenya-glow"></div>
-      <div class="scan-line"></div>
 
-      <!-- Floating data points -->
-      <div class="data-point dp-green">NDVI · 0.71 · NANDI</div>
-      <div class="data-point dp-orange">DROUGHT · 49 · GARISSA</div>
-      <div class="data-point dp-red">IPC 2 · WAJIR · MONITOR</div>
-      <div class="data-point dp-sand">SOIL · 0.41 · KIRINYAGA</div>
-
-      <!-- Kenya SVG outline -->
-      <svg class="kenya-visual" viewBox="0 0 340 420" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.6">
-        <path d="M170 20 L280 60 L310 120 L300 200 L260 280 L200 350 L170 400 L140 350 L80 280 L40 200 L30 120 L60 60 Z"
-          stroke="#28b858" stroke-width="1.5" fill="rgba(40,184,88,0.04)" stroke-dasharray="4 3"/>
-        <!-- County grid lines -->
-        <line x1="170" y1="20" x2="170" y2="400" stroke="#28b858" stroke-width="0.3" opacity="0.3"/>
-        <line x1="40" y1="200" x2="300" y2="200" stroke="#28b858" stroke-width="0.3" opacity="0.3"/>
-        <line x1="80" y1="100" x2="260" y2="100" stroke="#28b858" stroke-width="0.3" opacity="0.2"/>
-        <line x1="60" y1="300" x2="280" y2="300" stroke="#28b858" stroke-width="0.3" opacity="0.2"/>
-        <!-- Data dots -->
-        <circle cx="170" cy="200" r="4" fill="#28b858" opacity="0.8"/>
-        <circle cx="220" cy="150" r="3" fill="#e07820" opacity="0.7"/>
-        <circle cx="130" cy="170" r="3" fill="#28b858" opacity="0.7"/>
-        <circle cx="240" cy="260" r="3" fill="#e04030" opacity="0.6"/>
-        <circle cx="150" cy="300" r="2" fill="#28b858" opacity="0.5"/>
-        <circle cx="200" cy="320" r="2" fill="#c8a46e" opacity="0.5"/>
-        <circle cx="110" cy="230" r="2" fill="#28b858" opacity="0.6"/>
-        <circle cx="260" cy="180" r="2" fill="#e07820" opacity="0.5"/>
-      </svg>
-    </div>
-  </div>
 </section>
 
 <!-- MARQUEE -->
@@ -983,35 +951,35 @@
     <div class="timeline-item">
       <div class="timeline-dot tl-red"></div>
       <div class="timeline-content">
-        <div class="timeline-time">Day 0</div>
+        <div class="timeline-time" style="color:var(--red)">Day 0</div>
         <div class="timeline-text">Drought stress begins at pixel level — detectable in NDVI and soil moisture</div>
       </div>
     </div>
     <div class="timeline-item">
       <div class="timeline-dot tl-orange"></div>
       <div class="timeline-content">
-        <div class="timeline-time">Day 15 — SavannahIQ detects</div>
+        <div class="timeline-time" style="color:var(--orange)">Day 15 — SavannahIQ detects</div>
         <div class="timeline-text">County drought score rises. NDVI declining. Soil moisture below threshold. Alert triggered.</div>
       </div>
     </div>
     <div class="timeline-item">
       <div class="timeline-dot tl-orange"></div>
       <div class="timeline-content">
-        <div class="timeline-time">Day 45</div>
+        <div class="timeline-time" style="color:var(--orange)">Day 45</div>
         <div class="timeline-text">Visible crop stress. Farmers begin reporting losses. Local media picks up.</div>
       </div>
     </div>
     <div class="timeline-item">
       <div class="timeline-dot tl-red"></div>
       <div class="timeline-content">
-        <div class="timeline-time">Day 90</div>
+        <div class="timeline-time" style="color:var(--red)">Day 90</div>
         <div class="timeline-text">Government commissions assessment. Field teams deployed.</div>
       </div>
     </div>
     <div class="timeline-item">
       <div class="timeline-dot tl-red"></div>
       <div class="timeline-content">
-        <div class="timeline-time">Day 120+</div>
+        <div class="timeline-time" style="color:var(--red)">Day 120+</div>
         <div class="timeline-text">Drought officially declared. Emergency relief coordinated. Crops already failed.</div>
       </div>
     </div>
@@ -1030,7 +998,7 @@
   <div style="max-width:1400px;margin:0 auto">
     <div class="section-label">Intelligence layers</div>
     <h2 class="section-title">Six lenses on the land</h2>
-    <p style="font-size:15px;color:var(--muted);max-width:560px;line-height:1.7;margin-top:16px">Every layer is computed from best-available public satellite data and delivered as classified, actionable intelligence — not raw imagery.</p>
+    <p style="font-size:15px;color:var(--white);max-width:560px;line-height:1.7;margin-top:16px">Every layer is computed from best-available public satellite data and delivered as classified, actionable intelligence — not raw imagery.</p>
   </div>
   <div class="layers-grid">
     <div class="layer-card lc-lulc">
@@ -1118,6 +1086,61 @@
   </div>
 </div>
 
+<!-- WHAT MAKES US DIFFERENT -->
+<section style="padding:120px 48px;border-top:1px solid var(--dim);background:rgba(40,184,88,0.01)">
+  <div style="max-width:1400px;margin:0 auto">
+    <div class="section-label">What makes us different</div>
+    <h2 class="section-title" style="margin-bottom:16px">Every institution sees the problem.<br>SavannahIQ sees the pixel.</h2>
+    <p style="font-size:15px;color:var(--white);max-width:640px;line-height:1.7;margin-bottom:72px">Every major food security institution — NDMA, FAO, FEWS NET, WFP — is looking at the same problem from 30,000 feet. They produce reports. SavannahIQ produces decisions.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+
+      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--green)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">01 · Resolution</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">10m vs 250m</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">FEWS NET, NDMA and WFP rely on MODIS at 250m–1km. At 1km one pixel is 100 hectares — an entire village's farmland. SavannahIQ processes Sentinel-2 at 10m through Dynamic World — each pixel is 100 square metres, roughly one farm plot. A stressed field inside a healthy landscape is invisible at 250m. At 10m it is a red patch with a precise location.</p>
+      </div>
+
+      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--orange)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">02 · Speed</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">15 days vs 4–6 weeks</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">NDMA bulletins are monthly. FEWS NET seasonal outlooks come every 4–6 weeks. By the time a report reaches a county official the intervention window has closed. SavannahIQ updates every 15 days — aligned with Sentinel-2 pass frequency — meaning the signal from a failing crop reaches decision-makers while there is still time to act.</p>
+      </div>
+
+      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--sand)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--sand);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">03 · Precision</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Ward vs county</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">Existing tools say "Garissa is at risk." SavannahIQ lets you zoom into Garissa and see that stress is concentrated in Dadaab sub-county, not Ijara — 68% of cropland pixels critical in one ward, 71% stable in the next. That is the difference between sending relief to a county headquarters and sending an extension officer to the exact location that needs help.</p>
+      </div>
+
+      <div style="padding:36px;background:var(--dim);border-top:2px solid #419bdf">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#419bdf;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">04 · Intelligence</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Composite vs single index</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">NDVI alone does not tell you a crop is failing. Rainfall alone does not tell you a crop is stressed — it may have rained last week but soil moisture depleted overnight due to heat. SavannahIQ combines NDVI, LST anomaly, rainfall anomaly and soil moisture into a single calibrated drought score — weighted by agronomic importance — so the composite reflects actual crop stress, not a single satellite signal in isolation.</p>
+      </div>
+
+      <div style="padding:36px;background:var(--dim);border-top:2px solid #88b053">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#88b053;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">05 · Masking</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Farmland only</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">Every satellite index is contaminated when computed across an entire landscape — urban heat inflates LST in Nairobi, dense forest pushes NDVI high in Kakamega. SavannahIQ uses Dynamic World's land cover classification to compute drought intelligence only over agricultural pixels. The signal is clean because it only measures what matters for food security.</p>
+      </div>
+
+      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--green)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">06 · Time series</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Snapshots vs static maps</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">Land use change, crop growth stages, drought onset — none of these are visible in a snapshot. SavannahIQ's 15-day snapshot archive lets a county officer watch Trans Nzoia's maize move through growth to harvest, or watch Baringo's rangeland NDVI collapse over six weeks during drought onset. That temporal dimension is what converts a map into intelligence.</p>
+      </div>
+
+    </div>
+
+    <div style="margin-top:48px;padding:32px;border:1px solid rgba(40,184,88,0.2);background:rgba(40,184,88,0.03)">
+      <p style="font-size:14px;color:var(--white);line-height:1.8;text-align:center;max-width:900px;margin:0 auto">
+        <span style="color:var(--green);font-weight:500">SavannahIQ is the only platform in Africa</span> that delivers sub-county, 15-day agricultural intelligence at 10m resolution — twenty-five times sharper than the 250m MODIS imagery used by leading food security institutions — masked to actual farmland, combining five satellite datasets, accessible on any browser, built for the people who make food security decisions.
+      </p>
+    </div>
+  </div>
+</section>
+
 <!-- VISION -->
 <section class="vision-section" id="vision">
   <div class="vision-eyebrow">The mission</div>
@@ -1138,7 +1161,7 @@
 <section class="cta-section" id="contact">
   <div>
     <h2 class="cta-title">Work with<br><span>SavannahIQ</span></h2>
-    <p style="font-size:14px;color:var(--muted);margin-top:24px;line-height:1.7;max-width:400px">
+    <p style="font-size:14px;color:var(--white);margin-top:24px;line-height:1.7;max-width:400px">
       We are actively seeking partners, funders and collaborators who share the vision of open land intelligence for Africa. Whether you're a government agency, international organisation, researcher or funder — reach out.
     </p>
   </div>
@@ -1203,6 +1226,19 @@
     <a href="#contact">Contact</a>
   </div>
 </footer>
+
+</body>
+</html>
+  <ul class="nav-links">
+    <li><a href="#platform">Platform</a></li>
+    <li><a href="#layers">Data layers</a></li>
+    <li><a href="#vision">Vision</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="/dashboard.html" class="nav-cta">Open dashboard →</a>
+</nav>
+
+<!-- HERO -->
 
 </body>
 </html>
