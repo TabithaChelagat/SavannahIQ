@@ -98,17 +98,22 @@
   /* HERO */
   .hero {
     min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
     overflow: hidden;
+    text-align: center;
   }
 
   .hero-left {
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    padding: 160px 48px 100px; max-width: 800px;
+    padding: 160px 80px 100px;
+    max-width: 900px;
+    width: 100%;
     position: relative;
     z-index: 2;
   }
@@ -122,10 +127,19 @@
     margin-bottom: 24px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
   }
 
   .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--green);
+  }
+
+  .hero-eyebrow::after {
     content: '';
     display: block;
     width: 32px;
@@ -149,14 +163,16 @@
     font-size: 15px;
     line-height: 1.7;
     color: var(--white);
-    max-width: 420px;
+    max-width: 560px;
     margin-bottom: 48px;
+    text-align: center;
   }
 
   .hero-stats {
     display: flex;
     gap: 32px;
     margin-bottom: 48px;
+    justify-content: center;
   }
 
   .stat {
@@ -483,7 +499,7 @@
   .lc-ndvi::before { background: var(--green); }
   .lc-rain::before { background: #419bdf; }
   .lc-soil::before { background: var(--sand); }
-  .lc-lst::before { background: var(--orange); }
+  .lc-crops::before { background: var(--orange); }
   .lc-lulc::before { background: #88b053; }
 
   .layer-icon {
@@ -709,11 +725,11 @@
     padding: 120px 48px;
     border-top: 1px solid var(--dim);
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 80px;
     max-width: 1400px;
     margin: 0 auto;
-    align-items: center;
+    align-items: start;
   }
 
   .cta-title {
@@ -734,7 +750,7 @@
 
   .form-row {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
 
@@ -848,12 +864,12 @@
     nav { padding: 16px 24px; }
     .nav-links { display: none; }
     .hero { grid-template-columns: 1fr; }
-    .hero-right { display: none; }
     .hero-left { padding: 100px 24px 60px; }
     .problem-grid { grid-template-columns: 1fr; gap: 48px; padding: 80px 24px; }
     .layers-grid { grid-template-columns: 1fr; padding: 0 24px; }
     .audience-grid { grid-template-columns: 1fr; }
     .cta-section { grid-template-columns: 1fr; gap: 48px; }
+    .form-row { grid-template-columns: 1fr; }
     .section { padding: 80px 24px; }
     .layers-section { padding: 80px 24px; }
     .audience-section { padding: 80px 24px; }
@@ -913,23 +929,21 @@
     </div>
   </div>
 
-
 </section>
 
-<!-- MARQUEE -->
-<div class="marquee-wrap">
+  <div class="marquee-wrap">
   <div class="marquee-track">
     <span class="marquee-item"><span>●</span> SENTINEL-2 · 10M RESOLUTION</span>
     <span class="marquee-item"><span>●</span> DYNAMIC WORLD V1 · 9 LAND CLASSES</span>
-    <span class="marquee-item"><span>●</span> CHIRPS RAINFALL · 45-DAY WINDOW</span>
-    <span class="marquee-item"><span>●</span> MODIS LST · TEMPERATURE ANOMALY</span>
+    <span class="marquee-item"><span>●</span> CHIRPS RAINFALL · 15-DAY WINDOW</span>
     <span class="marquee-item"><span>●</span> NASA SMAP · SOIL MOISTURE</span>
+    <span class="marquee-item"><span>●</span> CROP CLASSIFICATION · 8 CLASSES</span>
     <span class="marquee-item"><span>●</span> 47 KENYA COUNTIES · LIVE</span>
     <span class="marquee-item"><span>●</span> SENTINEL-2 · 10M RESOLUTION</span>
     <span class="marquee-item"><span>●</span> DYNAMIC WORLD V1 · 9 LAND CLASSES</span>
-    <span class="marquee-item"><span>●</span> CHIRPS RAINFALL · 45-DAY WINDOW</span>
-    <span class="marquee-item"><span>●</span> MODIS LST · TEMPERATURE ANOMALY</span>
+    <span class="marquee-item"><span>●</span> CHIRPS RAINFALL · 15-DAY WINDOW</span>
     <span class="marquee-item"><span>●</span> NASA SMAP · SOIL MOISTURE</span>
+    <span class="marquee-item"><span>●</span> CROP CLASSIFICATION · 8 CLASSES</span>
     <span class="marquee-item"><span>●</span> 47 KENYA COUNTIES · LIVE</span>
   </div>
 </div>
@@ -1010,8 +1024,8 @@
     <div class="layer-card lc-drought">
       <div class="layer-icon li-red">COMPOSITE</div>
       <div class="layer-name">Drought Score</div>
-      <div class="layer-desc">Composite index combining NDVI, soil moisture, rainfall anomaly and LST. Scored 0–100. IPC-aligned classification.</div>
-      <div class="layer-source">Source: NDVI + SMAP + CHIRPS + MODIS</div>
+      <div class="layer-desc">Composite index combining NDVI, soil moisture and rainfall anomaly — weighted by agronomic importance. Scored 0–100, IPC-aligned. The synthesis that turns six signals into one decision.</div>
+      <div class="layer-source">Source: NDVI + SMAP + CHIRPS</div>
     </div>
     <div class="layer-card lc-ndvi">
       <div class="layer-icon li-green">VEG</div>
@@ -1022,7 +1036,7 @@
     <div class="layer-card lc-rain">
       <div class="layer-icon li-blue">PRECIP</div>
       <div class="layer-name">Rainfall</div>
-      <div class="layer-desc">45-day actual rainfall in mm from CHIRPS daily precipitation model. Full Kenya coverage with no cloud gaps.</div>
+      <div class="layer-desc">15-day actual rainfall in mm from CHIRPS daily precipitation model. Full Kenya coverage with no cloud gaps — updated with every snapshot.</div>
       <div class="layer-source">Source: UCSB-CHG CHIRPS Daily</div>
     </div>
     <div class="layer-card lc-soil">
@@ -1031,11 +1045,11 @@
       <div class="layer-desc">Root-zone soil moisture from NASA SMAP microwave satellite. Penetrates cloud cover. Critical for crop stress detection.</div>
       <div class="layer-source">Source: NASA SMAP SPL3SMP_E</div>
     </div>
-    <div class="layer-card lc-lst">
-      <div class="layer-icon li-orange">TEMP</div>
-      <div class="layer-name">LST Anomaly</div>
-      <div class="layer-desc">Land surface temperature deviation from 10-year baseline. Identifies heat stress zones and cooling from rainfall recovery.</div>
-      <div class="layer-source">Source: MODIS MOD11A2 · 8-day composite</div>
+    <div class="layer-card lc-crops">
+      <div class="layer-icon li-orange">CLASS</div>
+      <div class="layer-name">Crop Classification</div>
+      <div class="layer-desc">8-class crop type estimation from NDVI within Dynamic World cropland pixels — fallow, dryland cereals, maize stages, sugarcane, tea/coffee. Identifies what's at stake, not just that stress exists.</div>
+      <div class="layer-source">Source: Sentinel-2 NDVI · Dynamic World class 4 · Estimated</div>
     </div>
   </div>
 </div>
@@ -1093,7 +1107,7 @@
     <h2 class="section-title" style="margin-bottom:16px">Every institution sees the problem.<br>SavannahIQ sees the pixel.</h2>
     <p style="font-size:15px;color:var(--white);max-width:640px;line-height:1.7;margin-bottom:72px">Every major food security institution — NDMA, FAO, FEWS NET, WFP — is looking at the same problem from 30,000 feet. They produce reports. SavannahIQ produces decisions.</p>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+    <div style="display:grid;grid-template-columns:1fr;gap:2px">
 
       <div style="padding:36px;background:var(--dim);border-top:2px solid var(--green)">
         <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">01 · Resolution</div>
@@ -1116,13 +1130,13 @@
       <div style="padding:36px;background:var(--dim);border-top:2px solid #419bdf">
         <div style="font-family:'Space Mono',monospace;font-size:10px;color:#419bdf;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">04 · Intelligence</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Composite vs single index</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">NDVI alone does not tell you a crop is failing. Rainfall alone does not tell you a crop is stressed — it may have rained last week but soil moisture depleted overnight due to heat. SavannahIQ combines NDVI, LST anomaly, rainfall anomaly and soil moisture into a single calibrated drought score — weighted by agronomic importance — so the composite reflects actual crop stress, not a single satellite signal in isolation.</p>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">NDVI alone does not tell you a crop is failing. Rainfall alone does not tell you a crop is stressed — it may have rained last week but soil moisture depleted overnight. SavannahIQ combines NDVI, rainfall anomaly and soil moisture into a single calibrated drought score — weighted by agronomic importance — so the composite reflects actual crop stress, not a single satellite signal in isolation.</p>
       </div>
 
       <div style="padding:36px;background:var(--dim);border-top:2px solid #88b053">
         <div style="font-family:'Space Mono',monospace;font-size:10px;color:#88b053;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">05 · Masking</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Farmland only</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">Every satellite index is contaminated when computed across an entire landscape — urban heat inflates LST in Nairobi, dense forest pushes NDVI high in Kakamega. SavannahIQ uses Dynamic World's land cover classification to compute drought intelligence only over agricultural pixels. The signal is clean because it only measures what matters for food security.</p>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">Every satellite index is contaminated when computed across an entire landscape — urban heat inflates readings in Nairobi, dense forest pushes NDVI high in Kakamega. SavannahIQ uses Dynamic World's land cover classification to compute drought intelligence only over agricultural pixels. The signal is clean because it only measures what matters for food security.</p>
       </div>
 
       <div style="padding:36px;background:var(--dim);border-top:2px solid var(--green)">
@@ -1135,7 +1149,7 @@
 
     <div style="margin-top:48px;padding:32px;border:1px solid rgba(40,184,88,0.2);background:rgba(40,184,88,0.03)">
       <p style="font-size:14px;color:var(--white);line-height:1.8;text-align:center;max-width:900px;margin:0 auto">
-        <span style="color:var(--green);font-weight:500">SavannahIQ is the only platform in Africa</span> that delivers sub-county, 15-day agricultural intelligence at 10m resolution — twenty-five times sharper than the 250m MODIS imagery used by leading food security institutions — masked to actual farmland, combining five satellite datasets, accessible on any browser, built for the people who make food security decisions.
+        <span style="color:var(--green);font-weight:500">SavannahIQ is the only platform in Africa</span> that delivers sub-county, 15-day agricultural intelligence at 10m resolution — twenty-five times sharper than the 250m MODIS imagery used by leading food security institutions — masked to actual farmland, combining four satellite datasets into a composite drought score plus crop classification, accessible on any browser, built for the people who make food security decisions.
       </p>
     </div>
   </div>
