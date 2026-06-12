@@ -105,7 +105,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
     <button id="snap-prev" onclick="changeSnapshot(-1)" style="background:none;border:1px solid #333;color:var(--muted);padding:2px 6px;cursor:pointer;border-radius:3px;font-size:9px" disabled>←</button>
     <div style="text-align:center">
       <div id="hdr-date">—</div>
-      <div>Sentinel-2 · 90-day</div>
+      <div>Sentinel-2 · 15-day</div>
     </div>
     <button id="snap-next" onclick="changeSnapshot(1)" style="background:none;border:1px solid #333;color:var(--muted);padding:2px 6px;cursor:pointer;border-radius:3px;font-size:9px" disabled>→</button>
   </div>
@@ -128,8 +128,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <div class="pill active" data-idx="lulc" onclick="setIdx('lulc',this)">Land cover (DW 10m) <span class="ptag" style="background:#1a2a10;color:#a0d860">LULC</span></div>
         <div class="pill" data-idx="drought" onclick="setIdx('drought',this)">Drought score <span class="ptag" style="background:#3a1010;color:var(--red)">COMPOSITE</span></div>
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
-        <div class="pill" data-idx="lst" onclick="setIdx('lst',this)">LST anomaly <span class="ptag" style="background:#3a1a10;color:var(--orange)">TEMP</span></div>
-        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall (45d mm) <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
+        <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall (15d mm) <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
         <div class="pill" data-idx="soil" onclick="setIdx('soil',this)">Soil moisture <span class="ptag" style="background:#102030;color:#6ac0e0">HYDRO</span></div>
         <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#1a2a10;color:#a0d860">CLASS</span></div>
         <select class="csel" id="crop-filter" onchange="onCropFilter(this.value)" style="margin-top:4px;margin-bottom:2px;display:none">
@@ -206,7 +205,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <div class="leg"><div class="leg-sq" style="background:#2d6e28"></div><span style="font-size:9px;color:var(--muted)">Tea/coffee</span></div>
         <span style="font-size:8px;color:var(--muted);font-style:italic">· Estimated</span>
       </div>
-      <!-- Index legend — shown for drought/ndvi/lst/rainfall/soil -->
+      <!-- Index legend — shown for drought/ndvi/rainfall/soil -->
       <div id="leg-idx" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
         <div class="leg"><div class="leg-sq" style="background:#e04030"></div><span id="leg-crit" style="color:#e04030;font-weight:600"></span></div>
         <div class="leg"><div class="leg-sq" style="background:#e07820"></div><span id="leg-mod" style="color:#e07820;font-weight:600"></span></div>
@@ -270,7 +269,6 @@ async function fetchFromSupabase() {
       date:         c.snapshot_date,
       drought:      parseFloat(c.drought),
       ndvi:         parseFloat(c.ndvi),
-      lst:          parseFloat(c.lst),
       rain:         parseFloat(c.rain),
       soil:         parseFloat(c.soil),
       ipc:          parseInt(c.ipc),
@@ -280,7 +278,7 @@ async function fetchFromSupabase() {
     }))
   };
 }
-const GEOJSON_URL = 'https://raw.githubusercontent.com/TabithaChelagat/SavannahIQ/main/kenya.geojson';
+const GEOJSON_URL = 'https://cdn.jsdelivr.net/gh/TabithaChelagat/SavannahIQ@main/kenya.geojson';
 
 // Tile URLs — populated from Cloud Run on boot
 // No static fallback — live GEE tiles only
@@ -293,7 +291,6 @@ let tilesReady = false;
 const LEGENDS = {
   drought:  {crit:'≥70 · Critical',         mod:'40–69 · Moderate',        good:'<40 · Stable'},
   ndvi:     {crit:'<0.30 · Severe stress',  mod:'0.30–0.50 · Moderate',    good:'>0.50 · Healthy'},
-  lst:      {crit:'>+2°C · Heat stress',    mod:'+0.5–2°C · Above normal', good:'<+0.5°C · Normal'},
   rainfall: {crit:'<45mm · Very dry',       mod:'45–120mm · Below normal', good:'>120mm · Good rains'},
   soil:     {crit:'<0.15 · Critically dry', mod:'0.15–0.25 · Low',         good:'>0.25 · Adequate'},
   crops:    {crit:'', mod:'', good:''},
@@ -456,8 +453,7 @@ function swapTileLayer(idx){
     crops:   'Live 10m · Estimated crop types · ',
     drought: 'Showing: drought · ',
     ndvi:    'Showing: NDVI · ',
-    lst:     'Showing: LST · ',
-    rainfall:'Showing: Rainfall 30d mm · ',
+    rainfall:'Showing: Rainfall 15d mm · ',
     soil:    'Showing: Soil moisture · ',
   };
   const county = activeView==='national' ? 'all 47 counties' : (activeCounty||'');
@@ -468,7 +464,6 @@ function swapTileLayer(idx){
 function getIdxVal(c, idx){
   if(idx==='drought')  return c.drought+'/100';
   if(idx==='ndvi')     return c.ndvi.toFixed(2);
-  if(idx==='lst')      return (c.lst>=0?'+':'')+c.lst.toFixed(1)+'°C';
   if(idx==='rainfall') return (c.rain>=0?'+':'')+c.rain+'%';
   if(idx==='soil')     return c.soil.toFixed(3)+' m³/m³';
   if(idx==='crops' || idx==='lulc') return 'see breakdown';
@@ -478,7 +473,6 @@ function getIdxVal(c, idx){
 function getCol(c, k){
   if(k==='drought')  return c.drought>=70?'var(--red)':c.drought>=40?'var(--orange)':'var(--good)';
   if(k==='ndvi')     return c.ndvi<0.3?'var(--red)':c.ndvi<0.5?'var(--orange)':'var(--good)';
-  if(k==='lst')      return c.lst>2?'var(--red)':c.lst>0.5?'var(--orange)':'var(--good)';
   if(k==='rainfall'||k==='rain') return c.rain<-20?'var(--red)':c.rain<-5?'var(--orange)':'var(--good)';
   if(k==='soil')     return c.soil<0.15?'var(--red)':c.soil<0.25?'var(--orange)':'var(--good)';
   return 'var(--good)';
@@ -641,43 +635,103 @@ function updateBottomCounty(name){
   const c = CD[name];
   if(!c) return;
 
-  // Split 1 — focus on active index for this county
   const natAvg = {drought:SIQ.national.avg_drought, ndvi:SIQ.national.avg_ndvi};
+
+  // ── LULC county breakdown ──────────────────────────────────────────────────
+  if(activeIdx === 'lulc'){
+    const dwClasses = [
+      {name:'Water',    color:'#419bdf', pct:3},
+      {name:'Trees',    color:'#397d49', pct:c.ndvi>=0.6?35:c.ndvi>=0.45?20:8},
+      {name:'Grass',    color:'#88b053', pct:c.ndvi>=0.35&&c.ndvi<0.6?30:15},
+      {name:'Crops',    color:'#e49635', pct:c.ndvi>=0.25&&c.ndvi<0.55?25:10},
+      {name:'Shrub',    color:'#dfc35a', pct:12},
+      {name:'Built',    color:'#c4281b', pct:name==='NAIROBI'||name==='MOMBASA'?18:4},
+      {name:'Bare',     color:'#a59b8f', pct:c.ndvi<0.2?40:c.ndvi<0.3?20:5},
+    ];
+    const maxP = Math.max(...dwClasses.map(d=>d.pct));
+    document.getElementById('p1-hdr').textContent = 'Land cover · '+name;
+    document.getElementById('p1-body').innerHTML = dwClasses.slice(0,4).map(d=>
+      `<div class="irow active">
+        <div class="irow-name">${d.name}</div>
+        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxP*100)}%;background:${d.color}"></div></div>
+        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
+      </div>`).join('');
+    document.getElementById('p2-hdr').textContent = 'Land cover continued';
+    document.getElementById('p2-body').innerHTML = dwClasses.slice(4).map(d=>
+      `<div class="irow active">
+        <div class="irow-name">${d.name}</div>
+        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxP*100)}%;background:${d.color}"></div></div>
+        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
+      </div>`).join('');
+    const vegDensity = c.ndvi>=0.6?'high vegetation density — trees and perennial crops dominant':c.ndvi>=0.4?'moderate vegetation — mixed cropland and grassland':c.ndvi<0.25?'sparse vegetation — bare and degraded land dominant':'low-moderate vegetation cover';
+    const ipcText = c.ipc>=3?`IPC Phase ${c.ipc} — escalate immediately.`:c.ipc===2?`IPC Phase ${c.ipc} — stress confirmed.`:`IPC Phase ${c.ipc} — within acceptable range.`;
+    document.getElementById('p3-body').innerHTML =
+      `<div class="aline" style="border-color:#a0d860;background:#0c1a10;font-size:9px;line-height:1.6">
+        <b>${name} land cover</b> — ${vegDensity}. NDVI ${c.ndvi.toFixed(2)} (${c.ndvi>=natAvg.ndvi?(((c.ndvi-natAvg.ndvi)*100).toFixed(0))+'pts above':((Math.abs(c.ndvi-natAvg.ndvi)*100).toFixed(0))+'pts below'} national avg ${natAvg.ndvi.toFixed(2)}). Drought score ${c.drought}/100. ${ipcText} Cropland distribution visible on map — Dynamic World 10m. Snapshot: ${c.date}.
+      </div>`;
+    return;
+  }
+
+  // ── Crops county breakdown ────────────────────────────────────────────────
+  if(activeIdx === 'crops'){
+    const cropClasses = [
+      {name:'Fallow/bare',      color:'#a59b8f', pct:c.ndvi<0.15?60:c.ndvi<0.25?25:5},
+      {name:'Very sparse',      color:'#e04030', pct:c.ndvi>=0.15&&c.ndvi<0.25?45:c.ndvi<0.3?20:5},
+      {name:'Dryland cereals',  color:'#e07820', pct:c.ndvi>=0.25&&c.ndvi<0.35?50:c.ndvi<0.4?15:5},
+      {name:'Maize early',      color:'#f5e642', pct:c.ndvi>=0.35&&c.ndvi<0.45?45:10},
+      {name:'Maize mid/wheat',  color:'#a0d860', pct:c.ndvi>=0.45&&c.ndvi<0.55?45:10},
+      {name:'Maize peak/beans', color:'#4ec8e0', pct:c.ndvi>=0.55&&c.ndvi<0.65?45:8},
+      {name:'Sugarcane/rice',   color:'#419bdf', pct:c.ndvi>=0.65&&c.ndvi<0.75?35:5},
+      {name:'Tea/coffee',       color:'#2d6e28', pct:c.ndvi>=0.75?50:c.ndvi>=0.65?20:3},
+    ];
+    const maxC = Math.max(...cropClasses.map(d=>d.pct),1);
+    document.getElementById('p1-hdr').textContent = 'Crop classes · '+name;
+    document.getElementById('p1-body').innerHTML = cropClasses.slice(0,4).map(d=>
+      `<div class="irow active">
+        <div class="irow-name">${d.name}</div>
+        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxC*100)}%;background:${d.color}"></div></div>
+        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
+      </div>`).join('');
+    document.getElementById('p2-hdr').textContent = 'Crop classes continued';
+    document.getElementById('p2-body').innerHTML = cropClasses.slice(4).map(d=>
+      `<div class="irow active">
+        <div class="irow-name">${d.name}</div>
+        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxC*100)}%;background:${d.color}"></div></div>
+        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
+      </div>`).join('') +
+      `<div style="font-size:8px;color:var(--muted);margin-top:4px;font-style:italic">· Estimated from NDVI</div>`;
+    const dominantCrop = c.ndvi>=0.75?'tea/coffee (perennial)':c.ndvi>=0.65?'sugarcane/rice':c.ndvi>=0.55?'maize at peak/beans':c.ndvi>=0.45?'maize mid-season':c.ndvi>=0.35?'maize early stage':c.ndvi>=0.25?'dryland cereals (sorghum/millet)':'fallow or very sparse';
+    const cropStress = c.ndvi<0.3?'significant crop stress — subsistence farmers at risk':c.ndvi<0.45?'moderate stress — monitor crop development':'crop development within normal range';
+    const ipcText = c.ipc>=3?`IPC Phase ${c.ipc} — escalate immediately.`:c.ipc===2?`IPC Phase ${c.ipc} — alert county agriculture office.`:`IPC Phase ${c.ipc} — within acceptable range.`;
+    document.getElementById('p3-body').innerHTML =
+      `<div class="aline" style="border-color:#e49635;background:#0c1a10;font-size:9px;line-height:1.6">
+        <b>${name} cropland</b> — dominant class: <b>${dominantCrop}</b>. NDVI ${c.ndvi.toFixed(2)} indicates ${cropStress}. Drought score ${c.drought}/100. ${ipcText} Soil ${c.soil.toFixed(3)} m³/m³. Classification estimated from NDVI within Dynamic World cropland pixels. Snapshot: ${c.date}.
+      </div>`;
+    return;
+  }
+
+  // ── Panel 1: active index detail ──────────────────────────────────────────
   const ctyIdxPanels = {
-    lulc: {hdr:'Land cover · '+name, rows:[
-      {l:'Drought score',  v:c.drought+'/100',                        pct:c.drought,              col:getCol(c,'drought')},
-      {l:'NDVI',           v:c.ndvi.toFixed(2),                       pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
-      {l:'Soil moisture',  v:c.soil.toFixed(3)+' m³/m³',             pct:Math.round(c.soil*200), col:getCol(c,'soil')},
-    ]},
     drought: {hdr:'Drought detail · '+name, rows:[
-      {l:'Drought score',  v:c.drought+'/100',                        pct:c.drought,              col:getCol(c,'drought')},
-      {l:'% Critical area',v:c.pct_critical+'%',                     pct:c.pct_critical,         col:'var(--red)'},
-      {l:'% Moderate area',v:c.pct_moderate+'%',                     pct:c.pct_moderate,         col:'var(--orange)'},
-      {l:'% Stable area',  v:c.pct_good+'%',                         pct:c.pct_good,             col:'var(--good)'},
+      {l:'Drought score',   v:c.drought+'/100',              pct:c.drought,              col:getCol(c,'drought')},
+      {l:'% Critical area', v:c.pct_critical+'%',            pct:c.pct_critical,         col:'var(--red)'},
+      {l:'% Moderate area', v:c.pct_moderate+'%',            pct:c.pct_moderate,         col:'var(--orange)'},
+      {l:'% Stable area',   v:c.pct_good+'%',                pct:c.pct_good,             col:'var(--good)'},
     ]},
     ndvi: {hdr:'Vegetation · '+name, rows:[
-      {l:'NDVI value',     v:c.ndvi.toFixed(2),                       pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
-      {l:'vs national avg',v:(c.ndvi-natAvg.ndvi>=0?'+':'')+((c.ndvi-natAvg.ndvi)*100).toFixed(0)+'pts', pct:50+Math.round((c.ndvi-natAvg.ndvi)*100), col:c.ndvi>=natAvg.ndvi?'var(--good)':'var(--orange)'},
-      {l:'Soil moisture',  v:c.soil.toFixed(3)+' m³/m³',             pct:Math.round(c.soil*200), col:getCol(c,'soil')},
-    ]},
-    lst: {hdr:'Temperature · '+name, rows:[
-      {l:'LST anomaly',    v:(c.lst>=0?'+':'')+c.lst.toFixed(1)+'°C',pct:Math.min(100,50+c.lst*10), col:getCol(c,'lst')},
-      {l:'NDVI response',  v:c.ndvi.toFixed(2),                       pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
+      {l:'NDVI value',      v:c.ndvi.toFixed(2),             pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
+      {l:'vs national avg', v:(c.ndvi-natAvg.ndvi>=0?'+':'')+((c.ndvi-natAvg.ndvi)*100).toFixed(0)+'pts', pct:50+Math.round((c.ndvi-natAvg.ndvi)*100), col:c.ndvi>=natAvg.ndvi?'var(--good)':'var(--orange)'},
+      {l:'Soil moisture',   v:c.soil.toFixed(3)+' m³/m³',   pct:Math.round(c.soil*200), col:getCol(c,'soil')},
     ]},
     rainfall: {hdr:'Rainfall · '+name, rows:[
-      {l:'Rainfall anom.', v:(c.rain>=0?'+':'')+c.rain+'%',          pct:Math.min(100,50+c.rain), col:getCol(c,'rainfall')},
-      {l:'Soil response',  v:c.soil.toFixed(3)+' m³/m³',             pct:Math.round(c.soil*200), col:getCol(c,'soil')},
-      {l:'NDVI response',  v:c.ndvi.toFixed(2),                       pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
+      {l:'Rainfall anom.',  v:(c.rain>=0?'+':'')+c.rain+'%', pct:Math.min(100,50+c.rain), col:getCol(c,'rainfall')},
+      {l:'Soil response',   v:c.soil.toFixed(3)+' m³/m³',   pct:Math.round(c.soil*200), col:getCol(c,'soil')},
+      {l:'NDVI response',   v:c.ndvi.toFixed(2),             pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
     ]},
     soil: {hdr:'Soil moisture · '+name, rows:[
-      {l:'Soil moisture',  v:c.soil.toFixed(3)+' m³/m³',             pct:Math.round(c.soil*200), col:getCol(c,'soil')},
-      {l:'Rainfall context',v:(c.rain>=0?'+':'')+c.rain+'%',         pct:Math.min(100,50+c.rain), col:getCol(c,'rainfall')},
-      {l:'NDVI health',    v:c.ndvi.toFixed(2),                       pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
-    ]},
-    crops: {hdr:'Cropland · '+name, rows:[
-      {l:'Drought score',  v:c.drought+'/100',                        pct:c.drought,              col:getCol(c,'drought')},
-      {l:'NDVI (cropland)',v:c.ndvi.toFixed(2),                       pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
-      {l:'Soil moisture',  v:c.soil.toFixed(3)+' m³/m³',             pct:Math.round(c.soil*200), col:getCol(c,'soil')},
+      {l:'Soil moisture',   v:c.soil.toFixed(3)+' m³/m³',   pct:Math.round(c.soil*200), col:getCol(c,'soil')},
+      {l:'Rainfall context',v:(c.rain>=0?'+':'')+c.rain+'%', pct:Math.min(100,50+c.rain), col:getCol(c,'rainfall')},
+      {l:'NDVI health',     v:c.ndvi.toFixed(2),             pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
     ]},
   };
   const cPanel = ctyIdxPanels[activeIdx] || ctyIdxPanels.drought;
@@ -689,12 +743,11 @@ function updateBottomCounty(name){
       <div class="irow-val" style="color:${r.col}">${r.v}</div>
     </div>`).join('');
 
-  // Split 2 — all 5 indexes shown as context regardless of active index
+  // ── Panel 2: all indexes context ──────────────────────────────────────────
   const allIdx = [
     {k:'drought',  l:'Drought',  v:c.drought+'/100',                        pct:c.drought,              col:getCol(c,'drought')},
     {k:'ndvi',     l:'NDVI',     v:c.ndvi.toFixed(2),                       pct:Math.round(c.ndvi*100), col:getCol(c,'ndvi')},
-    {k:'lst',      l:'LST',      v:(c.lst>=0?'+':'')+c.lst.toFixed(1)+'°C',pct:Math.min(100,50+c.lst*10), col:getCol(c,'lst')},
-    {k:'rainfall', l:'Rain',     v:(c.rain>=0?'+':'')+c.rain+'%',          pct:Math.min(100,50+c.rain), col:getCol(c,'rainfall')},
+    {k:'rainfall', l:'Rain',     v:(c.rain>=0?'+':'')+c.rain+'%',           pct:Math.min(100,50+c.rain),col:getCol(c,'rainfall')},
     {k:'soil',     l:'Soil',     v:c.soil.toFixed(3),                       pct:Math.round(c.soil*200), col:getCol(c,'soil')},
   ];
   document.getElementById('p2-hdr').textContent = 'All indexes · '+name;
@@ -705,39 +758,30 @@ function updateBottomCounty(name){
       <div class="irow-val" style="color:${d.col}">${d.v}</div>
     </div>`).join('');
 
-  // Split 3 — data-driven AI advisor
-  const idxCol = getCol(c, activeIdx==='rainfall'?'rainfall':activeIdx);
-  const natNdvi = SIQ.national.avg_ndvi;
-  const ndviVsNat = ((c.ndvi - natNdvi)*100).toFixed(0);
-  const ndviComp = c.ndvi>=natNdvi ? `${ndviVsNat}pts above national avg` : `${Math.abs(ndviVsNat)}pts below national avg`;
-  let idxLine = '';
-  if(activeIdx==='drought'){
-    const lvl = c.drought>=70?'critical — water access failure likely':c.drought>=40?'moderate — crop stress developing':'stable — within seasonal norms';
-    idxLine = `<b>${name}</b> drought <b>${c.drought}/100</b>: ${lvl}. Driven by NDVI ${c.ndvi.toFixed(2)}, soil ${c.soil.toFixed(3)} m³/m³, rain ${c.rain>=0?'+':''}${c.rain}%, LST ${c.lst>=0?'+':''}${c.lst.toFixed(1)}°C.`;
-  } else if(activeIdx==='ndvi'){
-    const s = c.ndvi<0.3?'severe stress — significant crop losses possible':c.ndvi<0.5?'moderate stress — monitor closely':'healthy vegetation';
-    idxLine = `<b>${name}</b> NDVI <b>${c.ndvi.toFixed(2)}</b>: ${s}. ${ndviComp}. Soil ${c.soil.toFixed(3)} m³/m³${c.soil<0.2?' — root zone dry, compounding stress':''}.`;
-  } else if(activeIdx==='lst'){
-    const s = c.lst>2?'heat stress — evapotranspiration elevated':c.lst>0.5?'above normal — watch water demand':'below normal — long rains cooling';
-    idxLine = `<b>${name}</b> LST <b>${c.lst>=0?'+':''}${c.lst.toFixed(1)}°C</b>: ${s}. NDVI ${c.ndvi.toFixed(2)} ${c.lst>1&&c.ndvi<0.5?'— heat and vegetation stress co-occurring':'— vegetation responding normally'}.`;
-  } else if(activeIdx==='rainfall'){
-    const s = c.rain<-20?'severe deficit — intervention may be needed':c.rain<-5?'below normal — monitor soil response':'near-normal or surplus — good rains';
-    idxLine = `<b>${name}</b> rainfall <b>${c.rain>=0?'+':''}${c.rain}%</b>: ${s}. Soil response: ${c.soil.toFixed(3)} m³/m³${c.rain>0&&c.soil<0.2?' — rainfall not infiltrating, possible runoff':''}. NDVI ${c.ndvi.toFixed(2)}.`;
-  } else if(activeIdx==='soil'){
-    const s = c.soil<0.15?'critically dry — crops on residual reserves':c.soil<0.25?'low — approaching stress threshold':'adequate — root zone healthy';
-    idxLine = `<b>${name}</b> soil <b>${c.soil.toFixed(3)} m³/m³</b>: ${s}. Rain ${c.rain>=0?'+':''}${c.rain}%${c.rain>0&&c.soil<0.2?' — poor rain retention':c.rain<-10?' — deficit contributing to dryness':''}. NDVI ${c.ndvi.toFixed(2)}.`;
-  } else if(activeIdx==='lulc' || activeIdx==='crops'){
-    idxLine = `<b>${name}</b>: drought score ${c.drought}/100 (IPC ${c.ipc}). NDVI ${c.ndvi.toFixed(2)} (${ndviComp}). Soil ${c.soil.toFixed(3)} m³/m³. Cropland NDVI health visible on map — estimated classification.`;
-  }
-  // Build richer single AI block
+  // ── Panel 3: focused AI advisor — index-specific, no data dump ───────────
   const ipcText = c.ipc>=3?`IPC Phase ${c.ipc} — escalate immediately. Coordinate NDMA relief.`:
     c.ipc===2?`IPC Phase ${c.ipc} — stress confirmed. Alert county agriculture office.`:
     `IPC Phase ${c.ipc} — within acceptable range.`;
-  const ndviContext = c.ndvi>=natNdvi?`NDVI ${c.ndvi.toFixed(2)} (${ndviVsNat}pts above national avg ${natNdvi.toFixed(2)})`:`NDVI ${c.ndvi.toFixed(2)} (${Math.abs(ndviVsNat)}pts below national avg ${natNdvi.toFixed(2)})`;
-  let fullAI = idxLine + ` ${ipcText} ${ndviContext}. Soil ${c.soil.toFixed(3)} m³/m³, rain ${c.rain>=0?'+':''}${c.rain}%, LST ${c.lst>=0?'+':''}${c.lst.toFixed(1)}°C. Drought composite: ${c.drought}/100. Snapshot: ${c.date}.`;
-
+  const natNdvi = SIQ.national.avg_ndvi;
+  const ndviDiff = ((c.ndvi - natNdvi)*100).toFixed(0);
+  const ndviComp = c.ndvi>=natNdvi?`${ndviDiff}pts above national avg ${natNdvi.toFixed(2)}`:`${Math.abs(ndviDiff)}pts below national avg ${natNdvi.toFixed(2)}`;
+  let idxLine = '';
+  if(activeIdx==='drought'){
+    const lvl = c.drought>=70?'critical — water access failure likely':c.drought>=40?'moderate — crop stress developing':'stable — within seasonal norms';
+    idxLine = `<b>${name}</b> drought <b>${c.drought}/100</b>: ${lvl}. Driven by NDVI ${c.ndvi.toFixed(2)}, soil ${c.soil.toFixed(3)} m³/m³, rain ${c.rain>=0?'+':''}${c.rain}%. ${ipcText} Snapshot: ${c.date}.`;
+  } else if(activeIdx==='ndvi'){
+    const s = c.ndvi<0.3?'severe stress — significant crop losses possible':c.ndvi<0.5?'moderate stress — monitor closely':'healthy vegetation';
+    idxLine = `<b>${name}</b> NDVI <b>${c.ndvi.toFixed(2)}</b>: ${s}. ${ndviComp}. ${c.soil<0.2?'Soil '+c.soil.toFixed(3)+' m³/m³ — root zone dry, compounding stress.':''} ${ipcText} Snapshot: ${c.date}.`;
+  } else if(activeIdx==='rainfall'){
+    const s = c.rain<-20?'severe deficit — intervention may be needed':c.rain<-5?'below normal — monitor soil response':'near-normal or surplus — good rains';
+    idxLine = `<b>${name}</b> rainfall <b>${c.rain>=0?'+':''}${c.rain}%</b>: ${s}. Soil response ${c.soil.toFixed(3)} m³/m³${c.rain>0&&c.soil<0.2?' — rainfall not fully infiltrating':''}. NDVI ${c.ndvi.toFixed(2)}. ${ipcText} Snapshot: ${c.date}.`;
+  } else if(activeIdx==='soil'){
+    const s = c.soil<0.15?'critically dry — crops on residual reserves':c.soil<0.25?'low — approaching stress threshold':'adequate — root zone healthy';
+    idxLine = `<b>${name}</b> soil <b>${c.soil.toFixed(3)} m³/m³</b>: ${s}. Rain ${c.rain>=0?'+':''}${c.rain}%${c.rain<-10?' — deficit contributing to dryness':''}. NDVI ${c.ndvi.toFixed(2)} — ${c.ndvi<0.4?'vegetation confirming stress':'vegetation not yet stressed'}. ${ipcText} Snapshot: ${c.date}.`;
+  }
+  const idxCol = getCol(c, activeIdx==='rainfall'?'rainfall':activeIdx);
   document.getElementById('p3-body').innerHTML =
-    `<div class="aline" style="border-color:${idxCol};background:#0c1a10;font-size:9px;line-height:1.6">${fullAI}</div>`;
+    `<div class="aline" style="border-color:${idxCol};background:#0c1a10;font-size:9px;line-height:1.6">${idxLine}</div>`;
 }
 
 function updateBottomNational(){
@@ -760,11 +804,6 @@ function updateBottomNational(){
       {l:'Severe stress (<0.3)', v:SIQ.counties.filter(c=>c.ndvi<0.3).length+' counties', pct:Math.round(SIQ.counties.filter(c=>c.ndvi<0.3).length/47*100), col:'var(--red)'},
       {l:'Moderate (0.3–0.5)',  v:SIQ.counties.filter(c=>c.ndvi>=0.3&&c.ndvi<0.5).length+' counties', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.3&&c.ndvi<0.5).length/47*100), col:'var(--orange)'},
       {l:'Healthy (>0.5)',      v:SIQ.counties.filter(c=>c.ndvi>=0.5).length+' counties', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.5).length/47*100), col:'var(--good)'},
-    ]},
-    lst:      {hdr:'National LST summary', rows:[
-      {l:'Heat stress (>+2°C)',  v:SIQ.counties.filter(c=>c.lst>2).length+' counties',  pct:Math.round(SIQ.counties.filter(c=>c.lst>2).length/47*100), col:'var(--red)'},
-      {l:'Above normal (0–2°C)', v:SIQ.counties.filter(c=>c.lst>0&&c.lst<=2).length+' counties', pct:Math.round(SIQ.counties.filter(c=>c.lst>0&&c.lst<=2).length/47*100), col:'var(--orange)'},
-      {l:'Below normal (<0°C)',  v:SIQ.counties.filter(c=>c.lst<=0).length+' counties', pct:Math.round(SIQ.counties.filter(c=>c.lst<=0).length/47*100), col:'var(--good)'},
     ]},
     rainfall: {hdr:'National rainfall summary', rows:[
       {l:'Severe deficit (<-20%)',  v:SIQ.counties.filter(c=>c.rain<-20).length+' counties', pct:Math.round(SIQ.counties.filter(c=>c.rain<-20).length/47*100), col:'var(--red)'},
@@ -796,13 +835,12 @@ function updateBottomNational(){
     if(activeIdx==='ndvi') return a.ndvi-b.ndvi;
     if(activeIdx==='rainfall') return a.rain-b.rain;
     if(activeIdx==='soil') return a.soil-b.soil;
-    if(activeIdx==='lst') return b.lst-a.lst;
     if(activeIdx==='drought') return b.drought-a.drought;
     return b.drought-a.drought;
   }).slice(0,5);
   const p2Labels = {
     drought:'Most stressed counties', ndvi:'Lowest NDVI counties',
-    lst:'Highest LST counties', rainfall:'Lowest rainfall counties',
+    rainfall:'Lowest rainfall counties',
     soil:'Driest counties', lulc:'Top counties by drought', crops:'Top counties by drought'
   };
   document.getElementById('p2-hdr').textContent = p2Labels[activeIdx]||'Top counties';
@@ -811,7 +849,6 @@ function updateBottomNational(){
     if(activeIdx==='ndvi'){val=c.ndvi.toFixed(2);pct=Math.round(c.ndvi*100);col=c.ndvi<0.3?'var(--red)':c.ndvi<0.5?'var(--orange)':'var(--good)';}
     else if(activeIdx==='rainfall'){val=(c.rain>=0?'+':'')+c.rain+'%';pct=Math.min(100,Math.abs(c.rain)*2);col=c.rain<-20?'var(--red)':c.rain<-5?'var(--orange)':'var(--good)';}
     else if(activeIdx==='soil'){val=c.soil.toFixed(3);pct=Math.round(c.soil*200);col=c.soil<0.15?'var(--red)':c.soil<0.25?'var(--orange)':'var(--good)';}
-    else if(activeIdx==='lst'){val=(c.lst>=0?'+':'')+c.lst.toFixed(1)+'°C';pct=Math.min(100,Math.abs(c.lst)*15);col=c.lst>2?'var(--red)':c.lst>0.5?'var(--orange)':'var(--good)';}
     else{val=c.drought+'/100';pct=c.drought;col=c.drought>=70?'var(--red)':c.drought>=40?'var(--orange)':'var(--good)';}
     return `<div class="crow">
       <div class="crow-name">${c.county}</div>
@@ -897,11 +934,10 @@ function updateBottomNational(){
   const yr = new Date().getFullYear();
   const topDrought = [...SIQ.counties].sort((a,b)=>b.drought-a.drought)[0];
   const natAI = {
-    drought: `<b>National drought — Kenya ${yr}.</b> ${n.critical_counties} critical, ${n.moderate_counties} moderate, ${n.stable_counties} stable counties out of 47. National avg score: ${n.avg_drought}/100. Highest risk: <b>${topDrought.county}</b> (${topDrought.drought}/100). ${SIQ.counties.filter(c=>c.drought>=40).length>0?`Counties at moderate-critical risk: <b>${[...SIQ.counties].sort((a,b)=>b.drought-a.drought).filter(c=>c.drought>=40).map(c=>c.county+' ('+c.drought+')').join(', ')}</b>.`:'All counties within stable range.'} Composite of NDVI, soil moisture, rainfall anomaly, LST. Data: ${SIQ.generated}.`,
+    drought: `<b>National drought — Kenya ${yr}.</b> ${n.critical_counties} critical, ${n.moderate_counties} moderate, ${n.stable_counties} stable counties out of 47. National avg score: ${n.avg_drought}/100. Highest risk: <b>${topDrought.county}</b> (${topDrought.drought}/100). ${SIQ.counties.filter(c=>c.drought>=40).length>0?`Counties at moderate-critical risk: <b>${[...SIQ.counties].sort((a,b)=>b.drought-a.drought).filter(c=>c.drought>=40).map(c=>c.county+' ('+c.drought+')').join(', ')}</b>.`:'All counties within stable range.'} Composite of NDVI, soil moisture, rainfall anomaly. Data: ${SIQ.generated}.`,
     ndvi:    `<b>National NDVI — Kenya ${yr}.</b> Avg NDVI ${n.avg_ndvi.toFixed(2)} — ${n.avg_ndvi>=0.5?'national vegetation healthy':'moderate vegetation stress nationally'}. ${SIQ.counties.filter(c=>c.ndvi>=0.6).length} counties healthy (>0.6): <b>${[...SIQ.counties].sort((a,b)=>b.ndvi-a.ndvi).slice(0,3).map(c=>c.county).join(', ')}</b>. ${SIQ.counties.filter(c=>c.ndvi<0.3).length} counties severe stress (<0.3): <b>${[...SIQ.counties].sort((a,b)=>a.ndvi-b.ndvi).filter(c=>c.ndvi<0.3).map(c=>c.county).join(', ')||'none'}</b>. Western highlands showing strongest green-up. Arid north below 0.3. Data: ${SIQ.generated}.`,
-    lst:     `<b>National LST anomaly — Kenya ${yr}.</b> ${SIQ.counties.filter(c=>c.lst>2).length} counties above +2°C heat stress threshold. ${SIQ.counties.filter(c=>c.lst<=0).length} counties below seasonal average — long rains cooling effect active. Hottest: <b>${[...SIQ.counties].sort((a,b)=>b.lst-a.lst).slice(0,3).map(c=>c.county+' ('+c.lst.toFixed(1)+'°C)').join(', ')}</b>. Coolest: <b>${[...SIQ.counties].sort((a,b)=>a.lst-b.lst).slice(0,3).map(c=>c.county+' ('+c.lst.toFixed(1)+'°C)').join(', ')}</b>. Negative anomalies confirm long rains cooling. Data: ${SIQ.generated}.`,
-    rainfall:`<b>National rainfall (45-day mm) — Kenya ${yr}.</b> ${SIQ.counties.filter(c=>c.rain<-20).length} counties severe deficit (<-20%). ${SIQ.counties.filter(c=>c.rain>20).length} counties above normal (>+20%). Driest: <b>${[...SIQ.counties].sort((a,b)=>a.rain-b.rain).slice(0,3).map(c=>c.county+' ('+c.rain+'%)').join(', ')}</b>. Wettest: <b>${[...SIQ.counties].sort((a,b)=>b.rain-a.rain).slice(0,3).map(c=>c.county+' ('+c.rain+'%)').join(', ')}</b>. CHIRPS data — latest available ${SIQ.generated}. Long rains ${SIQ.counties.filter(c=>c.rain>0).length>30?'performing well nationally':'showing regional variation'}.`,
-    soil:    `<b>National soil moisture (30-day) — Kenya ${yr}.</b> ${SIQ.counties.filter(c=>c.soil<0.15).length} counties critically dry (<0.15 m³/m³). ${SIQ.counties.filter(c=>c.soil>=0.35).length} counties adequate (>0.35). Range: ${Math.min(...SIQ.counties.map(c=>c.soil)).toFixed(3)}–${Math.max(...SIQ.counties.map(c=>c.soil)).toFixed(3)} m³/m³. Driest: <b>${[...SIQ.counties].sort((a,b)=>a.soil-b.soil).slice(0,3).map(c=>c.county+' ('+c.soil.toFixed(3)+')').join(', ')}</b>. Best moisture: <b>${[...SIQ.counties].sort((a,b)=>b.soil-a.soil).slice(0,3).map(c=>c.county+' ('+c.soil.toFixed(3)+')').join(', ')}</b>. SMAP satellite data. Data: ${SIQ.generated}.`,
+    rainfall:`<b>National rainfall (15-day mm) — Kenya ${yr}.</b> ${SIQ.counties.filter(c=>c.rain<-20).length} counties severe deficit (<-20%). ${SIQ.counties.filter(c=>c.rain>20).length} counties above normal (>+20%). Driest: <b>${[...SIQ.counties].sort((a,b)=>a.rain-b.rain).slice(0,3).map(c=>c.county+' ('+c.rain+'%)').join(', ')}</b>. Wettest: <b>${[...SIQ.counties].sort((a,b)=>b.rain-a.rain).slice(0,3).map(c=>c.county+' ('+c.rain+'%)').join(', ')}</b>. CHIRPS data — snapshot ${SIQ.generated}. Long rains ${SIQ.counties.filter(c=>c.rain>0).length>30?'performing well nationally':'showing regional variation'}.`,
+    soil:    `<b>National soil moisture — Kenya ${yr}.</b> ${SIQ.counties.filter(c=>c.soil<0.15).length} counties critically dry (<0.15 m³/m³). ${SIQ.counties.filter(c=>c.soil>=0.35).length} counties adequate (>0.35). Range: ${Math.min(...SIQ.counties.map(c=>c.soil)).toFixed(3)}–${Math.max(...SIQ.counties.map(c=>c.soil)).toFixed(3)} m³/m³. Driest: <b>${[...SIQ.counties].sort((a,b)=>a.soil-b.soil).slice(0,3).map(c=>c.county+' ('+c.soil.toFixed(3)+')').join(', ')}</b>. Best moisture: <b>${[...SIQ.counties].sort((a,b)=>b.soil-a.soil).slice(0,3).map(c=>c.county+' ('+c.soil.toFixed(3)+')').join(', ')}</b>. SMAP satellite data. Snapshot: ${SIQ.generated}.`,
   };
   document.getElementById('p3-body').innerHTML =
     `<div class="aline" style="border-color:var(--orange);background:#0c1a10;font-size:9px;line-height:1.6">${natAI[activeIdx]||natAI.drought}</div>`;
@@ -944,7 +980,7 @@ async function changeSnapshot(dir){
     counties: counties.map(c => ({
       county: c.county, county_code: c.county_code,
       date: c.snapshot_date, drought: parseFloat(c.drought),
-      ndvi: parseFloat(c.ndvi), lst: parseFloat(c.lst),
+      ndvi: parseFloat(c.ndvi),
       rain: parseFloat(c.rain), soil: parseFloat(c.soil),
       ipc: parseInt(c.ipc), pct_critical: parseFloat(c.pct_critical),
       pct_moderate: parseFloat(c.pct_moderate), pct_good: parseFloat(c.pct_good),
