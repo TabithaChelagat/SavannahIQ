@@ -902,7 +902,7 @@
       <span class="line2">for Africa</span>
     </h1>
     <p class="hero-sub">
-      10-metre satellite data. 15-day update window. One country at a time.<br><br>
+      10-metre satellite data. 30-day update window. One country at a time.<br><br>
       Governments, FAO, WFP and agricultural organisations are making billion-dollar food security decisions on coarse, outdated data. SavannahIQ changes that.
     </p>
     <div class="hero-stats">
@@ -911,7 +911,7 @@
         <span class="stat-label">Resolution</span>
       </div>
       <div class="stat">
-        <span class="stat-val">15d</span>
+        <span class="stat-val">30d</span>
         <span class="stat-label">Update cycle</span>
       </div>
       <div class="stat">
@@ -935,13 +935,13 @@
   <div class="marquee-track">
     <span class="marquee-item"><span>●</span> SENTINEL-2 · 10M RESOLUTION</span>
     <span class="marquee-item"><span>●</span> DYNAMIC WORLD V1 · 9 LAND CLASSES</span>
-    <span class="marquee-item"><span>●</span> CHIRPS RAINFALL · 15-DAY WINDOW</span>
+    <span class="marquee-item"><span>●</span> GPM IMERG RAINFALL · 30-DAY WINDOW</span>
     <span class="marquee-item"><span>●</span> NASA SMAP · SOIL MOISTURE</span>
     <span class="marquee-item"><span>●</span> CROP CLASSIFICATION · 8 CLASSES</span>
     <span class="marquee-item"><span>●</span> 47 KENYA COUNTIES · LIVE</span>
     <span class="marquee-item"><span>●</span> SENTINEL-2 · 10M RESOLUTION</span>
     <span class="marquee-item"><span>●</span> DYNAMIC WORLD V1 · 9 LAND CLASSES</span>
-    <span class="marquee-item"><span>●</span> CHIRPS RAINFALL · 15-DAY WINDOW</span>
+    <span class="marquee-item"><span>●</span> GPM IMERG RAINFALL · 30-DAY WINDOW</span>
     <span class="marquee-item"><span>●</span> NASA SMAP · SOIL MOISTURE</span>
     <span class="marquee-item"><span>●</span> CROP CLASSIFICATION · 8 CLASSES</span>
     <span class="marquee-item"><span>●</span> 47 KENYA COUNTIES · LIVE</span>
@@ -958,7 +958,7 @@
     <div class="problem-quote">
       <p>"By the time a drought is officially declared, the window for early intervention has already closed."</p>
     </div>
-    <p>SavannahIQ is built to close that gap — delivering <strong>10-metre satellite intelligence, updated every 15 days</strong>, as actionable data not raw outputs.</p>
+    <p>SavannahIQ is built to close that gap — delivering <strong>10-metre satellite intelligence, updated every 30 days</strong>, as actionable data not raw outputs.</p>
   </div>
 
   <div class="timeline">
@@ -972,7 +972,7 @@
     <div class="timeline-item">
       <div class="timeline-dot tl-orange"></div>
       <div class="timeline-content">
-        <div class="timeline-time" style="color:var(--orange)">Day 15 — SavannahIQ detects</div>
+        <div class="timeline-time" style="color:var(--orange)">Day 30 — SavannahIQ detects</div>
         <div class="timeline-text">County drought score rises. NDVI declining. Soil moisture below threshold. Alert triggered.</div>
       </div>
     </div>
@@ -1001,7 +1001,7 @@
       <div class="timeline-dot tl-green"></div>
       <div class="timeline-content">
         <div class="timeline-time" style="color:var(--green)">With SavannahIQ</div>
-        <div class="timeline-text">Early warning at Day 15 enables pre-positioning of resources, advisory to farmers, policy response — <strong style="color:var(--green)">before the crisis.</strong></div>
+        <div class="timeline-text">Early warning at Day 30 enables pre-positioning of resources, advisory to farmers, policy response — <strong style="color:var(--green)">before the crisis.</strong></div>
       </div>
     </div>
   </div>
@@ -1025,19 +1025,19 @@
       <div class="layer-icon li-red">COMPOSITE</div>
       <div class="layer-name">Drought Score</div>
       <div class="layer-desc">Composite index combining NDVI, soil moisture and rainfall anomaly — weighted by agronomic importance. Scored 0–100, IPC-aligned. The synthesis that turns six signals into one decision.</div>
-      <div class="layer-source">Source: NDVI + SMAP + CHIRPS</div>
+      <div class="layer-source">Source: NDVI + SMAP + GPM IMERG</div>
     </div>
     <div class="layer-card lc-ndvi">
       <div class="layer-icon li-green">VEG</div>
       <div class="layer-name">NDVI</div>
-      <div class="layer-desc">Vegetation health index from Sentinel-2 NIR and red bands. Computed over vegetation land classes only. 15-day update window — detects crop stress, recovery and land change within a single growing period.</div>
+      <div class="layer-desc">Vegetation health index from Sentinel-2 NIR and red bands. Computed over vegetation land classes only. 30-day update window — detects crop stress, recovery and land change within a single growing period.</div>
       <div class="layer-source">Source: Copernicus S2_SR_HARMONIZED</div>
     </div>
     <div class="layer-card lc-rain">
       <div class="layer-icon li-blue">PRECIP</div>
       <div class="layer-name">Rainfall</div>
-      <div class="layer-desc">15-day actual rainfall in mm from CHIRPS daily precipitation model. Full Kenya coverage with no cloud gaps — updated with every snapshot.</div>
-      <div class="layer-source">Source: UCSB-CHG CHIRPS Daily</div>
+      <div class="layer-desc">30-day actual rainfall in mm from GPM IMERG daily precipitation model. Full Kenya coverage with no cloud gaps — updated with every snapshot.</div>
+      <div class="layer-source">Source: NASA GPM IMERG V07</div>
     </div>
     <div class="layer-card lc-soil">
       <div class="layer-icon li-sand">HYDRO</div>
@@ -1090,7 +1090,7 @@
     <div class="tech-items">
       <div class="tech-item">Sentinel-2</div>
       <div class="tech-item">Dynamic World</div>
-      <div class="tech-item">CHIRPS</div>
+      <div class="tech-item">GPM IMERG</div>
       <div class="tech-item">MODIS</div>
       <div class="tech-item">NASA SMAP</div>
       <div class="tech-item">Google Earth Engine</div>
@@ -1116,9 +1116,9 @@
       </div>
 
       <div style="padding:36px;background:var(--dim);border-top:2px solid var(--orange)">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">02 · Speed</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">15 days vs 4–6 weeks</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">NDMA bulletins are monthly. FEWS NET seasonal outlooks come every 4–6 weeks. By the time a report reaches a county official the intervention window has closed. SavannahIQ updates every 15 days — aligned with Sentinel-2 pass frequency — meaning the signal from a failing crop reaches decision-makers while there is still time to act.</p>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">02 · Automation</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">30 days, automatically</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">NDMA bulletins are nominally monthly but depend on field reports compiled by hand — coverage gaps and delays are routine. FEWS NET outlooks span 4 to 6 weeks at 250m resolution. SavannahIQ updates every 30 days entirely from satellite data — no field teams, no manual compilation — at 10m resolution, with every index synthesised into one drought score and AI-generated guidance the moment the data lands.</p>
       </div>
 
       <div style="padding:36px;background:var(--dim);border-top:2px solid var(--sand)">
@@ -1142,14 +1142,14 @@
       <div style="padding:36px;background:var(--dim);border-top:2px solid var(--green)">
         <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">06 · Time series</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Snapshots vs static maps</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">Land use change, crop growth stages, drought onset — none of these are visible in a snapshot. SavannahIQ's 15-day snapshot archive lets a county officer watch Trans Nzoia's maize move through growth to harvest, or watch Baringo's rangeland NDVI collapse over six weeks during drought onset. That temporal dimension is what converts a map into intelligence.</p>
+        <p style="font-size:13px;color:var(--white);line-height:1.7">Land use change, crop growth stages, drought onset — none of these are visible in a snapshot. SavannahIQ.s 30-day snapshot archive lets a county officer watch Trans Nzoia's maize move through growth to harvest, or watch Baringo's rangeland NDVI collapse over six weeks during drought onset. That temporal dimension is what converts a map into intelligence.</p>
       </div>
 
     </div>
 
     <div style="margin-top:48px;padding:32px;border:1px solid rgba(40,184,88,0.2);background:rgba(40,184,88,0.03)">
       <p style="font-size:14px;color:var(--white);line-height:1.8;text-align:center;max-width:900px;margin:0 auto">
-        <span style="color:var(--green);font-weight:500">SavannahIQ is the only platform in Africa</span> that delivers sub-county, 15-day agricultural intelligence at 10m resolution — twenty-five times sharper than the 250m MODIS imagery used by leading food security institutions — masked to actual farmland, combining four satellite datasets into a composite drought score plus crop classification, accessible on any browser, built for the people who make food security decisions.
+        <span style="color:var(--green);font-weight:500">SavannahIQ is the only platform in Africa</span> that delivers sub-county, 30-day agricultural intelligence at 10m resolution — twenty-five times sharper than the 250m MODIS imagery used by leading food security institutions — masked to actual farmland, combining four satellite datasets into a composite drought score plus crop classification, accessible on any browser, built for the people who make food security decisions.
       </p>
     </div>
   </div>
