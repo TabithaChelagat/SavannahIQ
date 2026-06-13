@@ -236,7 +236,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 async function fetchFromSupabase() {
   // Fetch all snapshots ordered newest first
   const snapResp = await fetch(
-    SUPABASE_URL + '/rest/v1/snapshots?order=snapshot_date.desc',
+    SUPABASE_URL + '/rest/v1/snapshots?order=window_end.desc',
     {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}
   );
   const snapshots = await snapResp.json();
@@ -1060,15 +1060,37 @@ function applyLulcWhenReady() {
   if(loader) loader.style.display = 'none';
 }
 
-// Boot — fetch tile URLs from Cloud Run, data+geojson from GitHub
+// Boot — fetch data+geojson from Supabase/GitHub first, then tiles for latest snapshot window
 async function boot() {
   try {
-    // Fetch live tile URLs from Cloud Run
+    document.getElementById('map-sub').textContent = 'Loading satellite intelligence...';
+    const loadStatus = document.getElementById('loading-status');
+    if(loadStatus) loadStatus.textContent = 'Loading snapshot data...';
+
+    // Fetch data from Supabase and geojson in parallel first —
+    // this gives us the latest snapshot's window_start/window_end
+    const [data, geojson] = await Promise.all([
+      fetchFromSupabase(),
+      fetch(GEOJSON_URL).then(r=>r.json())
+    ]);
+
+    SIQ = data;
+    CD  = {};
+    SIQ.counties.forEach(c => CD[c.county] = c);
+    window._geojson = geojson;
+
+    // Now fetch tile URLs from Cloud Run for the latest snapshot's exact window
+    // (without this, Cloud Run defaults to "today minus 30 days to today",
+    // which doesn't match any actual snapshot)
     document.getElementById('map-sub').textContent = 'Loading live satellite data...';
-      const loadStatus = document.getElementById('loading-status');
-      if(loadStatus) loadStatus.textContent = 'Computing GEE layers...';
+    if(loadStatus) loadStatus.textContent = 'Computing GEE layers...';
     try {
-      const tileResp = await fetch(CLOUD_RUN + '/tiles');
+      const latestSnap = ALL_SNAPSHOTS[0];
+      let tileUrl = CLOUD_RUN + '/tiles';
+      if(latestSnap && latestSnap.window_start && latestSnap.window_end) {
+        tileUrl += '?start=' + latestSnap.window_start + '&end=' + latestSnap.window_end;
+      }
+      const tileResp = await fetch(tileUrl);
       const tileData = await tileResp.json();
       if(tileData.status === 'ok' && tileData.tiles) {
         Object.assign(TILE_URLS, tileData.tiles);
@@ -1079,17 +1101,6 @@ async function boot() {
       console.error('Cloud Run unavailable:', err);
       document.getElementById('map-sub').textContent = 'Tile server unavailable — try refreshing';
     }
-
-    // Fetch data from Supabase and geojson in parallel
-    const [data, geojson] = await Promise.all([
-      fetchFromSupabase(),
-      fetch(GEOJSON_URL).then(r=>r.json())
-    ]);
-
-    SIQ = data;
-    CD  = {};
-    SIQ.counties.forEach(c => CD[c.county] = c);
-    window._geojson = geojson;
 
     // Populate dropdown sorted by drought score
     const sel = document.getElementById('csel');
