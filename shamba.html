@@ -133,6 +133,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <span id="gps-text">Waiting for location…</span>
       </div>
       <button class="btn-primary" id="btn-locate">📍 Use My Location</button>
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:.5px">OR</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.5px">ENTER FARM ID (0 – 38,359) FOR TESTING</div>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="farm-id-input" min="0" max="38359" placeholder="e.g. 1234"
+          style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:11px 12px;outline:none">
+        <button onclick="fetchByFarmId()" 
+          style="background:var(--gdim);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:12px;padding:0 16px;border-radius:6px;cursor:pointer;white-space:nowrap">
+          Find →
+        </button>
+      </div>
     </div>
 
     <!-- STEP 2: Select farm -->
@@ -371,6 +385,58 @@ function selectFarm(id, farmId, areaHa) {
   });
 
   $('btn-confirm-farm').disabled = false;
+}
+
+async function fetchByFarmId() {
+  const input = $('farm-id-input');
+  const farmId = parseInt(input.value);
+  if (isNaN(farmId) || farmId < 0 || farmId > 38359) {
+    alert('Please enter a farm ID between 0 and 38,359');
+    return;
+  }
+  showLoading('Fetching farm…');
+  try {
+    // Use farm_by_id RPC — returns id, farm_id, area_ha, geojson
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify({ fid: farmId })
+    });
+    const data = await res.json();
+
+    if (!data || !data.length) {
+      hideLoading();
+      alert(`Farm ID ${farmId} not found. Try a number between 0 and 38,359.`);
+      return;
+    }
+
+    const farm = data[0];
+    nearbyFarms = [farm];
+    hideLoading();
+
+    // Plot on map
+    const parsed = JSON.parse(farm.geojson);
+    const coords = parsed.coordinates[0];
+    const lngs = coords.map(c => c[0]);
+    const lats = coords.map(c => c[1]);
+    const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+    const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+
+    map.flyTo({ center: [centerLng, centerLat], zoom: 17, speed: 1.4 });
+    map.getSource('farms').setData({
+      type: 'FeatureCollection',
+      features: [{ type: 'Feature', geometry: parsed, properties: { id: farm.id, farm_id: farm.farm_id, area_ha: farm.area_ha, selected: false } }]
+    });
+
+    renderFarmList(nearbyFarms);
+    showStep(2);
+    $('map-hint').classList.remove('hidden');
+
+  } catch(err) {
+    hideLoading();
+    alert('Error fetching farm. Please try again.');
+    console.error(err);
+  }
 }
 
 $('btn-confirm-farm').addEventListener('click', () => {

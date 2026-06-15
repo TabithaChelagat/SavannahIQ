@@ -3,1256 +3,720 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SavannahIQ — Land Intelligence for Africa</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>SavannahIQ — Land Surveillance for Africa</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --black:   #080c08;
-    --green:   #28b858;
-    --orange:  #e07820;
-    --red:     #e04030;
-    --sand:    #c8a46e;
-    --dim:     #1a2a1a;
-    --muted:   #556655;
-    --text:    #d4e8d4;
-    --white:   #f0f8f0;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--black);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 300;
-    overflow-x: hidden;
-  }
-
-  /* GRAIN OVERLAY */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.4;
-  }
-
-  /* NAV */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 48px;
-    background: linear-gradient(to bottom, rgba(8,12,8,0.95), transparent);
-  }
-
-  .nav-logo {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 18px;
-    color: var(--white);
-    letter-spacing: -0.02em;
-  }
-
-  .nav-logo span { color: var(--green); font-style: italic; }
-
-  .nav-links {
-    display: flex;
-    gap: 32px;
-    list-style: none;
-  }
-
-  .nav-links a {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: color 0.2s;
-  }
-
-  .nav-links a:hover { color: var(--green); }
-
-  .nav-cta {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--black);
-    background: var(--green);
-    padding: 10px 20px;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: background 0.2s;
-  }
-
-  .nav-cta:hover { background: var(--white); }
-
-  /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    text-align: center;
-  }
-
-  .hero-left {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 160px 80px 100px;
-    max-width: 900px;
-    width: 100%;
-    position: relative;
-    z-index: 2;
-  }
-
-  .hero-eyebrow {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--green);
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .hero-eyebrow::before {
-    content: '';
-    display: block;
-    width: 32px;
-    height: 1px;
-    background: var(--green);
-  }
-
-  .hero-eyebrow::after {
-    content: '';
-    display: block;
-    width: 32px;
-    height: 1px;
-    background: var(--green);
-  }
-
-  .hero-headline {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(64px, 8vw, 110px);
-    line-height: 0.92;
-    color: var(--white);
-    letter-spacing: 0.02em;
-    margin-bottom: 32px;
-  }
-
-  .hero-headline .accent { color: var(--green); }
-  .hero-headline .line2 { display: block; color: var(--sand); font-size: 0.65em; }
-
-  .hero-sub {
-    font-size: 15px;
-    line-height: 1.7;
-    color: var(--white);
-    max-width: 560px;
-    margin-bottom: 48px;
-    text-align: center;
-  }
-
-  .hero-stats {
-    display: flex;
-    gap: 32px;
-    margin-bottom: 48px;
-    justify-content: center;
-  }
-
-  .stat {
-    border-left: 2px solid var(--dim);
-    padding-left: 16px;
-  }
-
-  .stat-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 22px;
-    color: var(--green);
-    display: block;
-  }
-
-  .stat-label {
-    font-size: 10px;
-    color: var(--white);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-
-  .btn-primary {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--black);
-    background: var(--green);
-    padding: 14px 28px;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: all 0.2s;
-    display: inline-block;
-  }
-
-  .btn-primary:hover { background: var(--white); transform: translateY(-1px); }
-
-  .btn-secondary {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border-bottom: 1px solid var(--muted);
-    padding-bottom: 2px;
-    transition: color 0.2s;
-  }
-
-  .btn-secondary:hover { color: var(--green); border-color: var(--green); }
-
-  .hero-right {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero-map {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse at 60% 40%, rgba(40,184,88,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 70%, rgba(224,120,32,0.06) 0%, transparent 50%),
-      linear-gradient(135deg, #0a140a 0%, #080c08 100%);
-  }
-
-  /* Animated satellite grid */
-  .satellite-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(40,184,88,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(40,184,88,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: gridMove 20s linear infinite;
-  }
-
-  @keyframes gridMove {
-    0% { background-position: 0 0; }
-    100% { background-position: 40px 40px; }
-  }
-
-  /* Kenya outline SVG placeholder */
-  .kenya-visual {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 340px;
-    height: 420px;
-  }
-
-  .kenya-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(ellipse, rgba(40,184,88,0.12) 0%, transparent 70%);
-    animation: pulse 4s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-  }
-
-  /* Floating data points */
-  .data-point {
-    position: absolute;
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    padding: 6px 10px;
-    border: 1px solid;
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .dp-green { color: var(--green); border-color: rgba(40,184,88,0.3); background: rgba(40,184,88,0.05); top: 20%; left: 10%; animation-delay: 0s; }
-  .dp-orange { color: var(--orange); border-color: rgba(224,120,32,0.3); background: rgba(224,120,32,0.05); top: 60%; right: 8%; animation-delay: 2s; }
-  .dp-red { color: var(--red); border-color: rgba(224,64,48,0.3); background: rgba(224,64,48,0.05); bottom: 25%; left: 15%; animation-delay: 4s; }
-  .dp-sand { color: var(--sand); border-color: rgba(200,164,110,0.3); background: rgba(200,164,110,0.05); top: 35%; right: 12%; animation-delay: 1s; }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-  }
-
-  /* Scan line */
-  .scan-line {
-    position: absolute;
-    left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(40,184,88,0.4), transparent);
-    animation: scan 8s linear infinite;
-  }
-
-  @keyframes scan {
-    0% { top: -2px; opacity: 0; }
-    5% { opacity: 1; }
-    95% { opacity: 1; }
-    100% { top: 100%; opacity: 0; }
-  }
-
-  /* MARQUEE */
-  .marquee-wrap {
-    border-top: 1px solid var(--dim);
-    border-bottom: 1px solid var(--dim);
-    padding: 14px 0;
-    overflow: hidden;
-    background: rgba(40,184,88,0.02);
-  }
-
-  .marquee-track {
-    display: flex;
-    gap: 0;
-    animation: marquee 30s linear infinite;
-    white-space: nowrap;
-  }
-
-  .marquee-item {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    padding: 0 48px;
-  }
-
-  .marquee-item span { color: var(--green); margin-right: 48px; }
-
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-  /* WHAT IS IT */
-  .section {
-    padding: 120px 48px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .section-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--green);
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--dim);
-    max-width: 80px;
-  }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 5vw, 72px);
-    color: var(--sand);
-    line-height: 1;
-    margin-bottom: 24px;
-    letter-spacing: 0.02em;
-  }
-
-  /* PROBLEM */
-  .problem-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 80px;
-    align-items: center;
-    padding: 120px 48px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .problem-text p {
-    font-size: 17px;
-    line-height: 1.8;
-    color: var(--white);
-    margin-bottom: 20px;
-  }
-
-  .problem-text p strong { color: var(--text); font-weight: 500; }
-
-  .problem-quote {
-    border-left: 3px solid var(--orange);
-    padding: 20px 24px;
-    margin: 32px 0;
-    background: rgba(224,120,32,0.04);
-  }
-
-  .problem-quote p {
-    font-size: 18px;
-    color: var(--white) !important;
-    font-style: italic;
-    line-height: 1.6;
-  }
-
-  .timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .timeline-item {
-    display: flex;
-    gap: 20px;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--dim);
-    position: relative;
-  }
-
-  .timeline-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-top: 5px;
-    flex-shrink: 0;
-  }
-
-  .tl-red { background: var(--red); box-shadow: 0 0 8px var(--red); }
-  .tl-orange { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
-  .tl-green { background: var(--green); box-shadow: 0 0 8px var(--green); }
-
-  .timeline-content {}
-  .timeline-time {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-  .timeline-text { font-size: 14px; color: var(--white); line-height: 1.5; }
-
-  /* LAYERS */
-  .layers-section {
-    padding: 120px 48px;
-    background: linear-gradient(180deg, transparent, rgba(40,184,88,0.02), transparent);
-    border-top: 1px solid var(--dim);
-    border-bottom: 1px solid var(--dim);
-  }
-
-  .layers-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-top: 64px;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .layer-card {
-    padding: 32px;
-    background: var(--dim);
-    position: relative;
-    overflow: hidden;
-    transition: background 0.3s;
-  }
-
-  .layer-card:hover { background: #1e321e; }
-
-  .layer-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-
-  .lc-drought::before { background: var(--red); }
-  .lc-ndvi::before { background: var(--green); }
-  .lc-rain::before { background: #419bdf; }
-  .lc-soil::before { background: var(--sand); }
-  .lc-crops::before { background: var(--orange); }
-  .lc-lulc::before { background: #88b053; }
-
-  .layer-icon {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 16px;
-    padding: 4px 10px;
-    display: inline-block;
-    border: 1px solid;
-  }
-
-  .li-red { color: var(--red); border-color: rgba(224,64,48,0.4); }
-  .li-green { color: var(--green); border-color: rgba(40,184,88,0.4); }
-  .li-blue { color: #419bdf; border-color: rgba(65,155,223,0.4); }
-  .li-sand { color: var(--sand); border-color: rgba(200,164,110,0.4); }
-  .li-orange { color: var(--orange); border-color: rgba(224,120,32,0.4); }
-  .li-lime { color: #88b053; border-color: rgba(136,176,83,0.4); }
-
-  .layer-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    color: var(--sand);
-    margin-bottom: 8px;
-    letter-spacing: 0.05em;
-  }
-
-  .layer-desc {
-    font-size: 13px;
-    color: var(--white);
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-
-  .layer-source {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: #889988;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  /* WHO IT'S FOR */
-  .audience-section {
-    padding: 120px 48px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .audience-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin-top: 64px;
-  }
-
-  .audience-card {
-    padding: 32px 24px;
-    border: 1px solid var(--dim);
-    position: relative;
-    transition: border-color 0.3s;
-  }
-
-  .audience-card:hover { border-color: var(--green); }
-
-  .audience-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 64px;
-    color: var(--dim);
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-
-  .audience-title {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 15px;
-    color: var(--white);
-    margin-bottom: 12px;
-  }
-
-  .audience-desc {
-    font-size: 13px;
-    color: var(--white);
-    line-height: 1.6;
-  }
-
-  /* TECH STACK */
-  .tech-section {
-    padding: 80px 48px;
-    border-top: 1px solid var(--dim);
-    background: rgba(40,184,88,0.01);
-  }
-
-  .tech-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 48px;
-    flex-wrap: wrap;
-  }
-
-  .tech-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: #99bb99;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    white-space: nowrap;
-  }
-
-  .tech-divider {
-    width: 1px;
-    height: 32px;
-    background: var(--dim);
-  }
-
-  .tech-items {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .tech-item {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: #99bb99;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 6px 12px;
-    border: 1px solid #2a3a2a;
-    transition: all 0.2s;
-  }
-
-  .tech-item:hover { color: var(--green); border-color: rgba(40,184,88,0.3); }
-
-  /* VISION */
-  .vision-section {
-    padding: 160px 48px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .vision-section::before {
-    content: 'AFRICA';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(120px, 20vw, 280px);
-    color: transparent;
-    -webkit-text-stroke: 1px rgba(40,184,88,0.06);
-    white-space: nowrap;
-    pointer-events: none;
-    letter-spacing: 0.1em;
-  }
-
-  .vision-eyebrow {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--green);
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 24px;
-  }
-
-  .vision-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(48px, 7vw, 96px);
-    color: var(--sand);
-    line-height: 1;
-    margin-bottom: 32px;
-    letter-spacing: 0.02em;
-  }
-
-  .vision-title em { color: var(--green); font-style: normal; }
-
-  .vision-text {
-    font-size: 16px;
-    color: var(--white);
-    max-width: 560px;
-    margin: 0 auto 48px;
-    line-height: 1.8;
-  }
-
-  /* COUNTRIES */
-  .countries-row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 48px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .country-chip {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    padding: 6px 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .chip-active {
-    color: var(--black);
-    background: var(--green);
-  }
-
-  .chip-soon {
-    color: var(--muted);
-    border: 1px solid var(--dim);
-  }
-
-  /* CTA */
-  .cta-section {
-    padding: 120px 48px;
-    border-top: 1px solid var(--dim);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    max-width: 1400px;
-    margin: 0 auto;
-    align-items: start;
-  }
-
-  .cta-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 5vw, 72px);
-    color: var(--sand);
-    line-height: 1;
-    letter-spacing: 0.02em;
-  }
-
-  .cta-title span { color: var(--green); }
-
-  .cta-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .form-input {
-    background: var(--dim);
-    border: 1px solid #2a3a2a;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 14px 16px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  .form-input:focus { border-color: var(--green); }
-  .form-input::placeholder { color: var(--muted); }
-
-  .form-select {
-    background: var(--dim);
-    border: 1px solid #2a3a2a;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 14px 16px;
-    outline: none;
-    width: 100%;
-    appearance: none;
-    cursor: pointer;
-  }
-
-  .form-submit {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--black);
-    background: var(--green);
-    border: none;
-    padding: 16px 32px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: background 0.2s;
-    align-self: flex-start;
-  }
-
-  .form-submit:hover { background: var(--white); }
-
-  .form-note {
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--dim);
-    padding: 48px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: gap;
-  }
-
-  .footer-logo {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 16px;
-    color: var(--white);
-  }
-
-  .footer-logo span { color: var(--green); font-style: italic; }
-
-  .footer-copy {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    text-align: center;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 24px;
-  }
-
-  .footer-links a {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: color 0.2s;
-  }
-
-  .footer-links a:hover { color: var(--green); }
-
-  /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .hero-eyebrow  { animation: fadeUp 0.6s ease both; animation-delay: 0.1s; }
-  .hero-headline { animation: fadeUp 0.6s ease both; animation-delay: 0.2s; }
-  .hero-sub      { animation: fadeUp 0.6s ease both; animation-delay: 0.3s; }
-  .hero-stats    { animation: fadeUp 0.6s ease both; animation-delay: 0.4s; }
-  .hero-actions  { animation: fadeUp 0.6s ease both; animation-delay: 0.5s; }
-
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    nav { padding: 16px 24px; }
-    .nav-links { display: none; }
-    .hero { grid-template-columns: 1fr; }
-    .hero-left { padding: 100px 24px 60px; }
-    .problem-grid { grid-template-columns: 1fr; gap: 48px; padding: 80px 24px; }
-    .layers-grid { grid-template-columns: 1fr; padding: 0 24px; }
-    .audience-grid { grid-template-columns: 1fr; }
-    .cta-section { grid-template-columns: 1fr; gap: 48px; }
-    .form-row { grid-template-columns: 1fr; }
-    .section { padding: 80px 24px; }
-    .layers-section { padding: 80px 24px; }
-    .audience-section { padding: 80px 24px; }
-    .vision-section { padding: 100px 24px; }
-    footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
-  }
+:root{
+  --black:#080c08;
+  --dkgreen:#0d2b12;
+  --green:#28b858;
+  --ltgreen:#e8f5ec;
+  --sand:#c8a46e;
+  --muted:#6b7c6b;
+  --text:#1a2a1a;
+  --white:#ffffff;
+  --offwhite:#f7faf7;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:400;overflow-x:hidden}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:64px;
+  background:var(--dkgreen);
+}
+.nav-logo{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:18px;
+  color:var(--white);letter-spacing:-0.01em;text-decoration:none;
+  display:flex;align-items:center;gap:10px;
+}
+.nav-logo-icon{
+  width:32px;height:32px;
+}
+.nav-logo span{color:var(--green)}
+
+.hamburger{
+  display:flex;flex-direction:column;gap:5px;cursor:pointer;
+  padding:6px;background:none;border:none;
+}
+.hamburger span{
+  display:block;width:24px;height:2px;background:var(--white);
+  transition:all 0.3s;transform-origin:center;
+}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* DRAWER */
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:280px;
+  background:var(--dkgreen);z-index:250;
+  transform:translateX(100%);transition:transform 0.35s ease;
+  display:flex;flex-direction:column;padding:88px 40px 48px;
+}
+.drawer.open{transform:translateX(0)}
+.drawer-links{display:flex;flex-direction:column;gap:0;flex:1}
+.drawer-links a{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:28px;
+  color:var(--white);text-decoration:none;
+  padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.1);
+  transition:color 0.2s;
+}
+.drawer-links a:hover{color:var(--green)}
+.drawer-links a.highlight{color:var(--green)}
+.drawer-bottom{margin-top:32px}
+.drawer-bottom p{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.8}
+
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);
+  z-index:240;opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.overlay.open{opacity:1;pointer-events:all}
+
+/* HERO */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:flex-end;
+  padding:0 0 80px 0;overflow:hidden;
+  margin-top:64px;
+}
+.hero-img{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(160deg,#1a3d1a 0%,#0d2b12 40%,#2d5a2d 100%);
+  /* REPLACE WITH: background-image:url('your-hero-image.jpg');background-size:cover;background-position:center; */
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-img-placeholder{
+  font-family:'Space Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,0.2);letter-spacing:0.2em;text-transform:uppercase;
+}
+.hero-img img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+}
+.hero-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to top,rgba(8,12,8,0.75) 0%,rgba(8,12,8,0.2) 60%,transparent 100%);
+}
+.hero-inner{
+  position:relative;z-index:2;
+  padding:0 32px;max-width:700px;
+}
+.hero-headline{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:clamp(52px,10vw,88px);
+  line-height:1;color:var(--white);
+  margin-bottom:20px;letter-spacing:-0.02em;
+}
+.hero-tagline{
+  font-size:clamp(15px,2.5vw,18px);line-height:1.6;
+  color:rgba(255,255,255,0.85);max-width:520px;
+  font-weight:400;
+}
+
+/* TWO AUDIENCE CARDS */
+.audience{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:0;margin-top:0;
+}
+
+.aud-card{
+  position:relative;min-height:420px;
+  display:flex;flex-direction:column;
+  justify-content:flex-end;
+  padding:40px 32px 48px;
+  text-decoration:none;overflow:hidden;
+  border-radius:0 0 40px 40px;
+  transition:transform 0.3s;
+}
+.aud-card:first-child{border-radius:0 0 0 40px}
+.aud-card:last-child{border-radius:0 0 40px 0}
+.aud-card:hover{transform:translateY(-6px)}
+
+/* Farmer card */
+.aud-farmer{background:linear-gradient(160deg,#1a4a2a 0%,#0d3318 100%)}
+.aud-farmer-img{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(160deg,#1a4a2a,#2d6e3a);
+  /* REPLACE WITH: background-image:url('farmer-image.jpg');background-size:cover;background-position:center; */
+}
+.aud-farmer-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.aud-farmer-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to top,rgba(8,40,16,0.88) 0%,rgba(8,40,16,0.3) 60%,transparent 100%);
+}
+
+/* Org card */
+.aud-org{background:linear-gradient(160deg,#0d2b12 0%,#163820 100%)}
+.aud-org-img{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(160deg,#0d3318,#1a4a28);
+  /* REPLACE WITH: background-image:url('org-image.jpg');background-size:cover;background-position:center; */
+}
+.aud-org-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.aud-org-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to top,rgba(5,25,10,0.88) 0%,rgba(5,25,10,0.3) 60%,transparent 100%);
+}
+
+.aud-inner{position:relative;z-index:2}
+.aud-label{
+  font-size:11px;color:rgba(255,255,255,0.6);
+  text-transform:uppercase;letter-spacing:0.15em;
+  margin-bottom:10px;font-family:'Space Mono',monospace;
+}
+.aud-title{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:clamp(28px,4vw,38px);color:var(--white);
+  line-height:1.1;margin-bottom:16px;
+}
+.aud-desc{
+  font-size:13px;color:rgba(255,255,255,0.72);
+  line-height:1.65;margin-bottom:28px;
+}
+.aud-btn{
+  display:inline-block;font-family:'DM Sans',sans-serif;
+  font-weight:700;font-size:13px;
+  background:var(--green);color:var(--black);
+  padding:12px 24px;border-radius:40px;
+  transition:all 0.2s;letter-spacing:0.01em;
+}
+.aud-card:hover .aud-btn{background:var(--white)}
+
+/* BETWEEN PHOTO */
+.between-photo{
+  width:100%;aspect-ratio:16/7;overflow:hidden;
+  background:linear-gradient(135deg,#1a3d1a,#2d6e3a);
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
+.between-photo img{width:100%;height:100%;object-fit:cover}
+.between-photo-placeholder{
+  font-family:'Space Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,0.2);letter-spacing:0.2em;text-transform:uppercase;
+}
+
+/* WHAT WE DO */
+.what{
+  background:var(--offwhite);
+  padding:96px 32px;
+}
+.what-inner{max-width:720px;margin:0 auto}
+.what-icon{
+  width:56px;height:56px;margin-bottom:28px;
+}
+.what-title{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:clamp(28px,4vw,36px);color:var(--text);
+  margin-bottom:24px;line-height:1.2;
+}
+.what-body{
+  font-size:clamp(16px,2vw,19px);line-height:1.8;
+  color:#2a3d2a;margin-bottom:16px;font-weight:400;
+}
+.what-body + .what-body{margin-top:0}
+.btn-learn{
+  display:inline-block;margin-top:36px;
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  background:var(--green);color:var(--white);
+  padding:14px 32px;border-radius:40px;
+  text-decoration:none;transition:background 0.2s;
+}
+.btn-learn:hover{background:var(--dkgreen)}
+
+/* NUMBERS */
+.numbers{
+  background:var(--white);
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:1px solid #e0ebe0;border-bottom:1px solid #e0ebe0;
+}
+.number-item{
+  padding:56px 32px;text-align:center;
+  border-right:1px solid #e0ebe0;
+}
+.number-item:last-child{border-right:none}
+.number-val{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:clamp(48px,6vw,72px);color:var(--green);
+  display:block;line-height:1;margin-bottom:8px;
+}
+.number-label{
+  font-size:12px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.12em;
+  line-height:1.6;font-family:'Space Mono',monospace;
+}
+
+/* FOUNDER */
+.founder{
+  position:relative;min-height:80vh;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.founder-bg{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(135deg,#0d2b12 0%,#1a4a2a 50%,#0d2b12 100%);
+  /* REPLACE WITH: background-image:url('founder-image.jpg');background-size:cover;background-position:center top; */
+  display:flex;align-items:center;justify-content:center;
+}
+.founder-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.founder-bg-placeholder{
+  font-family:'Space Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,0.15);letter-spacing:0.2em;text-transform:uppercase;
+}
+.founder-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to bottom,rgba(8,12,8,0.2),rgba(8,12,8,0.72));
+}
+.founder-inner{
+  position:relative;z-index:2;
+  max-width:700px;padding:80px 32px;text-align:center;
+}
+.founder-quote-mark{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:80px;color:var(--green);line-height:0.5;
+  display:block;margin-bottom:28px;opacity:0.7;
+}
+.founder-quote{
+  font-family:'DM Sans',sans-serif;font-weight:500;
+  font-size:clamp(18px,2.8vw,24px);
+  line-height:1.65;color:var(--white);margin-bottom:36px;
+}
+.founder-name{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:15px;color:var(--green);margin-bottom:4px;
+}
+.founder-role{
+  font-size:12px;color:rgba(255,255,255,0.5);
+  text-transform:uppercase;letter-spacing:0.15em;
+  font-family:'Space Mono',monospace;
+}
+
+/* FOOTER */
+footer{
+  background:var(--dkgreen);
+  padding:40px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:20px;
+}
+.footer-logo{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:17px;color:var(--white);
+}
+.footer-logo span{color:var(--green)}
+.footer-copy{
+  font-size:11px;color:rgba(255,255,255,0.35);
+  font-family:'Space Mono',monospace;
+}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{
+  font-size:11px;color:rgba(255,255,255,0.5);
+  text-decoration:none;text-transform:uppercase;
+  letter-spacing:0.1em;font-family:'Space Mono',monospace;
+  transition:color 0.2s;
+}
+.footer-links a:hover{color:var(--green)}
+
+/* ABOUT PAGE */
+.about-page{display:none}
+.about-page.active{display:block}
+.main-page.hidden{display:none}
+
+.about-nav-area{
+  padding:88px 32px 0;max-width:800px;margin:0 auto;
+}
+.about-back{
+  font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;
+  color:var(--muted);cursor:pointer;display:inline-flex;
+  align-items:center;gap:6px;background:none;border:none;
+  transition:color 0.2s;padding:8px 0;
+}
+.about-back:hover{color:var(--green)}
+
+.about-hero{
+  padding:48px 32px 64px;border-bottom:1px solid #e0ebe0;
+  background:var(--offwhite);
+}
+.about-hero-inner{max-width:800px;margin:0 auto}
+.about-tag{
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--green);
+  text-transform:uppercase;letter-spacing:0.2em;margin-bottom:20px;
+}
+.about-title{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:clamp(48px,8vw,80px);
+  color:var(--text);line-height:0.95;margin-bottom:20px;
+}
+.about-title span{color:var(--green)}
+.about-sub{
+  font-size:17px;color:#3a5a3a;line-height:1.75;max-width:560px;
+}
+.about-body{max-width:800px;margin:0 auto;padding:64px 32px}
+.about-section{margin-bottom:56px}
+.about-section-label{
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--green);
+  text-transform:uppercase;letter-spacing:0.2em;margin-bottom:14px;
+}
+.about-section h3{
+  font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:26px;color:var(--text);margin-bottom:16px;
+}
+.about-section p{
+  font-size:16px;color:#2a3d2a;line-height:1.8;margin-bottom:14px;
+}
+.about-section p:last-child{margin-bottom:0}
+.about-contact{
+  padding:48px 32px;background:var(--ltgreen);
+  border-radius:16px;margin-top:16px;
+}
+.about-contact p{font-size:15px;color:var(--text);line-height:1.7}
+.about-contact a{color:var(--green);text-decoration:none;font-weight:700}
+
+/* MOBILE */
+@media(max-width:640px){
+  .audience{grid-template-columns:1fr}
+  .aud-card{min-height:340px;border-radius:0}
+  .aud-card:first-child{border-radius:0}
+  .aud-card:last-child{border-radius:0 0 32px 32px}
+  .numbers{grid-template-columns:1fr}
+  .number-item{border-right:none;border-bottom:1px solid #e0ebe0;padding:40px 24px}
+  .number-item:last-child{border-bottom:none}
+  footer{flex-direction:column;align-items:flex-start}
+  .between-photo{aspect-ratio:4/3}
+}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav>
-  <div class="nav-logo">Savannah<span>IQ</span></div>
-  <ul class="nav-links">
-    <li><a href="#platform">Platform</a></li>
-    <li><a href="#layers">Data layers</a></li>
-    <li><a href="#vision">Vision</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <a href="/dashboard.html" class="nav-cta">Open dashboard →</a>
+<nav id="nav">
+  <a href="#" class="nav-logo" onclick="showMain();return false;">
+    <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="14" fill="rgba(40,184,88,0.15)" stroke="#28b858" stroke-width="1"/>
+      <path d="M8 22 Q12 10 16 14 Q20 18 24 8" stroke="#28b858" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="16" cy="14" r="2" fill="#28b858"/>
+    </svg>
+    Savannah<span>IQ</span>
+  </a>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-left">
-    <div class="hero-eyebrow">Now live · Kenya</div>
-    <h1 class="hero-headline">
-      Land<br>
-      <span class="accent">Intelligence</span><br>
-      <span class="line2">for Africa</span>
-    </h1>
-    <p class="hero-sub">
-      10-metre satellite data. 30-day update window. One country at a time.<br><br>
-      Governments, FAO, WFP and agricultural organisations are making billion-dollar food security decisions on coarse, outdated data. SavannahIQ changes that.
-    </p>
-    <div class="hero-stats">
-      <div class="stat">
-        <span class="stat-val">10m</span>
-        <span class="stat-label">Resolution</span>
-      </div>
-      <div class="stat">
-        <span class="stat-val">30d</span>
-        <span class="stat-label">Update cycle</span>
-      </div>
-      <div class="stat">
-        <span class="stat-val">47</span>
-        <span class="stat-label">Counties tracked</span>
-      </div>
-      <div class="stat">
-        <span class="stat-val">6</span>
-        <span class="stat-label">Data layers</span>
-      </div>
-    </div>
-    <div class="hero-actions">
-      <a href="/dashboard.html" class="btn-primary">Explore Kenya →</a>
-      <a href="#contact" class="btn-secondary">Partner with us</a>
-    </div>
+<!-- DRAWER -->
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-links">
+    <a href="#" onclick="showMain();closeDrawer();return false;">Home</a>
+    <a href="#" onclick="showAbout();closeDrawer();return false;" class="highlight">About SavannahIQ</a>
+    <a href="shamba.html" class="highlight">Farmer Portal</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="mailto:savannahiq.africa@gmail.com">Contact</a>
   </div>
-
-</section>
-
-  <div class="marquee-wrap">
-  <div class="marquee-track">
-    <span class="marquee-item"><span>●</span> SENTINEL-2 · 10M RESOLUTION</span>
-    <span class="marquee-item"><span>●</span> DYNAMIC WORLD V1 · 9 LAND CLASSES</span>
-    <span class="marquee-item"><span>●</span> GPM IMERG RAINFALL · 30-DAY WINDOW</span>
-    <span class="marquee-item"><span>●</span> NASA SMAP · SOIL MOISTURE</span>
-    <span class="marquee-item"><span>●</span> CROP CLASSIFICATION · 8 CLASSES</span>
-    <span class="marquee-item"><span>●</span> 47 KENYA COUNTIES · LIVE</span>
-    <span class="marquee-item"><span>●</span> SENTINEL-2 · 10M RESOLUTION</span>
-    <span class="marquee-item"><span>●</span> DYNAMIC WORLD V1 · 9 LAND CLASSES</span>
-    <span class="marquee-item"><span>●</span> GPM IMERG RAINFALL · 30-DAY WINDOW</span>
-    <span class="marquee-item"><span>●</span> NASA SMAP · SOIL MOISTURE</span>
-    <span class="marquee-item"><span>●</span> CROP CLASSIFICATION · 8 CLASSES</span>
-    <span class="marquee-item"><span>●</span> 47 KENYA COUNTIES · LIVE</span>
+  <div class="drawer-bottom">
+    <p>Land Surveillance for Africa<br>Kenya · 2026</p>
   </div>
 </div>
 
-<!-- PROBLEM -->
-<div class="problem-grid" id="platform">
-  <div class="problem-text">
-    <div class="section-label">The problem</div>
-    <h2 class="section-title">Decisions made in the dark</h2>
-    <p>Africa's governments, international food agencies and agricultural organisations are making decisions worth <strong>hundreds of billions of dollars</strong> based on data that is coarse, delayed and incomplete.</p>
-    <p>Drought declarations come <strong>weeks after crops fail</strong>. Aid arrives after hunger sets in. Climate reports describe what happened years ago. The land is changing faster than any institution can track it.</p>
-    <div class="problem-quote">
-      <p>"By the time a drought is officially declared, the window for early intervention has already closed."</p>
-    </div>
-    <p>SavannahIQ is built to close that gap — delivering <strong>10-metre satellite intelligence, updated every 30 days</strong>, as actionable data not raw outputs.</p>
-  </div>
+<!-- MAIN PAGE -->
+<div class="main-page" id="main-page">
 
-  <div class="timeline">
-    <div class="timeline-item">
-      <div class="timeline-dot tl-red"></div>
-      <div class="timeline-content">
-        <div class="timeline-time" style="color:var(--red)">Day 0</div>
-        <div class="timeline-text">Drought stress begins at pixel level — detectable in NDVI and soil moisture</div>
-      </div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-img" id="hero-img">
+      <!-- REPLACE COMMENT BELOW WITH: <img src="hero-farm.jpg" alt="Aerial farm view"> -->
+      <div class="hero-img-placeholder">Hero image — aerial farm / satellite view</div>
     </div>
-    <div class="timeline-item">
-      <div class="timeline-dot tl-orange"></div>
-      <div class="timeline-content">
-        <div class="timeline-time" style="color:var(--orange)">Day 30 — SavannahIQ detects</div>
-        <div class="timeline-text">County drought score rises. NDVI declining. Soil moisture below threshold. Alert triggered.</div>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-dot tl-orange"></div>
-      <div class="timeline-content">
-        <div class="timeline-time" style="color:var(--orange)">Day 45</div>
-        <div class="timeline-text">Visible crop stress. Farmers begin reporting losses. Local media picks up.</div>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-dot tl-red"></div>
-      <div class="timeline-content">
-        <div class="timeline-time" style="color:var(--red)">Day 90</div>
-        <div class="timeline-text">Government commissions assessment. Field teams deployed.</div>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-dot tl-red"></div>
-      <div class="timeline-content">
-        <div class="timeline-time" style="color:var(--red)">Day 120+</div>
-        <div class="timeline-text">Drought officially declared. Emergency relief coordinated. Crops already failed.</div>
-      </div>
-    </div>
-    <div class="timeline-item" style="border:none">
-      <div class="timeline-dot tl-green"></div>
-      <div class="timeline-content">
-        <div class="timeline-time" style="color:var(--green)">With SavannahIQ</div>
-        <div class="timeline-text">Early warning at Day 30 enables pre-positioning of resources, advisory to farmers, policy response — <strong style="color:var(--green)">before the crisis.</strong></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- DATA LAYERS -->
-<div class="layers-section" id="layers">
-  <div style="max-width:1400px;margin:0 auto">
-    <div class="section-label">Intelligence layers</div>
-    <h2 class="section-title">Six lenses on the land</h2>
-    <p style="font-size:15px;color:var(--white);max-width:560px;line-height:1.7;margin-top:16px">Every layer is computed from best-available public satellite data and delivered as classified, actionable intelligence — not raw imagery.</p>
-  </div>
-  <div class="layers-grid">
-    <div class="layer-card lc-lulc">
-      <div class="layer-icon li-lime">LULC</div>
-      <div class="layer-name">Land Cover</div>
-      <div class="layer-desc">9-class Dynamic World classification at 10m. Water, trees, grass, crops, shrub, built, bare — updated every satellite pass.</div>
-      <div class="layer-source">Source: Google Dynamic World V1 · Sentinel-2</div>
-    </div>
-    <div class="layer-card lc-drought">
-      <div class="layer-icon li-red">COMPOSITE</div>
-      <div class="layer-name">Drought Score</div>
-      <div class="layer-desc">Composite index combining NDVI, soil moisture and rainfall anomaly — weighted by agronomic importance. Scored 0–100, IPC-aligned. The synthesis that turns six signals into one decision.</div>
-      <div class="layer-source">Source: NDVI + SMAP + GPM IMERG</div>
-    </div>
-    <div class="layer-card lc-ndvi">
-      <div class="layer-icon li-green">VEG</div>
-      <div class="layer-name">NDVI</div>
-      <div class="layer-desc">Vegetation health index from Sentinel-2 NIR and red bands. Computed over vegetation land classes only. 30-day update window — detects crop stress, recovery and land change within a single growing period.</div>
-      <div class="layer-source">Source: Copernicus S2_SR_HARMONIZED</div>
-    </div>
-    <div class="layer-card lc-rain">
-      <div class="layer-icon li-blue">PRECIP</div>
-      <div class="layer-name">Rainfall</div>
-      <div class="layer-desc">30-day actual rainfall in mm from GPM IMERG daily precipitation model. Full Kenya coverage with no cloud gaps — updated with every snapshot.</div>
-      <div class="layer-source">Source: NASA GPM IMERG V07</div>
-    </div>
-    <div class="layer-card lc-soil">
-      <div class="layer-icon li-sand">HYDRO</div>
-      <div class="layer-name">Soil Moisture</div>
-      <div class="layer-desc">Root-zone soil moisture from NASA SMAP microwave satellite. Penetrates cloud cover. Critical for crop stress detection.</div>
-      <div class="layer-source">Source: NASA SMAP SPL3SMP_E</div>
-    </div>
-    <div class="layer-card lc-crops">
-      <div class="layer-icon li-orange">CLASS</div>
-      <div class="layer-name">Crop Classification</div>
-      <div class="layer-desc">8-class crop type estimation from NDVI within Dynamic World cropland pixels — fallow, dryland cereals, maize stages, sugarcane, tea/coffee. Identifies what's at stake, not just that stress exists.</div>
-      <div class="layer-source">Source: Sentinel-2 NDVI · Dynamic World class 4 · Estimated</div>
-    </div>
-  </div>
-</div>
-
-<!-- WHO IT'S FOR -->
-<div class="audience-section">
-  <div class="section-label">Who it's for</div>
-  <h2 class="section-title">Built for decision-makers</h2>
-  <div class="audience-grid">
-    <div class="audience-card">
-      <div class="audience-num">01</div>
-      <div class="audience-title">Governments</div>
-      <div class="audience-desc">Ministry of Agriculture, NDMA and county governments — early warning data to inform food security declarations, budget allocations and relief coordination.</div>
-    </div>
-    <div class="audience-card">
-      <div class="audience-num">02</div>
-      <div class="audience-title">International Agencies</div>
-      <div class="audience-desc">FAO, WFP, USAID and CGIAR — directing where to deploy resources, which regions are deteriorating, which programs are making a measurable difference.</div>
-    </div>
-    <div class="audience-card">
-      <div class="audience-num">03</div>
-      <div class="audience-title">Climate & Research</div>
-      <div class="audience-desc">Tracking land use change, vegetation loss, drought frequency and seasonal shift over decades. Temporal snapshots building a historical record.</div>
-    </div>
-    <div class="audience-card">
-      <div class="audience-num">04</div>
-      <div class="audience-title">Development Finance</div>
-      <div class="audience-desc">World Bank, AfDB and impact investors — evidence-based decisions on where to invest in agricultural resilience and climate adaptation.</div>
-    </div>
-  </div>
-</div>
-
-<!-- TECH -->
-<div class="tech-section">
-  <div class="tech-inner">
-    <div class="tech-label">Data sources</div>
-    <div class="tech-divider"></div>
-    <div class="tech-items">
-      <div class="tech-item">Sentinel-2</div>
-      <div class="tech-item">Dynamic World</div>
-      <div class="tech-item">GPM IMERG</div>
-      <div class="tech-item">MODIS</div>
-      <div class="tech-item">NASA SMAP</div>
-      <div class="tech-item">Google Earth Engine</div>
-      <div class="tech-item">Cloud Run</div>
-      <div class="tech-item">Supabase</div>
-    </div>
-  </div>
-</div>
-
-<!-- WHAT MAKES US DIFFERENT -->
-<section style="padding:120px 48px;border-top:1px solid var(--dim);background:rgba(40,184,88,0.01)">
-  <div style="max-width:1400px;margin:0 auto">
-    <div class="section-label">What makes us different</div>
-    <h2 class="section-title" style="margin-bottom:16px">Every institution sees the problem.<br>SavannahIQ sees the pixel.</h2>
-    <p style="font-size:15px;color:var(--white);max-width:640px;line-height:1.7;margin-bottom:72px">Every major food security institution — NDMA, FAO, FEWS NET, WFP — is looking at the same problem from 30,000 feet. They produce reports. SavannahIQ produces decisions.</p>
-
-    <div style="display:grid;grid-template-columns:1fr;gap:2px">
-
-      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--green)">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">01 · Resolution</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">10m vs 250m</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">FEWS NET, NDMA and WFP rely on MODIS at 250m–1km. At 1km one pixel is 100 hectares — an entire village's farmland. SavannahIQ processes Sentinel-2 at 10m through Dynamic World — each pixel is 100 square metres, roughly one farm plot. A stressed field inside a healthy landscape is invisible at 250m. At 10m it is a red patch with a precise location.</p>
-      </div>
-
-      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--orange)">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">02 · Automation</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">30 days, automatically</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">NDMA bulletins are nominally monthly but depend on field reports compiled by hand — coverage gaps and delays are routine. FEWS NET outlooks span 4 to 6 weeks at 250m resolution. SavannahIQ updates every 30 days entirely from satellite data — no field teams, no manual compilation — at 10m resolution, with every index synthesised into one drought score and AI-generated guidance the moment the data lands.</p>
-      </div>
-
-      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--sand)">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--sand);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">03 · Precision</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Ward vs county</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">Existing tools say "Garissa is at risk." SavannahIQ lets you zoom into Garissa and see that stress is concentrated in Dadaab sub-county, not Ijara — 68% of cropland pixels critical in one ward, 71% stable in the next. That is the difference between sending relief to a county headquarters and sending an extension officer to the exact location that needs help.</p>
-      </div>
-
-      <div style="padding:36px;background:var(--dim);border-top:2px solid #419bdf">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#419bdf;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">04 · Intelligence</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Composite vs single index</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">NDVI alone does not tell you a crop is failing. Rainfall alone does not tell you a crop is stressed — it may have rained last week but soil moisture depleted overnight. SavannahIQ combines NDVI, rainfall anomaly and soil moisture into a single calibrated drought score — weighted by agronomic importance — so the composite reflects actual crop stress, not a single satellite signal in isolation.</p>
-      </div>
-
-      <div style="padding:36px;background:var(--dim);border-top:2px solid #88b053">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#88b053;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">05 · Masking</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Farmland only</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">Every satellite index is contaminated when computed across an entire landscape — urban heat inflates readings in Nairobi, dense forest pushes NDVI high in Kakamega. SavannahIQ uses Dynamic World's land cover classification to compute drought intelligence only over agricultural pixels. The signal is clean because it only measures what matters for food security.</p>
-      </div>
-
-      <div style="padding:36px;background:var(--dim);border-top:2px solid var(--green)">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">06 · Time series</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--sand);margin-bottom:12px">Snapshots vs static maps</div>
-        <p style="font-size:13px;color:var(--white);line-height:1.7">Land use change, crop growth stages, drought onset — none of these are visible in a snapshot. SavannahIQ.s 30-day snapshot archive lets a county officer watch Trans Nzoia's maize move through growth to harvest, or watch Baringo's rangeland NDVI collapse over six weeks during drought onset. That temporal dimension is what converts a map into intelligence.</p>
-      </div>
-
-    </div>
-
-    <div style="margin-top:48px;padding:32px;border:1px solid rgba(40,184,88,0.2);background:rgba(40,184,88,0.03)">
-      <p style="font-size:14px;color:var(--white);line-height:1.8;text-align:center;max-width:900px;margin:0 auto">
-        <span style="color:var(--green);font-weight:500">SavannahIQ is the only platform in Africa</span> that delivers sub-county, 30-day agricultural intelligence at 10m resolution — twenty-five times sharper than the 250m MODIS imagery used by leading food security institutions — masked to actual farmland, combining four satellite datasets into a composite drought score plus crop classification, accessible on any browser, built for the people who make food security decisions.
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <h1 class="hero-headline">Land<br>Surveillance<br>for Africa</h1>
+      <p class="hero-tagline">
+        From space to the shamba — satellite intelligence that tells farmers what their land needs and tells organisations where to act
       </p>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- VISION -->
-<section class="vision-section" id="vision">
-  <div class="vision-eyebrow">The mission</div>
-  <h2 class="vision-title">One country<br>at a time.<br><em>All of Africa.</em></h2>
-  <p class="vision-text">Kenya is the proof of concept. The methodology, the data pipeline and the intelligence framework is built to replicate across every country on the continent. Ethiopia, Tanzania, Uganda, the Sahel, the Horn of Africa.</p>
-  <div class="countries-row">
-    <span class="country-chip chip-active">Kenya · Live</span>
-    <span class="country-chip chip-soon">Ethiopia · Soon</span>
-    <span class="country-chip chip-soon">Tanzania · Soon</span>
-    <span class="country-chip chip-soon">Uganda · Soon</span>
-    <span class="country-chip chip-soon">Rwanda · Soon</span>
-    <span class="country-chip chip-soon">Sahel · Planned</span>
-    <span class="country-chip chip-soon">Horn of Africa · Planned</span>
-  </div>
-</section>
+  <!-- TWO AUDIENCE CARDS -->
+  <div class="audience">
 
-<!-- CTA -->
-<section class="cta-section" id="contact">
-  <div>
-    <h2 class="cta-title">Work with<br><span>SavannahIQ</span></h2>
-    <p style="font-size:14px;color:var(--white);margin-top:24px;line-height:1.7;max-width:400px">
-      We are actively seeking partners, funders and collaborators who share the vision of open land intelligence for Africa. Whether you're a government agency, international organisation, researcher or funder — reach out.
-    </p>
+    <a href="shamba.html" class="aud-card">
+      <div class="aud-farmer-img" id="farmer-img">
+        <!-- REPLACE WITH: <img src="farmer.jpg" alt="Farmer in field"> -->
+      </div>
+      <div class="aud-farmer-overlay"></div>
+      <div class="aud-inner">
+        <div class="aud-label">For smallholder farmers</div>
+        <div class="aud-title">I'm a Farmer</div>
+        <p class="aud-desc">Get satellite intelligence for your specific farm — crop health, soil moisture and personalised advice every season.</p>
+        <div class="aud-btn">Register your farm →</div>
+      </div>
+    </a>
+
+    <a href="dashboard.html" class="aud-card">
+      <div class="aud-org-img" id="org-img">
+        <!-- REPLACE WITH: <img src="org.jpg" alt="Organisation team"> -->
+      </div>
+      <div class="aud-org-overlay"></div>
+      <div class="aud-inner">
+        <div class="aud-label">For governments, NGOs & research</div>
+        <div class="aud-title">I'm an Organisation</div>
+        <p class="aud-desc">Land intelligence across all 47 counties of Kenya — monitor drought, vegetation health and crop stress updated every 30 days from satellite data.</p>
+        <div class="aud-btn">Open dashboard →</div>
+      </div>
+    </a>
+
   </div>
-  <form class="cta-form" action="https://formspree.io/f/xvznzyza" method="POST" id="contact-form">
-    <div class="form-row">
-      <input type="text" name="name" class="form-input" placeholder="Name" required>
-      <input type="text" name="organisation" class="form-input" placeholder="Organisation" required>
+
+  <!-- BETWEEN PHOTO -->
+  <div class="between-photo" id="between-photo">
+    <!-- REPLACE WITH: <img src="between.jpg" alt="Farms from above"> -->
+    <div class="between-photo-placeholder">Photo — farms / landscape / satellite view</div>
+  </div>
+
+  <!-- WHAT WE DO -->
+  <section class="what">
+    <div class="what-inner">
+      <svg class="what-icon" viewBox="0 0 56 56" fill="none">
+        <circle cx="28" cy="28" r="26" fill="#e8f5ec" stroke="#28b858" stroke-width="1.5"/>
+        <path d="M16 36 Q22 20 28 26 Q34 32 40 16" stroke="#28b858" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="28" cy="26" r="3" fill="#28b858"/>
+        <circle cx="16" cy="36" r="2" fill="#0d2b12"/>
+        <circle cx="40" cy="16" r="2" fill="#0d2b12"/>
+      </svg>
+      <h2 class="what-title">What do we do?</h2>
+      <p class="what-body">
+        We give farmers and organisations the intelligence to make better decisions about land. Using satellite data updated every 30 days, SavannahIQ monitors every farm, every county and every season — turning what was once only visible from space into practical guidance on the ground.
+      </p>
+      <p class="what-body" style="margin-top:16px">
+        From a smallholder in Bungoma knowing when to plant, to a government agency knowing where drought is coming before it arrives.
+      </p>
+      <a href="#" class="btn-learn" onclick="showAbout();window.scrollTo(0,0);return false;">Learn more</a>
     </div>
-    <input type="email" name="email" class="form-input" placeholder="Email" required>
-    <select name="type" class="form-select" required>
-      <option value="" disabled selected>I am a...</option>
-      <option>Government agency</option>
-      <option>International organisation (FAO / WFP / USAID)</option>
-      <option>Research institution</option>
-      <option>Development finance / Funder</option>
-      <option>NGO / Field programme</option>
-      <option>Private sector</option>
-      <option>Other</option>
-    </select>
-    <textarea name="message" class="form-input" placeholder="Tell us about your interest in SavannahIQ" rows="3" style="resize:vertical" required></textarea>
-    <button type="submit" class="form-submit" id="form-btn">Send message →</button>
-    <div id="form-success" style="display:none;font-family:Space Mono,monospace;font-size:11px;color:var(--green);padding:12px;border:1px solid rgba(40,184,88,0.3);background:rgba(40,184,88,0.05)">
-      ✓ Message sent! We'll be in touch at savannahiq.africa@gmail.com
+  </section>
+
+  <!-- NUMBERS -->
+  <div class="numbers">
+    <div class="number-item">
+      <span class="number-val">38k</span>
+      <span class="number-label">Farm boundaries<br>mapped · Bungoma</span>
     </div>
-    <p class="form-note">Or email directly: <span style="color:var(--green)">savannahiq.africa@gmail.com</span></p>
-  </form>
-  <script>
-    document.getElementById('contact-form').addEventListener('submit', async function(e){
-      e.preventDefault();
-      const btn = document.getElementById('form-btn');
-      btn.textContent = 'Sending...';
-      btn.disabled = true;
-      try {
-        const resp = await fetch('https://formspree.io/f/xvznzyza', {
-          method: 'POST',
-          body: new FormData(this),
-          headers: {'Accept': 'application/json'}
-        });
-        if(resp.ok){
-          this.reset();
-          document.getElementById('form-success').style.display = 'block';
-          btn.style.display = 'none';
-        } else {
-          btn.textContent = 'Error — try again';
-          btn.disabled = false;
-        }
-      } catch(err){
-        btn.textContent = 'Error — try again';
-        btn.disabled = false;
-      }
-    });
-  </script>
-</section>
+    <div class="number-item">
+      <span class="number-val">47</span>
+      <span class="number-label">Kenya counties<br>monitored</span>
+    </div>
+    <div class="number-item">
+      <span class="number-val">30d</span>
+      <span class="number-label">Satellite update<br>cycle</span>
+    </div>
+  </div>
+
+  <!-- FOUNDER QUOTE -->
+  <section class="founder">
+    <div class="founder-bg" id="founder-bg">
+      <!-- REPLACE WITH: <img src="tabitha.jpg" alt="Tabitha Chelagat"> -->
+      <div class="founder-bg-placeholder">Founder photo — Tabitha Chelagat</div>
+    </div>
+    <div class="founder-overlay"></div>
+    <div class="founder-inner">
+      <span class="founder-quote-mark">"</span>
+      <p class="founder-quote">
+        The land holds every answer about what we'll eat next season, where drought will hit, which farms will fail. We're building the nervous system that reads those signals — so governments, organisations and farmers can act before it's too late.
+      </p>
+      <div class="founder-name">Tabitha Chelagat</div>
+      <div class="founder-role">Founder, SavannahIQ</div>
+    </div>
+  </section>
+
+</div><!-- end main-page -->
 
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">Savannah<span>IQ</span></div>
-  <div class="footer-copy">© 2026 SavannahIQ · Land intelligence for Africa · Kenya first</div>
+  <div class="footer-copy">© 2026 SavannahIQ · Kenya</div>
   <div class="footer-links">
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="#layers">Data</a>
-    <a href="#contact">Contact</a>
+    <a href="#" onclick="showMain();return false;">Home</a>
+    <a href="#" onclick="showAbout();window.scrollTo(0,0);return false;">About</a>
+    <a href="shamba.html">Shamba</a>
+    <a href="dashboard.html">Dashboard</a>
   </div>
 </footer>
 
-</body>
-</html>
-  <ul class="nav-links">
-    <li><a href="#platform">Platform</a></li>
-    <li><a href="#layers">Data layers</a></li>
-    <li><a href="#vision">Vision</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <a href="/dashboard.html" class="nav-cta">Open dashboard →</a>
-</nav>
+<!-- ABOUT PAGE -->
+<div class="about-page" id="about-page">
 
-<!-- HERO -->
+  <div class="about-nav-area">
+    <button class="about-back" onclick="showMain();window.scrollTo(0,0)">← Back to home</button>
+  </div>
 
+  <div class="about-hero">
+    <div class="about-hero-inner">
+      <div class="about-tag">About SavannahIQ</div>
+      <h1 class="about-title">We read<br>the <span>land</span></h1>
+      <p class="about-sub">
+        SavannahIQ is a land intelligence platform built for Africa — turning raw satellite data into decisions for farmers, governments and the organisations that serve them.
+      </p>
+    </div>
+  </div>
+
+  <div class="about-body">
+
+    <div class="about-section">
+      <div class="about-section-label">The problem</div>
+      <h3>Decisions made in the dark</h3>
+      <p>Africa's governments, food agencies and agricultural organisations are making decisions worth hundreds of billions of dollars based on data that is coarse, delayed and incomplete. Drought declarations come weeks after crops fail. Aid arrives after hunger sets in.</p>
+      <p>At the farm level it is worse. By the time a smallholder farmer knows something is wrong, the window to act has already closed. The land was sending signals weeks earlier — but nobody was reading them.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="about-section-label">What we built</div>
+      <h3>Intelligence at every scale</h3>
+      <p>SavannahIQ processes Sentinel-2 satellite data at 10-metre resolution — updated every 30 days — and delivers it as six actionable intelligence layers: vegetation health, land cover, drought score, rainfall, soil moisture and crop classification.</p>
+      <p>For organisations, this means early warning at county and sub-county level before a crisis. For farmers, this means knowing the health of their specific plot, how it has changed season by season, and what to do next.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="about-section-label">The pilot</div>
+      <h3>Bungoma first</h3>
+      <p>We began in Bungoma County, Western Kenya — digitising 38,360 individual farm boundaries against high-resolution satellite imagery. Every farm boundary is now stored and ready for farm-level intelligence delivery through the Shamba Portal.</p>
+      <p>Bungoma is the proof of concept. The methodology, pipeline and intelligence framework is built to replicate across every county in Kenya and ultimately across the continent.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="about-section-label">The vision</div>
+      <h3>One country at a time. All of Africa.</h3>
+      <p>Kenya is live. Ethiopia, Tanzania and Uganda are next. The goal is a continent-wide nervous system for land — where any farmer, government or organisation can access satellite intelligence about any piece of land in Africa, updated continuously.</p>
+    </div>
+
+    <div class="about-contact">
+      <div class="about-section-label" style="margin-bottom:12px">Get in touch</div>
+      <p style="font-size:14px;color:#3a5a3a;margin-bottom:24px;line-height:1.7">
+        We are actively seeking partners, funders and collaborators. Fill in the form below or email us at
+        <a href="mailto:savannahiq.africa@gmail.com" style="color:var(--green);font-weight:700;text-decoration:none">savannahiq.africa@gmail.com</a>
+      </p>
+      <form id="contact-form" style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Name</label>
+            <input type="text" name="name" required placeholder="Your name"
+              style="width:100%;background:white;border:1px solid #c8dcc8;border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Organisation</label>
+            <input type="text" name="organisation" required placeholder="Your organisation"
+              style="width:100%;background:white;border:1px solid #c8dcc8;border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none">
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Email</label>
+          <input type="email" name="email" required placeholder="your@email.com"
+            style="width:100%;background:white;border:1px solid #c8dcc8;border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">I am a...</label>
+          <select name="type" required
+            style="width:100%;background:white;border:1px solid #c8dcc8;border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none;appearance:none">
+            <option value="" disabled selected>Select…</option>
+            <option>Government agency</option>
+            <option>International organisation (FAO / WFP / USAID)</option>
+            <option>Research institution</option>
+            <option>Development finance / Funder</option>
+            <option>NGO / Field programme</option>
+            <option>Private sector</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Message</label>
+          <textarea name="message" required rows="4" placeholder="Tell us about your interest in SavannahIQ"
+            style="width:100%;background:white;border:1px solid #c8dcc8;border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none;resize:vertical"></textarea>
+        </div>
+        <button type="submit" id="contact-form-btn"
+          style="background:var(--green);color:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border:none;border-radius:40px;cursor:pointer;align-self:flex-start;transition:background .2s">
+          Send message
+        </button>
+        <div id="contact-form-success" style="display:none;font-size:13px;color:var(--green);padding:12px;border:1px solid rgba(40,184,88,0.3);background:rgba(40,184,88,0.05);border-radius:6px">
+          ✓ Message sent! We'll be in touch soon.
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-logo">Savannah<span>IQ</span></div>
+    <div class="footer-copy">© 2026 SavannahIQ · Kenya</div>
+    <div class="footer-links">
+      <a href="#" onclick="showMain();return false;">Home</a>
+      <a href="shamba.html">Shamba</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+  </footer>
+
+</div><!-- end about-page -->
+
+<script>
+// NAV scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').style.boxShadow =
+    window.scrollY > 10 ? '0 2px 16px rgba(0,0,0,0.3)' : 'none';
+});
+
+// HAMBURGER
+const hamburger = document.getElementById('hamburger');
+const drawer = document.getElementById('drawer');
+const overlay = document.getElementById('overlay');
+
+hamburger.addEventListener('click',()=>{
+  const open = drawer.classList.toggle('open');
+  overlay.classList.toggle('open',open);
+  hamburger.classList.toggle('open',open);
+  document.body.style.overflow = open ? 'hidden' : '';
+});
+
+function closeDrawer(){
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  hamburger.classList.remove('open');
+  document.body.style.overflow = '';
+}
+overlay.addEventListener('click',closeDrawer);
+
+// PAGE SWITCHING
+function showAbout(){
+  document.getElementById('main-page').classList.add('hidden');
+  document.getElementById('about-page').classList.add('active');
+  window.scrollTo(0,0);
+}
+function showMain(){
+  document.getElementById('about-page').classList.remove('active');
+  document.getElementById('main-page').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+// CONTACT FORM
+document.getElementById('contact-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('contact-form-btn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  try {
+    const resp = await fetch('https://formspree.io/f/xvznzyza', {
+      method:'POST', body:new FormData(this), headers:{'Accept':'application/json'}
+    });
+    if(resp.ok){
+      this.reset();
+      document.getElementById('contact-form-success').style.display='block';
+      btn.style.display='none';
+    } else {
+      btn.textContent='Error — try again';
+      btn.disabled=false;
+    }
+  } catch(err){
+    btn.textContent='Error — try again';
+    btn.disabled=false;
+  }
+});
+</script>
 </body>
 </html>
