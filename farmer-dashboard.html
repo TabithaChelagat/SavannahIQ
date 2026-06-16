@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SavannahIQ — My Farm</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --dkgreen:#0d2b12;--green:#28b858;--ltgreen:#e8f5ec;
+  --muted:#6b7c6b;--text:#1a2a1a;--white:#fff;--offwhite:#f7faf7;
+  --border:#c8dcc8;--red:#e04030;--orange:#e07820;
+}
+html,body{height:100%;background:var(--offwhite);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
+
+/* NAV */
+nav{
+  background:var(--dkgreen);padding:0 20px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;z-index:100;flex-shrink:0;
+}
+.nav-logo{font-weight:700;font-size:16px;color:var(--white);text-decoration:none}
+.nav-logo span{color:var(--green);font-style:italic}
+.nav-farmer{font-size:11px;color:rgba(255,255,255,0.6);font-family:'Space Mono',monospace}
+
+/* LAYOUT */
+.app{display:flex;flex-direction:column;height:100vh}
+.body{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* LOGIN PAGE */
+.login-page{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:32px 24px;
+}
+.login-page.hidden{display:none}
+.login-box{width:100%;max-width:400px}
+.login-title{font-weight:700;font-size:24px;color:var(--dkgreen);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.5}
+.field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px;font-family:'Space Mono',monospace}
+.field input{
+  width:100%;background:var(--white);border:1.5px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:15px;padding:13px 14px;outline:none;transition:border .2s;
+}
+.field input:focus{border-color:var(--green)}
+.btn-login{
+  width:100%;padding:14px;background:var(--green);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  border:none;border-radius:40px;cursor:pointer;margin-top:20px;
+  transition:background .2s;
+}
+.btn-login:hover{background:var(--dkgreen)}
+.login-err{font-size:12px;color:var(--red);margin-top:12px;display:none}
+
+/* DASHBOARD PAGE */
+.dash-page{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.dash-page.hidden{display:none}
+
+/* MAP */
+.map-wrap{flex:1;position:relative;min-height:0}
+#map{width:100%;height:100%}
+
+/* SELECTOR BAR */
+.selector-bar{
+  position:absolute;top:10px;left:10px;right:10px;z-index:10;
+  background:rgba(13,43,18,0.92);backdrop-filter:blur(8px);
+  border-radius:10px;padding:10px 14px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.sel-label{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+.sel-group{display:flex;gap:6px;flex-wrap:wrap}
+.sel-btn{
+  font-family:'Space Mono',monospace;font-size:9px;
+  padding:5px 10px;border-radius:20px;cursor:pointer;
+  border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);
+  background:transparent;transition:all .2s;white-space:nowrap;
+}
+.sel-btn.active{background:var(--green);border-color:var(--green);color:var(--dkgreen);font-weight:700}
+.sel-divider{width:1px;height:20px;background:rgba(255,255,255,0.1);flex-shrink:0}
+.sel-year{
+  font-family:'Space Mono',monospace;font-size:10px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+  border-radius:6px;color:var(--white);padding:4px 8px;outline:none;
+  cursor:pointer;
+}
+.sel-month{
+  font-family:'Space Mono',monospace;font-size:10px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+  border-radius:6px;color:var(--white);padding:4px 8px;outline:none;
+  cursor:pointer;
+}
+.sel-go{
+  font-family:'Space Mono',monospace;font-size:9px;
+  background:var(--green);color:var(--dkgreen);font-weight:700;
+  border:none;border-radius:6px;padding:5px 12px;cursor:pointer;
+  transition:background .2s;
+}
+.sel-go:hover{background:var(--white)}
+
+/* LEGEND */
+.legend{
+  position:absolute;bottom:10px;left:10px;z-index:10;
+  background:rgba(13,43,18,0.88);backdrop-filter:blur(8px);
+  border-radius:8px;padding:8px 12px;
+}
+.legend-title{font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.legend-bar{width:120px;height:8px;border-radius:4px;background:linear-gradient(to right,#e04030,#e07820,#28b858);margin-bottom:4px}
+.legend-labels{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5)}
+
+/* BOTTOM PANEL */
+.bottom-panel{
+  background:var(--white);border-top:1px solid var(--border);
+  padding:16px 20px;flex-shrink:0;max-height:45vh;overflow-y:auto;
+}
+
+/* FARM INFO ROW */
+.farm-info-row{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);
+}
+.farm-badge{
+  background:var(--ltgreen);border:1.5px solid var(--green);
+  border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;
+}
+.farm-badge-num{font-weight:700;font-size:18px;color:var(--dkgreen);line-height:1}
+.farm-badge-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:'Space Mono',monospace}
+.farm-meta{flex:1}
+.farm-name{font-weight:700;font-size:15px;color:var(--dkgreen);margin-bottom:2px}
+.farm-details{font-size:11px;color:var(--muted)}
+
+/* NDVI STATUS */
+.ndvi-status{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;
+}
+.status-card{
+  background:var(--offwhite);border-radius:10px;
+  padding:12px 14px;border:1px solid var(--border);
+}
+.status-card-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.status-card-val{font-weight:700;font-size:20px;color:var(--dkgreen);line-height:1;margin-bottom:2px}
+.status-card-desc{font-size:11px}
+.status-healthy{color:var(--green)}
+.status-moderate{color:var(--orange)}
+.status-stressed{color:var(--red)}
+
+/* TREND CHART */
+.trend-section{margin-bottom:16px}
+.trend-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.trend-bars{display:flex;align-items:flex-end;gap:4px;height:60px}
+.trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.trend-bar{
+  width:100%;border-radius:3px 3px 0 0;
+  transition:height .4s ease;min-height:3px;
+}
+.trend-bar-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center;white-space:nowrap}
+.trend-bar-val{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center}
+
+/* ADVISORY */
+.advisory{
+  background:var(--ltgreen);border:1px solid rgba(40,184,88,0.3);
+  border-radius:10px;padding:14px 16px;
+}
+.advisory-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.advisory-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.advisory-text{font-size:13px;color:var(--dkgreen);line-height:1.65}
+.advisory-loading{font-size:12px;color:var(--muted);font-style:italic}
+
+/* LOADING */
+.loading{
+  position:fixed;inset:0;background:rgba(247,250,247,0.9);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:300;gap:14px;
+}
+.loading.hidden{display:none}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Loading…</div>
+</div>
+
+<div class="app">
+  <nav>
+    <a href="index.html" class="nav-logo">Savannah<span>IQ</span> / My Farm</a>
+    <span class="nav-farmer" id="nav-farmer"></span>
+  </nav>
+
+  <div class="body">
+
+    <!-- LOGIN -->
+    <div class="login-page" id="login-page">
+      <div class="login-box">
+        <div class="login-title">Welcome back</div>
+        <div class="login-sub">Enter your phone number to view your farm dashboard.</div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="login-phone" placeholder="e.g. 0712 345 678" autocomplete="tel">
+        </div>
+        <button class="btn-login" onclick="login()">View my farm →</button>
+        <div class="login-err" id="login-err">Phone number not found. Have you registered your farm?</div>
+        <div style="margin-top:20px;font-size:12px;color:var(--muted)">
+          Not registered yet? <a href="shamba.html" style="color:var(--green);font-weight:700;text-decoration:none">Register your farm →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dash-page hidden" id="dash-page">
+
+      <!-- MAP -->
+      <div class="map-wrap">
+        <div id="map"></div>
+
+        <!-- SELECTOR BAR -->
+        <div class="selector-bar">
+          <span class="sel-label">Index</span>
+          <div class="sel-group">
+            <button class="sel-btn active" data-index="ndvi" onclick="setIndex('ndvi',this)">NDVI</button>
+            <button class="sel-btn" data-index="drought" onclick="setIndex('drought',this)">Drought</button>
+            <button class="sel-btn" data-index="rainfall" onclick="setIndex('rainfall',this)">Rainfall</button>
+            <button class="sel-btn" data-index="soil" onclick="setIndex('soil',this)">Soil</button>
+          </div>
+          <div class="sel-divider"></div>
+          <span class="sel-label">Period</span>
+          <select class="sel-year" id="sel-year"></select>
+          <select class="sel-month" id="sel-month">
+            <option value="01">Jan</option><option value="02">Feb</option>
+            <option value="03">Mar</option><option value="04">Apr</option>
+            <option value="05">May</option><option value="06">Jun</option>
+            <option value="07">Jul</option><option value="08">Aug</option>
+            <option value="09">Sep</option><option value="10">Oct</option>
+            <option value="11">Nov</option><option value="12">Dec</option>
+          </select>
+          <button class="sel-go" onclick="loadSnapshot()">Go</button>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="legend" id="legend">
+          <div class="legend-title" id="legend-title">NDVI</div>
+          <div class="legend-bar" id="legend-bar"></div>
+          <div class="legend-labels" id="legend-labels">
+            <span>Low</span><span>High</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM PANEL -->
+      <div class="bottom-panel" id="bottom-panel">
+
+        <!-- FARM INFO -->
+        <div class="farm-info-row" id="farm-info-row">
+          <div class="farm-badge">
+            <div class="farm-badge-num" id="farm-size">—</div>
+            <div class="farm-badge-label">Hectares</div>
+          </div>
+          <div class="farm-meta">
+            <div class="farm-name" id="farm-farmer-name">—</div>
+            <div class="farm-details" id="farm-details">—</div>
+          </div>
+        </div>
+
+        <!-- NDVI STATUS CARDS -->
+        <div class="ndvi-status">
+          <div class="status-card">
+            <div class="status-card-label">Crop Health</div>
+            <div class="status-card-val" id="ndvi-val">—</div>
+            <div class="status-card-desc" id="ndvi-label">Loading…</div>
+          </div>
+          <div class="status-card">
+            <div class="status-card-label">5yr Trend</div>
+            <div class="status-card-val" id="trend-val">—</div>
+            <div class="status-card-desc" id="trend-label">Loading…</div>
+          </div>
+        </div>
+
+        <!-- TREND CHART -->
+        <div class="trend-section">
+          <div class="trend-title">NDVI — Last 5 years (same month)</div>
+          <div class="trend-bars" id="trend-bars">
+            <div style="font-size:11px;color:var(--muted);padding:8px">Loading trend data…</div>
+          </div>
+        </div>
+
+        <!-- ADVISORY -->
+        <div class="advisory">
+          <div class="advisory-label">Farm Advisory</div>
+          <div class="advisory-text" id="advisory-text">
+            <span class="advisory-loading">Generating advisory based on your farm data…</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://alcsddfvcczxgjijnpwt.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsY3NkZGZ2Y2N6eGdqaWpucHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTE1NjUsImV4cCI6MjA5NjEyNzU2NX0.O37lDC45hlr9ul9q-6_1LEv91SZa8VuDTso83gVnjV4';
+const HEADERS = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
+const CLOUD_RUN = 'https://savannahiq-tiles-353411679165.europe-west1.run.app';
+const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+
+const $ = id => document.getElementById(id);
+let map, farmer, farmGeojson, currentIndex = 'ndvi';
+let trendData = {};
+
+function showLoading(t){ $('loading').classList.remove('hidden'); $('loading-text').textContent = t; }
+function hideLoading(){ $('loading').classList.add('hidden'); }
+
+// Auto-login if coming from registration
+const savedPhone = sessionStorage.getItem('farmer_phone');
+if(savedPhone){
+  window.addEventListener('DOMContentLoaded', ()=>{
+    $('login-phone').value = savedPhone;
+    login();
+  });
+}
+
+// Populate year selector — current year back 5 years
+const now = new Date();
+const yearSel = $('sel-year');
+for(let y = now.getFullYear(); y >= now.getFullYear()-5; y--){
+  const o = document.createElement('option');
+  o.value = y; o.textContent = y;
+  yearSel.appendChild(o);
+}
+$('sel-month').value = String(now.getMonth()+1).padStart(2,'0');
+
+// LOGIN
+async function login(){
+  const phone = $('login-phone').value.trim();
+  if(!phone){ return; }
+  showLoading('Looking up your farm…');
+  $('login-err').style.display = 'none';
+  try{
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/farmers?phone=eq.${encodeURIComponent(phone)}&select=*`,
+      { headers: HEADERS }
+    );
+    const data = await res.json();
+    if(!data||!data.length){
+      hideLoading();
+      $('login-err').style.display = 'block';
+      return;
+    }
+    farmer = data[0];
+    await loadFarmGeojson();
+  } catch(e){
+    hideLoading();
+    alert('Network error. Please try again.');
+  }
+}
+
+$('login-phone').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+
+async function loadFarmGeojson(){
+  showLoading('Loading your farm…');
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
+      method:'POST', headers:HEADERS,
+      body:JSON.stringify({ fid: farmer.farm_id })
+    });
+    const data = await res.json();
+    if(!data||!data.length){ hideLoading(); alert('Farm not found.'); return; }
+    farmGeojson = JSON.parse(data[0].geojson);
+    initDashboard();
+  } catch(e){
+    hideLoading();
+    alert('Error loading farm data.');
+  }
+}
+
+function initDashboard(){
+  $('login-page').classList.add('hidden');
+  $('dash-page').classList.remove('hidden');
+  $('nav-farmer').textContent = farmer.name;
+  $('farm-farmer-name').textContent = farmer.name;
+  $('farm-size').textContent = farmer.area_ha ? farmer.area_ha.toFixed(2) : '—';
+  $('farm-details').textContent = `Farm #${farmer.farm_id} · ${farmer.primary_crop} · Bungoma`;
+
+  initMap();
+  loadSnapshot();
+  loadTrend();
+}
+
+function initMap(){
+  const coords = farmGeojson.coordinates[0];
+  const lngs = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+  const cLng = (Math.min(...lngs)+Math.max(...lngs))/2;
+  const cLat = (Math.min(...lats)+Math.max(...lats))/2;
+
+  map = new maplibregl.Map({
+    container:'map',
+    style:{
+      version:8,
+      sources:{
+        satellite:{
+          type:'raster',
+          tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+          tileSize:256
+        }
+      },
+      layers:[{ id:'satellite', type:'raster', source:'satellite' }]
+    },
+    center:[cLng, cLat], zoom:16
+  });
+
+  map.on('load',()=>{
+    // Farm polygon source — used for zoom reference only, no outline
+    map.addSource('farm',{ type:'geojson', data:{ type:'Feature', geometry:farmGeojson } });
+  });
+}
+
+async function loadSnapshot(){
+  const year  = $('sel-year').value;
+  const month = $('sel-month').value;
+  const start = `${year}-${month}-01`;
+  const end   = `${year}-${month}-28`;
+
+  showLoading(`Loading ${currentIndex.toUpperCase()} for ${month}/${year}…`);
+
+  try{
+    const res = await fetch(`${CLOUD_RUN}/tiles?start=${start}&end=${end}`);
+    const data = await res.json();
+    if(data.status !== 'ok'){ hideLoading(); return; }
+
+    const tileUrl = data.tiles[currentIndex];
+    if(!tileUrl){ hideLoading(); return; }
+
+    // Remove old tile layer
+    if(map.getLayer('index-layer')) map.removeLayer('index-layer');
+    if(map.getSource('index-source')) map.removeSource('index-source');
+
+    map.addSource('index-source',{ type:'raster', tiles:[tileUrl], tileSize:256 });
+    map.addLayer({ id:'index-layer', type:'raster', source:'index-source',
+      paint:{ 'raster-opacity':0.75 }
+    });
+
+    updateLegend(currentIndex);
+
+    // Also fetch NDVI value for this snapshot
+    if(currentIndex === 'ndvi'){
+      fetchNdviValue(start, end);
+    }
+
+    hideLoading();
+  } catch(e){
+    hideLoading();
+    console.error(e);
+  }
+}
+
+async function fetchNdviValue(start, end){
+  try{
+    const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({ geometry: farmGeojson })
+    });
+    const data = await res.json();
+    if(data.status==='ok'){
+      const ndvi = data.indices.ndvi;
+      const label = data.indices.ndvi_label;
+      $('ndvi-val').textContent = ndvi ? ndvi.toFixed(2) : '—';
+      const cls = label==='Healthy'?'status-healthy':label==='Moderate'?'status-moderate':'status-stressed';
+      $('ndvi-label').textContent = label;
+      $('ndvi-label').className = 'status-card-desc ' + cls;
+      trendData[`${start.slice(0,7)}`] = ndvi;
+    }
+  } catch(e){ console.error(e); }
+}
+
+async function loadTrend(){
+  // Load NDVI for same month across last 5 years
+  const month = $('sel-month').value;
+  const currentYear = now.getFullYear();
+  const years = [];
+  for(let y=currentYear-4; y<=currentYear; y++) years.push(y);
+
+  const promises = years.map(async y => {
+    const start = `${y}-${month}-01`;
+    const end   = `${y}-${month}-28`;
+    try{
+      const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ geometry: farmGeojson })
+      });
+      const data = await res.json();
+      return { year: y, ndvi: data.status==='ok' ? data.indices.ndvi : null };
+    } catch(e){ return { year: y, ndvi: null }; }
+  });
+
+  const results = await Promise.all(promises);
+  renderTrendChart(results);
+  computeTrendSummary(results);
+  generateAdvisory(results);
+}
+
+function renderTrendChart(results){
+  const bars = $('trend-bars');
+  bars.innerHTML = '';
+  const vals = results.map(r=>r.ndvi).filter(v=>v!==null);
+  const maxVal = vals.length ? Math.max(...vals) : 1;
+
+  results.forEach(r=>{
+    const pct = r.ndvi ? (r.ndvi / maxVal)*100 : 5;
+    const color = r.ndvi
+      ? (r.ndvi>=0.6?'#28b858':r.ndvi>=0.4?'#e07820':'#e04030')
+      : '#c8dcc8';
+    const wrap = document.createElement('div');
+    wrap.className = 'trend-bar-wrap';
+    wrap.innerHTML = `
+      <div class="trend-bar-val">${r.ndvi ? r.ndvi.toFixed(2) : '—'}</div>
+      <div class="trend-bar" style="height:${pct}%;background:${color}"></div>
+      <div class="trend-bar-label">${r.year}</div>
+    `;
+    bars.appendChild(wrap);
+  });
+}
+
+function computeTrendSummary(results){
+  const valid = results.filter(r=>r.ndvi!==null);
+  if(valid.length < 2){ $('trend-val').textContent='—'; $('trend-label').textContent='Not enough data'; return; }
+
+  const first = valid[0].ndvi;
+  const last  = valid[valid.length-1].ndvi;
+  const change = ((last-first)/first*100).toFixed(1);
+  const improving = last > first;
+
+  $('trend-val').textContent = (improving?'+':'')+change+'%';
+  $('trend-label').textContent = improving ? 'Improving over 5yrs' : 'Declining over 5yrs';
+  $('trend-val').style.color = improving ? 'var(--green)' : 'var(--red)';
+}
+
+function generateAdvisory(trendResults){
+  $('advisory-text').innerHTML = '<span class="advisory-loading">Analysing your farm data…</span>';
+
+  const valid = trendResults.filter(r=>r.ndvi!==null);
+  if(!valid.length){
+    $('advisory-text').textContent = 'Not enough satellite data yet. Check back after your first growing season on SavannahIQ.';
+    return;
+  }
+
+  const latestNdvi = valid[valid.length-1].ndvi;
+  const firstNdvi  = valid[0].ndvi;
+  const change     = ((latestNdvi - firstNdvi) / firstNdvi) * 100;
+  const trend      = change > 5 ? 'improving' : change < -5 ? 'declining' : 'stable';
+
+  setTimeout(()=> fallbackAdvisory(trend, latestNdvi, change), 800);
+}
+
+function fallbackAdvisory(trend, ndvi, change){
+  const crop = farmer.primary_crop || 'your crop';
+  const changeAbs = Math.abs(change).toFixed(0);
+
+  let text = '';
+
+  if(trend === 'declining'){
+    if(ndvi < 0.3){
+      text = `Your farm's crop health is critically low and has dropped ${changeAbs}% over 5 years. This points to serious soil degradation. Stop planting ${crop} alone — rotate with beans or cowpeas for at least one season to restore nitrogen. Add compost or manure before the next planting and consider contacting your local extension officer.`;
+    } else {
+      text = `Your farm's crop health has declined ${changeAbs}% over the past 5 years. To reverse this, try intercropping ${crop} with legumes like beans which fix nitrogen back into the soil. Vary your planting positions each season and avoid leaving the soil bare between seasons.`;
+    }
+  } else if(trend === 'improving'){
+    text = `Your farm is improving — crop health is up ${changeAbs}% over 5 years. Keep up your current practices. To maintain this momentum, continue with timely planting at the onset of rains and consider adding a second crop variety alongside ${crop} to reduce risk if one fails.`;
+  } else {
+    if(ndvi >= 0.6){
+      text = `Your farm is healthy and stable. To push yields higher, try intercropping ${crop} with beans or cowpeas which add nitrogen to the soil naturally. Ensure you plant at the right time and maintain consistent spacing for better sunlight and airflow.`;
+    } else {
+      text = `Your farm health is stable but there is room to improve. Consider intercropping ${crop} with drought-tolerant varieties and apply organic matter before planting. Consistent timing with the rains and proper spacing will help lift your yields this season.`;
+    }
+  }
+
+  $('advisory-text').textContent = text;
+}
+
+function setIndex(index, btn){
+  currentIndex = index;
+  document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadSnapshot();
+}
+
+function updateLegend(index){
+  const legends = {
+    ndvi:     { title:'NDVI — Vegetation Health', gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Low', high:'High' },
+    drought:  { title:'Drought Score', gradient:'linear-gradient(to right,#28b858,#e07820,#e04030)', low:'Stable', high:'Critical' },
+    rainfall: { title:'Rainfall (mm)', gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Dry', high:'Wet' },
+    soil:     { title:'Soil Moisture', gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Dry', high:'Moist' },
+  };
+  const l = legends[index] || legends.ndvi;
+  $('legend-title').textContent = l.title;
+  $('legend-bar').style.background = l.gradient;
+  $('legend-labels').innerHTML = `<span>${l.low}</span><span>${l.high}</span>`;
+}
+</script>
+</body>
+</html>

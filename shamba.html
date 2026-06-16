@@ -258,7 +258,8 @@ nav{
     <div class="success-title">Farm Registered!</div>
     <div class="success-sub">Your farm is now on SavannahIQ. We'll monitor it every month and send you updates when conditions change.</div>
     <div class="farm-card" id="farm-card"></div>
-    <a href="index.html" class="btn-home">Back to home</a>
+    <a href="farmer-dashboard.html" class="btn-home" id="btn-dashboard">View my farm dashboard →</a>
+    <a href="index.html" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--muted);text-decoration:none">Back to home</a>
   </div>
 
 </div>
@@ -325,8 +326,15 @@ function initMap(){
     container: 'map',
     style:{
       version:8,
-      sources:{ osm:{ type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256 } },
-      layers:[{ id:'osm', type:'raster', source:'osm' }]
+      sources:{
+        satellite:{
+          type:'raster',
+          tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+          tileSize:256,
+          attribution:'Esri, Maxar, Earthstar Geographics'
+        }
+      },
+      layers:[{ id:'satellite', type:'raster', source:'satellite' }]
     },
     center:[34.56, 0.57], zoom:11
   });
@@ -470,6 +478,7 @@ async function registerFarm(){
     hideLoading();
 
     if(res.ok||res.status===201){
+      sessionStorage.setItem('farmer_phone', phone);
       $('form-page').querySelector('.form-wrap').style.display='none';
       $('farm-card').innerHTML = `
         <div class="farm-row"><span class="farm-label">Name</span><span class="farm-val">${name}</span></div>
