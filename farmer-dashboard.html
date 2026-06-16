@@ -183,7 +183,7 @@ nav{
 </head>
 <body>
 
-<div class="loading" id="loading">
+<div class="loading hidden" id="loading">
   <div class="spinner"></div>
   <div class="loading-text" id="loading-text">Loading…</div>
 </div>
@@ -318,13 +318,16 @@ let trendData = {};
 function showLoading(t){ $('loading').classList.remove('hidden'); $('loading-text').textContent = t; }
 function hideLoading(){ $('loading').classList.add('hidden'); }
 
-// Auto-login if coming from registration
+// Auto-login only if coming directly from registration
 const savedPhone = sessionStorage.getItem('farmer_phone');
 if(savedPhone){
   window.addEventListener('DOMContentLoaded', ()=>{
     $('login-phone').value = savedPhone;
+    sessionStorage.removeItem('farmer_phone');
     login();
   });
+} else {
+  hideLoading();
 }
 
 // Populate year selector — current year back 5 years
