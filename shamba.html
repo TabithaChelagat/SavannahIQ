@@ -7,511 +7,490 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d1610;--surface:#111d14;--s2:#162019;--border:#1e3326;
-  --green:#3ddc6f;--gdim:#1a3d26;
-  --text:#c8dcc8;--muted:#9ec89e;
-  --red:#e04030;--orange:#e07820;--good:#28b858;
-  --mono:'DM Mono',monospace;--serif:'Fraunces',serif;
+  --black:#080c08;--dkgreen:#0d2b12;--green:#28b858;
+  --ltgreen:#e8f5ec;--muted:#6b7c6b;--text:#1a2a1a;
+  --white:#ffffff;--offwhite:#f7faf7;--border:#c8dcc8;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden}
+html,body{height:100%;background:var(--offwhite);color:var(--text);font-family:'DM Sans',sans-serif}
 
-/* HEADER */
-.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.logo{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--green);letter-spacing:-.5px}
-.logo em{color:var(--muted);font-weight:300;font-style:italic}
-.logo-sub{font-size:9px;color:var(--muted);letter-spacing:.8px;margin-top:1px}
-.live{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--green)}
-.dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+/* NAV */
+nav{
+  background:var(--dkgreen);padding:0 24px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.nav-logo{font-weight:700;font-size:17px;color:var(--white);text-decoration:none}
+.nav-logo span{color:var(--green);font-style:italic}
+.nav-back{font-size:12px;color:rgba(255,255,255,0.6);text-decoration:none;
+  display:flex;align-items:center;gap:4px;font-family:'Space Mono',monospace;
+  text-transform:uppercase;letter-spacing:.08em}
+.nav-back:hover{color:var(--green)}
 
-/* LAYOUT */
-.wrap{display:flex;flex-direction:column;height:100vh}
-.body{flex:1;position:relative;overflow:hidden}
-#map{width:100%;height:100%}
+/* MAIN FORM PAGE */
+.form-page{display:block}
+.form-page.hidden{display:none}
 
-/* STEPS */
-.step{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px 20px 32px;z-index:10;transition:transform .3s ease;transform:translateY(0)}
-.step.hidden{transform:translateY(110%)}
-.step-pill{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+.form-wrap{max-width:480px;margin:0 auto;padding:32px 24px 48px}
 
-/* STEP 1 — GPS */
-.step-title{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--green);margin-bottom:6px;line-height:1.2}
-.step-sub{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:20px}
-.btn-primary{width:100%;padding:14px;background:var(--green);color:#0d1610;font-family:var(--mono);font-size:13px;font-weight:500;border:none;border-radius:8px;cursor:pointer;letter-spacing:.5px;transition:opacity .2s}
-.btn-primary:active{opacity:.8}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed}
-.btn-outline{width:100%;padding:12px;background:transparent;color:var(--muted);font-family:var(--mono);font-size:12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-top:10px;transition:all .2s}
-.btn-outline:active{border-color:var(--green);color:var(--green)}
+.page-title{
+  font-weight:700;font-size:26px;color:var(--dkgreen);
+  margin-bottom:6px;letter-spacing:-.01em;
+}
+.page-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.5}
 
-/* STATUS */
-.status{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-bottom:16px;padding:10px 12px;background:var(--s2);border-radius:6px;border:1px solid var(--border)}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0}
-.status-dot.active{background:var(--green);animation:blink 2s infinite}
-.status-dot.error{background:var(--red)}
-
-/* FARM CARD — tap to select */
-.farm-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s}
-.farm-card.selected{border-color:var(--green);background:var(--gdim)}
-.farm-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.farm-card-id{font-size:10px;color:var(--muted)}
-.farm-card-check{width:18px;height:18px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s}
-.farm-card.selected .farm-card-check{background:var(--green);border-color:var(--green);color:#0d1610}
-.farm-card-area{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--green);line-height:1}
-.farm-card-unit{font-size:10px;color:var(--muted)}
-.farms-list{max-height:220px;overflow-y:auto;margin-bottom:16px}
-.farms-list::-webkit-scrollbar{width:2px}
-.farms-list::-webkit-scrollbar-thumb{background:var(--border)}
-.none-found{font-size:11px;color:var(--muted);text-align:center;padding:24px 0}
-
-/* STEP 3 — registration form */
-.field{margin-bottom:14px}
-.field label{display:block;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-.field input,.field select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:11px 12px;outline:none;transition:border .2s;-webkit-appearance:none}
+/* FIELDS */
+.field{margin-bottom:20px}
+.field label{
+  display:block;font-size:11px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;
+  font-family:'Space Mono',monospace;
+}
+.field input,.field select{
+  width:100%;background:var(--white);
+  border:1.5px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:15px;padding:13px 14px;outline:none;
+  transition:border .2s;
+}
 .field input:focus,.field select:focus{border-color:var(--green)}
-.field select option{background:var(--surface)}
+.field select{appearance:none;cursor:pointer}
+.field input::placeholder{color:#b0c4b0}
 
-/* STEP 4 — success */
-.success-icon{width:56px;height:56px;border-radius:50%;background:var(--gdim);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}
-.success-title{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--green);text-align:center;margin-bottom:8px}
-.success-sub{font-size:11px;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:20px}
-.farm-summary{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:20px}
-.fs-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:4px 0;border-bottom:1px solid var(--border)}
-.fs-row:last-child{border-bottom:none}
-.fs-label{color:var(--muted)}
-.fs-val{color:var(--text);font-weight:500}
+/* LOCATION PICKER FIELD */
+.location-field{
+  width:100%;background:var(--white);
+  border:1.5px solid var(--border);border-radius:10px;
+  padding:13px 14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:border .2s;
+}
+.location-field:hover{border-color:var(--green)}
+.location-field.selected{border-color:var(--green);background:var(--ltgreen)}
+.location-field-left{display:flex;align-items:center;gap:10px}
+.location-icon{font-size:18px}
+.location-text{font-size:15px;color:#b0c4b0}
+.location-text.selected{color:var(--dkgreen);font-weight:500}
+.location-arrow{font-size:12px;color:var(--muted)}
 
-/* MAP OVERLAYS */
-.map-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:10px;color:var(--muted);z-index:5;white-space:nowrap;pointer-events:none}
-.map-hint.hidden{display:none}
-.locate-btn{position:absolute;top:12px;right:12px;width:38px;height:38px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;font-size:16px;transition:all .2s}
-.locate-btn:active{border-color:var(--green)}
-.locate-btn.hidden{display:none}
+/* REGISTER BUTTON */
+.btn-register{
+  width:100%;padding:16px;background:var(--green);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:16px;
+  border:none;border-radius:40px;cursor:pointer;margin-top:8px;
+  transition:background .2s;letter-spacing:.01em;
+}
+.btn-register:hover{background:var(--dkgreen)}
+.btn-register:disabled{opacity:.4;cursor:not-allowed}
+
+/* SUCCESS */
+.success-wrap{
+  max-width:480px;margin:0 auto;padding:48px 24px;
+  text-align:center;display:none;
+}
+.success-wrap.show{display:block}
+.success-icon{
+  width:72px;height:72px;border-radius:50%;
+  background:var(--ltgreen);border:2px solid var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 20px;
+}
+.success-title{font-weight:700;font-size:26px;color:var(--dkgreen);margin-bottom:10px}
+.success-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px}
+.farm-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:12px;padding:20px;text-align:left;margin-bottom:24px;
+}
+.farm-row{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;padding:8px 0;border-bottom:1px solid #e8f0e8;
+}
+.farm-row:last-child{border-bottom:none}
+.farm-label{color:var(--muted)}
+.farm-val{color:var(--text);font-weight:500}
+.btn-home{
+  display:inline-block;padding:14px 32px;
+  background:var(--green);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  border-radius:40px;text-decoration:none;transition:background .2s;
+}
+.btn-home:hover{background:var(--dkgreen)}
+
+/* MAP PICKER PAGE */
+.map-page{display:none;position:fixed;inset:0;z-index:200;flex-direction:column;background:var(--offwhite)}
+.map-page.show{display:flex}
+
+.map-nav{
+  background:var(--dkgreen);padding:0 20px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.map-nav-title{font-weight:700;font-size:15px;color:var(--white)}
+.map-close{
+  font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.7);
+  background:none;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:.1em;
+}
+.map-close:hover{color:var(--green)}
+
+.map-controls{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:12px 16px;flex-shrink:0;
+}
+.map-hint-text{font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center}
+
+.map-id-row{display:flex;gap:8px}
+.map-id-input{
+  flex:1;background:var(--offwhite);border:1.5px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:14px;padding:10px 12px;outline:none;
+}
+.map-id-input:focus{border-color:var(--green)}
+.map-id-btn{
+  background:var(--green);color:var(--white);font-family:'DM Sans',sans-serif;
+  font-weight:700;font-size:13px;padding:0 18px;border:none;border-radius:8px;
+  cursor:pointer;white-space:nowrap;transition:background .2s;
+}
+.map-id-btn:hover{background:var(--dkgreen)}
+
+#map{flex:1;width:100%}
+
+.map-bottom{
+  background:var(--white);border-top:1px solid var(--border);
+  padding:16px 20px;flex-shrink:0;
+}
+.selected-farm-info{
+  font-size:13px;color:var(--muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.selected-farm-info.has-farm{color:var(--dkgreen)}
+.farm-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
+.farm-dot.active{background:var(--green)}
+.btn-confirm{
+  width:100%;padding:14px;background:var(--green);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  border:none;border-radius:40px;cursor:pointer;transition:background .2s;
+}
+.btn-confirm:disabled{opacity:.4;cursor:not-allowed}
+.btn-confirm:not(:disabled):hover{background:var(--dkgreen)}
 
 /* LOADING OVERLAY */
-.loading{position:absolute;inset:0;background:rgba(13,22,16,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;gap:12px}
+.loading{
+  position:fixed;inset:0;background:rgba(247,250,247,0.88);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:300;gap:14px;
+}
 .loading.hidden{display:none}
-.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+.spinner{
+  width:36px;height:36px;border:3px solid var(--border);
+  border-top-color:var(--green);border-radius:50%;
+  animation:spin .7s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:11px;color:var(--muted)}
+.loading-text{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <!-- HEADER -->
-  <div class="hdr">
-    <div>
-      <div class="logo">Savannah<em>IQ</em> <span style="font-size:13px;color:var(--muted);font-family:var(--mono);font-weight:400">/ Shamba</span></div>
-      <div class="logo-sub">FARM REGISTRATION · BUNGOMA</div>
+<!-- LOADING -->
+<div class="loading hidden" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Loading…</div>
+</div>
+
+<!-- MAIN FORM PAGE -->
+<div class="form-page" id="form-page">
+
+  <nav>
+    <a href="index.html" class="nav-back">← Home</a>
+    <a href="index.html" class="nav-logo">Savannah<span>IQ</span></a>
+  </nav>
+
+  <div class="form-wrap">
+    <div class="page-title">Register your farm</div>
+    <div class="page-sub">Join SavannahIQ and get satellite intelligence for your land every season.</div>
+
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="f-name" placeholder="e.g. John Wafula" autocomplete="name">
     </div>
-    <div class="live"><span class="dot"></span> LIVE</div>
+
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" id="f-phone" placeholder="e.g. 0712 345 678" autocomplete="tel">
+    </div>
+
+    <div class="field">
+      <label>Primary Crop</label>
+      <select id="f-crop">
+        <option value="">Select your main crop…</option>
+        <option value="maize">Maize</option>
+        <option value="sugarcane">Sugarcane</option>
+        <option value="beans">Beans</option>
+        <option value="cassava">Cassava</option>
+        <option value="sorghum">Sorghum</option>
+        <option value="vegetables">Vegetables</option>
+        <option value="mixed">Mixed crops</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Farm Location</label>
+      <div class="location-field" id="location-field" onclick="openMap()">
+        <div class="location-field-left">
+          <span class="location-icon">📍</span>
+          <span class="location-text" id="location-text">Tap to select your farm on the map</span>
+        </div>
+        <span class="location-arrow">›</span>
+      </div>
+    </div>
+
+    <button class="btn-register" id="btn-register" disabled onclick="registerFarm()">
+      Register Farm
+    </button>
+
   </div>
 
-  <!-- MAP -->
-  <div class="body">
-    <div id="map"></div>
-
-    <div class="map-hint hidden" id="map-hint">Tap your farm to select it</div>
-    <div class="locate-btn hidden" id="locate-btn" title="Go to my location">📍</div>
-
-    <!-- LOADING -->
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <div class="loading-text" id="loading-text">Initialising map…</div>
-    </div>
-
-    <!-- STEP 1: Request GPS -->
-    <div class="step" id="step-1">
-      <div class="step-pill"></div>
-      <div class="step-title">Find your farm</div>
-      <div class="step-sub">We'll use your location to show farms near you. Stand on or near your farm for best results.</div>
-      <div class="status" id="gps-status">
-        <div class="status-dot" id="gps-dot"></div>
-        <span id="gps-text">Waiting for location…</span>
-      </div>
-      <button class="btn-primary" id="btn-locate">📍 Use My Location</button>
-      <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
-        <div style="flex:1;height:1px;background:var(--border)"></div>
-        <span style="font-size:10px;color:var(--muted);letter-spacing:.5px">OR</span>
-        <div style="flex:1;height:1px;background:var(--border)"></div>
-      </div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.5px">ENTER FARM ID (0 – 38,359) FOR TESTING</div>
-      <div style="display:flex;gap:8px">
-        <input type="number" id="farm-id-input" min="0" max="38359" placeholder="e.g. 1234"
-          style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:11px 12px;outline:none">
-        <button onclick="fetchByFarmId()" 
-          style="background:var(--gdim);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:12px;padding:0 16px;border-radius:6px;cursor:pointer;white-space:nowrap">
-          Find →
-        </button>
-      </div>
-    </div>
-
-    <!-- STEP 2: Select farm -->
-    <div class="step hidden" id="step-2">
-      <div class="step-pill"></div>
-      <div class="step-title">Select your farm</div>
-      <div class="step-sub">Tap your farm on the map or choose from the list below.</div>
-      <div class="farms-list" id="farms-list"></div>
-      <button class="btn-primary" id="btn-confirm-farm" disabled>Confirm Selection</button>
-    </div>
-
-    <!-- STEP 3: Register details -->
-    <div class="step hidden" id="step-3">
-      <div class="step-pill"></div>
-      <div class="step-title">Register your farm</div>
-      <div class="step-sub">Enter your details to complete registration.</div>
-      <div class="field">
-        <label>Full Name</label>
-        <input type="text" id="f-name" placeholder="e.g. John Wafula" autocomplete="name">
-      </div>
-      <div class="field">
-        <label>Phone Number</label>
-        <input type="tel" id="f-phone" placeholder="e.g. 0712345678" autocomplete="tel">
-      </div>
-      <div class="field">
-        <label>Primary Crop</label>
-        <select id="f-crop">
-          <option value="">Select crop…</option>
-          <option value="maize">Maize</option>
-          <option value="sugarcane">Sugarcane</option>
-          <option value="beans">Beans</option>
-          <option value="cassava">Cassava</option>
-          <option value="sorghum">Sorghum</option>
-          <option value="vegetables">Vegetables</option>
-          <option value="mixed">Mixed crops</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <button class="btn-primary" id="btn-register">Register Farm</button>
-      <button class="btn-outline" id="btn-back">← Choose different farm</button>
-    </div>
-
-    <!-- STEP 4: Success -->
-    <div class="step hidden" id="step-4">
-      <div class="step-pill"></div>
-      <div class="success-icon">🌱</div>
-      <div class="success-title">Farm Registered</div>
-      <div class="success-sub">Your farm is now on SavannahIQ. We'll monitor it every month and alert you when conditions change.</div>
-      <div class="farm-summary" id="farm-summary"></div>
-      <button class="btn-primary" id="btn-dashboard">View Farm Dashboard →</button>
-    </div>
-
+  <!-- SUCCESS -->
+  <div class="success-wrap" id="success-wrap">
+    <div class="success-icon">🌱</div>
+    <div class="success-title">Farm Registered!</div>
+    <div class="success-sub">Your farm is now on SavannahIQ. We'll monitor it every month and send you updates when conditions change.</div>
+    <div class="farm-card" id="farm-card"></div>
+    <a href="index.html" class="btn-home">Back to home</a>
   </div>
+
+</div>
+
+<!-- MAP PICKER PAGE -->
+<div class="map-page" id="map-page">
+
+  <div class="map-nav">
+    <div class="map-nav-title">Select your farm</div>
+    <button class="map-close" onclick="closeMap()">✕ Cancel</button>
+  </div>
+
+  <div class="map-controls">
+    <div class="map-hint-text">Tap your farm on the map — or enter a Farm ID to find it</div>
+    <div class="map-id-row">
+      <input type="number" class="map-id-input" id="farm-id-input" min="0" max="38359" placeholder="Enter Farm ID (0 – 38,359)">
+      <button class="map-id-btn" onclick="fetchByFarmId()">Find →</button>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="map-bottom">
+    <div class="selected-farm-info" id="selected-farm-info">
+      <div class="farm-dot" id="farm-dot"></div>
+      <span id="selected-farm-text">No farm selected yet</span>
+    </div>
+    <button class="btn-confirm" id="btn-confirm" disabled onclick="confirmFarm()">
+      Confirm this farm →
+    </button>
+  </div>
+
 </div>
 
 <script>
 const SUPABASE_URL = 'https://alcsddfvcczxgjijnpwt.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsY3NkZGZ2Y2N6eGdqaWpucHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTE1NjUsImV4cCI6MjA5NjEyNzU2NX0.O37lDC45hlr9ul9q-6_1LEv91SZa8VuDTso83gVnjV4';
-const HEADERS = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
+const HEADERS = {
+  'apikey': SUPABASE_ANON,
+  'Authorization': 'Bearer ' + SUPABASE_ANON,
+  'Content-Type': 'application/json'
+};
 
-// State
-let map, userLat, userLng, selectedFarm = null, nearbyFarms = [];
-
-// DOM refs
 const $ = id => document.getElementById(id);
-const steps = [null, $('step-1'), $('step-2'), $('step-3'), $('step-4')];
+let map, selectedFarm = null, mapInitialised = false;
 
-function showStep(n) {
-  steps.forEach((s, i) => { if (s) s.classList.toggle('hidden', i !== n); });
+function showLoading(text){ $('loading').classList.remove('hidden'); $('loading-text').textContent = text; }
+function hideLoading(){ $('loading').classList.add('hidden'); }
+
+// OPEN MAP
+function openMap(){
+  $('map-page').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  if(!mapInitialised) initMap();
+}
+function closeMap(){
+  $('map-page').classList.remove('show');
+  document.body.style.overflow = '';
 }
 
-function showLoading(text) {
-  $('loading').classList.remove('hidden');
-  $('loading-text').textContent = text;
+function initMap(){
+  mapInitialised = true;
+  map = new maplibregl.Map({
+    container: 'map',
+    style:{
+      version:8,
+      sources:{ osm:{ type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256 } },
+      layers:[{ id:'osm', type:'raster', source:'osm' }]
+    },
+    center:[34.56, 0.57], zoom:11
+  });
+
+  map.on('load',()=>{
+    map.addSource('farms',{ type:'geojson', data:{ type:'FeatureCollection', features:[] } });
+    map.addLayer({ id:'farms-fill', type:'fill', source:'farms',
+      paint:{
+        'fill-color':['case',['==',['get','selected'],true],'#28b858','#e8f5ec'],
+        'fill-opacity':['case',['==',['get','selected'],true],0.6,0.3]
+      }
+    });
+    map.addLayer({ id:'farms-outline', type:'line', source:'farms',
+      paint:{
+        'line-color':'#28b858',
+        'line-width':['case',['==',['get','selected'],true],2.5,1],
+      }
+    });
+    map.on('click','farms-fill', e=>{
+      if(!e.features.length) return;
+      const f = e.features[0];
+      selectFarm(f.properties.id, f.properties.farm_id, f.properties.area_ha, null);
+    });
+    map.on('mouseenter','farms-fill',()=> map.getCanvas().style.cursor='pointer');
+    map.on('mouseleave','farms-fill',()=> map.getCanvas().style.cursor='');
+  });
+
+  // try GPS
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+      map.flyTo({ center:[lng,lat], zoom:16 });
+      loadNearbyFarms(lat, lng);
+    }, ()=>{});
+  }
 }
-function hideLoading() { $('loading').classList.add('hidden'); }
 
-// Init map
-map = new maplibregl.Map({
-  container: 'map',
-  style: {
-    version: 8,
-    sources: {
-      osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256 }
-    },
-    layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
-  },
-  center: [34.56, 0.57],
-  zoom: 10
-});
-
-map.on('load', () => {
-  hideLoading();
-
-  // Farm polygons source (filled dynamically)
-  map.addSource('farms', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-
-  map.addLayer({
-    id: 'farms-fill',
-    type: 'fill',
-    source: 'farms',
-    paint: {
-      'fill-color': ['case', ['==', ['get', 'selected'], true], '#3ddc6f', '#1a3d26'],
-      'fill-opacity': ['case', ['==', ['get', 'selected'], true], 0.6, 0.35]
-    }
-  });
-
-  map.addLayer({
-    id: 'farms-outline',
-    type: 'line',
-    source: 'farms',
-    paint: {
-      'line-color': ['case', ['==', ['get', 'selected'], true], '#3ddc6f', '#3ddc6f'],
-      'line-width': ['case', ['==', ['get', 'selected'], true], 2.5, 1],
-      'line-opacity': 0.8
-    }
-  });
-
-  // User location marker source
-  map.addSource('user', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-  map.addLayer({
-    id: 'user-dot',
-    type: 'circle',
-    source: 'user',
-    paint: { 'circle-radius': 8, 'circle-color': '#3ddc6f', 'circle-stroke-width': 2, 'circle-stroke-color': '#0d1610' }
-  });
-
-  // Tap farm on map
-  map.on('click', 'farms-fill', e => {
-    if (!e.features.length) return;
-    const f = e.features[0];
-    selectFarm(f.properties.id, f.properties.farm_id, f.properties.area_ha);
-  });
-
-  map.on('mouseenter', 'farms-fill', () => map.getCanvas().style.cursor = 'pointer');
-  map.on('mouseleave', 'farms-fill', () => map.getCanvas().style.cursor = '');
-});
-
-// GPS
-$('btn-locate').addEventListener('click', () => {
-  $('btn-locate').disabled = true;
-  $('gps-dot').className = 'status-dot active';
-  $('gps-text').textContent = 'Getting your location…';
-
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      userLat = pos.coords.latitude;
-      userLng = pos.coords.longitude;
-      $('gps-dot').className = 'status-dot active';
-      $('gps-text').textContent = `Found: ${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
-      fetchNearbyFarms();
-    },
-    err => {
-      $('gps-dot').className = 'status-dot error';
-      $('gps-text').textContent = 'Could not get location. Check permissions.';
-      $('btn-locate').disabled = false;
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-});
-
-async function fetchNearbyFarms() {
-  showLoading('Finding your farms…');
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farms_near_location`, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify({ lat: userLat, lng: userLng, radius_meters: 800 })
+async function loadNearbyFarms(lat, lng){
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farms_near_location`,{
+      method:'POST', headers:HEADERS,
+      body:JSON.stringify({ lat, lng, radius_meters:800 })
     });
     const data = await res.json();
-    nearbyFarms = data;
-    hideLoading();
-
-    // Place user dot on map
-    map.getSource('user').setData({
-      type: 'FeatureCollection',
-      features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [userLng, userLat] } }]
-    });
-
-    // Fly to user location
-    map.flyTo({ center: [userLng, userLat], zoom: 16, speed: 1.4 });
-
-    // Load farm polygons onto map
-    const features = data.map(f => ({
-      type: 'Feature',
-      geometry: JSON.parse(f.geojson),
-      properties: { id: f.id, farm_id: f.farm_id, area_ha: f.area_ha, selected: false }
+    if(!data.length) return;
+    const features = data.map(f=>({
+      type:'Feature', geometry:JSON.parse(f.geojson),
+      properties:{ id:f.id, farm_id:f.farm_id, area_ha:f.area_ha, selected:false }
     }));
-    map.getSource('farms').setData({ type: 'FeatureCollection', features });
-
-    // Show farm list
-    renderFarmList(data);
-    showStep(2);
-    $('map-hint').classList.remove('hidden');
-    $('locate-btn').classList.remove('hidden');
-
-  } catch (err) {
-    hideLoading();
-    alert('Error fetching farms. Please try again.');
-  }
+    map.getSource('farms').setData({ type:'FeatureCollection', features });
+  } catch(e){ console.error(e); }
 }
 
-function renderFarmList(farms) {
-  const list = $('farms-list');
-  if (!farms.length) {
-    list.innerHTML = `<div class="none-found">No registered farms found within 800m.<br>Move closer to your farm and try again.</div>`;
-    return;
-  }
-  list.innerHTML = farms.map((f, i) => `
-    <div class="farm-card" data-id="${f.id}" data-farmid="${f.farm_id}" data-area="${f.area_ha}" onclick="selectFarm(${f.id}, ${f.farm_id}, ${f.area_ha})">
-      <div class="farm-card-top">
-        <span class="farm-card-id">Farm #${f.farm_id}</span>
-        <div class="farm-card-check" id="check-${f.id}">✓</div>
-      </div>
-      <div class="farm-card-area">${f.area_ha ? f.area_ha.toFixed(2) : '—'}</div>
-      <div class="farm-card-unit">hectares</div>
-    </div>
-  `).join('');
-}
-
-function selectFarm(id, farmId, areaHa) {
-  selectedFarm = { id, farmId, areaHa };
-
-  // Update map highlight
-  const features = nearbyFarms.map(f => ({
-    type: 'Feature',
-    geometry: JSON.parse(f.geojson),
-    properties: { id: f.id, farm_id: f.farm_id, area_ha: f.area_ha, selected: f.id === id }
-  }));
-  map.getSource('farms').setData({ type: 'FeatureCollection', features });
-
-  // Update list cards
-  document.querySelectorAll('.farm-card').forEach(card => {
-    const isSelected = parseInt(card.dataset.id) === id;
-    card.classList.toggle('selected', isSelected);
-  });
-
-  $('btn-confirm-farm').disabled = false;
-}
-
-async function fetchByFarmId() {
-  const input = $('farm-id-input');
-  const farmId = parseInt(input.value);
-  if (isNaN(farmId) || farmId < 0 || farmId > 38359) {
-    alert('Please enter a farm ID between 0 and 38,359');
-    return;
-  }
-  showLoading('Fetching farm…');
-  try {
-    // Use farm_by_id RPC — returns id, farm_id, area_ha, geojson
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify({ fid: farmId })
+async function fetchByFarmId(){
+  const val = parseInt($('farm-id-input').value);
+  if(isNaN(val)||val<0||val>38359){ alert('Enter a Farm ID between 0 and 38,359'); return; }
+  showLoading('Finding farm…');
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
+      method:'POST', headers:HEADERS,
+      body:JSON.stringify({ fid: val })
     });
     const data = await res.json();
-
-    if (!data || !data.length) {
-      hideLoading();
-      alert(`Farm ID ${farmId} not found. Try a number between 0 and 38,359.`);
-      return;
-    }
-
-    const farm = data[0];
-    nearbyFarms = [farm];
     hideLoading();
-
-    // Plot on map
+    if(!data||!data.length){ alert(`Farm ID ${val} not found. Try another number.`); return; }
+    const farm = data[0];
     const parsed = JSON.parse(farm.geojson);
     const coords = parsed.coordinates[0];
-    const lngs = coords.map(c => c[0]);
-    const lats = coords.map(c => c[1]);
-    const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
-    const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
-
-    map.flyTo({ center: [centerLng, centerLat], zoom: 17, speed: 1.4 });
-    map.getSource('farms').setData({
-      type: 'FeatureCollection',
-      features: [{ type: 'Feature', geometry: parsed, properties: { id: farm.id, farm_id: farm.farm_id, area_ha: farm.area_ha, selected: false } }]
-    });
-
-    renderFarmList(nearbyFarms);
-    showStep(2);
-    $('map-hint').classList.remove('hidden');
-
-  } catch(err) {
-    hideLoading();
-    alert('Error fetching farm. Please try again.');
-    console.error(err);
-  }
+    const lngs = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+    const cLng=(Math.min(...lngs)+Math.max(...lngs))/2;
+    const cLat=(Math.min(...lats)+Math.max(...lats))/2;
+    map.flyTo({ center:[cLng,cLat], zoom:17, speed:1.4 });
+    map.getSource('farms').setData({ type:'FeatureCollection', features:[{
+      type:'Feature', geometry:parsed,
+      properties:{ id:farm.id, farm_id:farm.farm_id, area_ha:farm.area_ha, selected:false }
+    }]});
+    selectFarm(farm.id, farm.farm_id, farm.area_ha, farm.geojson);
+  } catch(e){ hideLoading(); alert('Error finding farm. Try again.'); }
 }
 
-$('btn-confirm-farm').addEventListener('click', () => {
-  if (!selectedFarm) return;
-  $('map-hint').classList.add('hidden');
-  showStep(3);
-});
+function selectFarm(id, farmId, areaHa, geojson){
+  selectedFarm = { id, farmId, areaHa, geojson };
+  // highlight on map
+  const src = map.getSource('farms');
+  if(src){
+    const data = src._data || { type:'FeatureCollection', features:[] };
+    if(data.features){
+      data.features = data.features.map(f=>({
+        ...f, properties:{ ...f.properties, selected: f.properties.id===id }
+      }));
+      src.setData(data);
+    }
+  }
+  $('selected-farm-info').classList.add('has-farm');
+  $('farm-dot').classList.add('active');
+  $('selected-farm-text').textContent = `Farm #${farmId} · ${areaHa ? areaHa.toFixed(2)+' ha' : '—'}`;
+  $('btn-confirm').disabled = false;
+}
 
-$('btn-back').addEventListener('click', () => showStep(2));
+function confirmFarm(){
+  if(!selectedFarm) return;
+  closeMap();
+  $('location-field').classList.add('selected');
+  $('location-text').classList.add('selected');
+  $('location-text').textContent = `Farm #${selectedFarm.farmId} · ${selectedFarm.areaHa ? selectedFarm.areaHa.toFixed(2)+' ha' : '—'}`;
+  checkFormReady();
+}
 
-$('btn-register').addEventListener('click', async () => {
+function checkFormReady(){
   const name = $('f-name').value.trim();
   const phone = $('f-phone').value.trim();
   const crop = $('f-crop').value;
+  $('btn-register').disabled = !(name && phone && crop && selectedFarm);
+}
 
-  if (!name || !phone || !crop) {
-    alert('Please fill in all fields.');
-    return;
-  }
-  if (phone.length < 9) {
-    alert('Please enter a valid phone number.');
-    return;
-  }
+['f-name','f-phone','f-crop'].forEach(id=>{
+  $(id).addEventListener('input', checkFormReady);
+  $(id).addEventListener('change', checkFormReady);
+});
+
+async function registerFarm(){
+  const name = $('f-name').value.trim();
+  const phone = $('f-phone').value.trim();
+  const crop = $('f-crop').value;
+  if(!name||!phone||!crop||!selectedFarm){ alert('Please fill in all fields and select a farm.'); return; }
+  if(phone.length < 9){ alert('Please enter a valid phone number.'); return; }
 
   showLoading('Registering your farm…');
   $('btn-register').disabled = true;
 
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/farmers`, {
-      method: 'POST',
-      headers: { ...HEADERS, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({
-        name,
-        phone,
-        primary_crop: crop,
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/farmers`,{
+      method:'POST',
+      headers:{ ...HEADERS, 'Prefer':'return=minimal' },
+      body:JSON.stringify({
+        name, phone, primary_crop:crop,
         farm_id: selectedFarm.id,
         area_ha: selectedFarm.areaHa
       })
     });
-
     hideLoading();
 
-    if (res.ok || res.status === 201) {
-      // Show success
-      $('farm-summary').innerHTML = `
-        <div class="fs-row"><span class="fs-label">Farmer</span><span class="fs-val">${name}</span></div>
-        <div class="fs-row"><span class="fs-label">Phone</span><span class="fs-val">${phone}</span></div>
-        <div class="fs-row"><span class="fs-label">Primary crop</span><span class="fs-val">${crop}</span></div>
-        <div class="fs-row"><span class="fs-label">Farm size</span><span class="fs-val">${selectedFarm.areaHa ? selectedFarm.areaHa.toFixed(2) + ' ha' : '—'}</span></div>
-        <div class="fs-row"><span class="fs-label">Farm ID</span><span class="fs-val">#${selectedFarm.farmId}</span></div>
+    if(res.ok||res.status===201){
+      $('form-page').querySelector('.form-wrap').style.display='none';
+      $('farm-card').innerHTML = `
+        <div class="farm-row"><span class="farm-label">Name</span><span class="farm-val">${name}</span></div>
+        <div class="farm-row"><span class="farm-label">Phone</span><span class="farm-val">${phone}</span></div>
+        <div class="farm-row"><span class="farm-label">Crop</span><span class="farm-val">${crop}</span></div>
+        <div class="farm-row"><span class="farm-label">Farm</span><span class="farm-val">#${selectedFarm.farmId}</span></div>
+        <div class="farm-row"><span class="farm-label">Size</span><span class="farm-val">${selectedFarm.areaHa ? selectedFarm.areaHa.toFixed(2)+' ha' : '—'}</span></div>
       `;
-      showStep(4);
+      $('success-wrap').classList.add('show');
     } else {
       const err = await res.json();
-      if (err.code === '23505') {
-        alert('This phone number is already registered.');
-      } else {
-        alert('Registration failed. Please try again.');
-      }
+      if(err.code==='23505'){ alert('This phone number is already registered.'); }
+      else { alert('Registration failed. Please try again.'); }
       $('btn-register').disabled = false;
     }
-  } catch (err) {
+  } catch(e){
     hideLoading();
     alert('Network error. Please try again.');
     $('btn-register').disabled = false;
   }
-});
-
-$('locate-btn').addEventListener('click', () => {
-  if (userLat && userLng) map.flyTo({ center: [userLng, userLat], zoom: 16 });
-});
-
-$('btn-dashboard').addEventListener('click', () => {
-  alert('Farm dashboard coming soon!');
-});
+}
 </script>
 </body>
 </html>
