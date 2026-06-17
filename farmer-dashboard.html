@@ -233,12 +233,12 @@ nav{
             <option value="09">Sep</option><option value="10">Oct</option>
             <option value="11">Nov</option><option value="12">Dec</option>
           </select>
-          <button class="sel-go" onclick="loadSnapshot()">Go</button>
+          <button class="sel-go" onclick="loadSnapshotAndTrend()">Go</button>
         </div>
 
         <!-- LEGEND -->
         <div class="legend" id="legend">
-          <div class="legend-title" id="legend-title">NDVI</div>
+          <div class="legend-title" id="legend-title">NDVI — Vegetation Health</div>
           <div class="legend-bar" id="legend-bar"></div>
           <div class="legend-labels" id="legend-labels">
             <span>Low</span><span>High</span>
@@ -249,6 +249,8 @@ nav{
 
       <!-- BOTTOM PANEL -->
       <div class="bottom-panel" id="bottom-panel">
+
+        <!-- SELECTOR ROW IN BOTTOM - REMOVED, NOW ON MAP -->
 
         <!-- FARM INFO -->
         <div class="farm-info-row" id="farm-info-row">
@@ -413,16 +415,29 @@ function initMap(){
   });
 
   map.on('load',()=>{
-    // Farm polygon source — no outline, just for reference
+    // Farm polygon source
     map.addSource('farm',{ type:'geojson', data:{ type:'Feature', geometry:farmGeojson } });
 
-    // Fit map tightly to the farm polygon bounds
+    // Add farm polygon as a fill — NDVI will only show inside this
+    map.addLayer({
+      id:'farm-fill',
+      type:'fill',
+      source:'farm',
+      paint:{ 'fill-color':'rgba(0,0,0,0)', 'fill-opacity':1 }
+    });
+
+    // Fit map to farm bounds
     const bounds = [
       [Math.min(...lngs), Math.min(...lats)],
       [Math.max(...lngs), Math.max(...lats)]
     ];
     map.fitBounds(bounds, { padding: 80, maxZoom: 17 });
   });
+}
+
+function loadSnapshotAndTrend(){
+  loadSnapshot();
+  loadTrend();
 }
 
 async function loadSnapshot(){
@@ -441,14 +456,49 @@ async function loadSnapshot(){
     const tileUrl = data.tiles[currentIndex];
     if(!tileUrl){ hideLoading(); return; }
 
-    // Remove old tile layer
+    // Remove old layers
+    if(map.getLayer('outside-mask')) map.removeLayer('outside-mask');
+    if(map.getLayer('index-clip')) map.removeLayer('index-clip');
     if(map.getLayer('index-layer')) map.removeLayer('index-layer');
+    if(map.getSource('outside-mask-src')) map.removeSource('outside-mask-src');
     if(map.getSource('index-source')) map.removeSource('index-source');
 
     map.addSource('index-source',{ type:'raster', tiles:[tileUrl], tileSize:256 });
+
+    // Add NDVI raster below farm polygon
     map.addLayer({ id:'index-layer', type:'raster', source:'index-source',
-      paint:{ 'raster-opacity':0.75 }
+      paint:{ 'raster-opacity': 0.85 }
+    }, 'farm-fill');
+
+    // Mask everything outside farm polygon with satellite
+    // by adding a white/opaque fill over the world minus the farm
+    const outerRing = [[-180,-90],[-180,90],[180,90],[180,-90],[-180,-90]];
+    const farmRing  = farmGeojson.coordinates[0];
+    const maskFeature = {
+      type:'Feature',
+      geometry:{ type:'Polygon', coordinates:[outerRing, farmRing] }
+    };
+    map.addSource('outside-mask-src',{ type:'geojson', data:maskFeature });
+    map.addLayer({
+      id:'outside-mask',
+      type:'fill',
+      source:'outside-mask-src',
+      paint:{ 'fill-color':'rgba(0,0,0,0)', 'fill-opacity':1 }
     });
+
+    // Re-add satellite on top of NDVI outside farm
+    if(!map.getSource('sat2')){
+      map.addSource('sat2',{
+        type:'raster',
+        tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize:256
+      });
+    }
+    if(!map.getLayer('sat2-layer')){
+      map.addLayer({ id:'sat2-layer', type:'raster', source:'sat2',
+        paint:{ 'raster-opacity':1 }
+      }, 'index-layer');
+    }
 
     updateLegend(currentIndex);
 
