@@ -222,15 +222,8 @@ nav{
 
         <!-- SELECTOR BAR -->
         <div class="selector-bar">
-          <span class="sel-label">Index</span>
-          <div class="sel-group">
-            <button class="sel-btn active" data-index="ndvi" onclick="setIndex('ndvi',this)">NDVI</button>
-            <button class="sel-btn" data-index="drought" onclick="setIndex('drought',this)">Drought</button>
-            <button class="sel-btn" data-index="rainfall" onclick="setIndex('rainfall',this)">Rainfall</button>
-            <button class="sel-btn" data-index="soil" onclick="setIndex('soil',this)">Soil</button>
-          </div>
+          <span class="sel-label">NDVI</span>
           <div class="sel-divider"></div>
-          <span class="sel-label">Period</span>
           <select class="sel-year" id="sel-year"></select>
           <select class="sel-month" id="sel-month">
             <option value="01">Jan</option><option value="02">Feb</option>
@@ -416,12 +409,19 @@ function initMap(){
       },
       layers:[{ id:'satellite', type:'raster', source:'satellite' }]
     },
-    center:[cLng, cLat], zoom:16
+    center:[cLng, cLat], zoom:17
   });
 
   map.on('load',()=>{
-    // Farm polygon source — used for zoom reference only, no outline
+    // Farm polygon source — no outline, just for reference
     map.addSource('farm',{ type:'geojson', data:{ type:'Feature', geometry:farmGeojson } });
+
+    // Fit map tightly to the farm polygon bounds
+    const bounds = [
+      [Math.min(...lngs), Math.min(...lats)],
+      [Math.max(...lngs), Math.max(...lats)]
+    ];
+    map.fitBounds(bounds, { padding: 60, maxZoom: 19 });
   });
 }
 
@@ -469,7 +469,7 @@ async function fetchNdviValue(start, end){
     const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
-      body:JSON.stringify({ geometry: farmGeojson })
+      body:JSON.stringify({ geometry: farmGeojson, start: start, end: end })
     });
     const data = await res.json();
     if(data.status==='ok'){
@@ -477,7 +477,7 @@ async function fetchNdviValue(start, end){
       const label = data.indices.ndvi_label;
       $('ndvi-val').textContent = ndvi ? ndvi.toFixed(2) : '—';
       const cls = label==='Healthy'?'status-healthy':label==='Moderate'?'status-moderate':'status-stressed';
-      $('ndvi-label').textContent = label;
+      $('ndvi-label').textContent = label || '—';
       $('ndvi-label').className = 'status-card-desc ' + cls;
       trendData[`${start.slice(0,7)}`] = ndvi;
     }
