@@ -421,7 +421,7 @@ function initMap(){
       [Math.min(...lngs), Math.min(...lats)],
       [Math.max(...lngs), Math.max(...lats)]
     ];
-    map.fitBounds(bounds, { padding: 60, maxZoom: 19 });
+    map.fitBounds(bounds, { padding: 80, maxZoom: 17 });
   });
 }
 
@@ -498,7 +498,7 @@ async function loadTrend(){
       const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
-        body:JSON.stringify({ geometry: farmGeojson })
+        body:JSON.stringify({ geometry: farmGeojson, start: start, end: end })
       });
       const data = await res.json();
       return { year: y, ndvi: data.status==='ok' ? data.indices.ndvi : null };
