@@ -17,45 +17,36 @@
 html,body{height:100%;background:var(--offwhite);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
 
 /* NAV */
-nav{
-  background:var(--dkgreen);padding:0 20px;height:52px;
-  display:flex;align-items:center;justify-content:space-between;
-  position:relative;z-index:100;flex-shrink:0;
-}
+nav{background:var(--dkgreen);padding:0 20px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:100}
 .nav-logo{font-weight:700;font-size:16px;color:var(--white);text-decoration:none}
 .nav-logo span{color:var(--green);font-style:italic}
-.nav-farmer{font-size:11px;color:rgba(255,255,255,0.6);font-family:'Space Mono',monospace}
+.nav-right{font-size:11px;color:rgba(255,255,255,0.6);font-family:'Space Mono',monospace}
 
-/* LAYOUT */
 .app{display:flex;flex-direction:column;height:100vh}
 .body{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
-/* LOGIN PAGE */
-.login-page{
-  flex:1;display:flex;align-items:center;justify-content:center;
-  padding:32px 24px;
-}
+/* ── LOGIN PAGE ── */
+.login-page{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px}
 .login-page.hidden{display:none}
 .login-box{width:100%;max-width:400px}
 .login-title{font-weight:700;font-size:24px;color:var(--dkgreen);margin-bottom:6px}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.5}
-.field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px;font-family:'Space Mono',monospace}
-.field input{
-  width:100%;background:var(--white);border:1.5px solid var(--border);
+.field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:7px;font-family:'Space Mono',monospace}
+.field input{width:100%;background:var(--white);border:1.5px solid var(--border);
   border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;
-  font-size:15px;padding:13px 14px;outline:none;transition:border .2s;
-}
+  font-size:15px;padding:13px 14px;outline:none;transition:border .2s}
 .field input:focus{border-color:var(--green)}
-.btn-login{
-  width:100%;padding:14px;background:var(--green);color:var(--white);
+.btn-login{width:100%;padding:14px;background:var(--green);color:var(--white);
   font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
-  border:none;border-radius:40px;cursor:pointer;margin-top:20px;
-  transition:background .2s;
-}
+  border:none;border-radius:40px;cursor:pointer;margin-top:20px;transition:background .2s}
 .btn-login:hover{background:var(--dkgreen)}
 .login-err{font-size:12px;color:var(--red);margin-top:12px;display:none}
+.login-reg{margin-top:16px;font-size:12px;color:var(--muted)}
+.login-reg a{color:var(--green);font-weight:700;text-decoration:none}
 
-/* DASHBOARD PAGE */
+/* ── DASHBOARD PAGE ── */
 .dash-page{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .dash-page.hidden{display:none}
 
@@ -63,127 +54,146 @@ nav{
 .map-wrap{flex:1;position:relative;min-height:0}
 #map{width:100%;height:100%}
 
-/* SELECTOR BAR */
 .selector-bar{
   position:absolute;top:10px;left:10px;right:10px;z-index:10;
   background:rgba(13,43,18,0.92);backdrop-filter:blur(8px);
   border-radius:10px;padding:10px 14px;
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:8px;
 }
-.sel-label{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
-.sel-group{display:flex;gap:6px;flex-wrap:wrap}
-.sel-btn{
-  font-family:'Space Mono',monospace;font-size:9px;
-  padding:5px 10px;border-radius:20px;cursor:pointer;
-  border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);
-  background:transparent;transition:all .2s;white-space:nowrap;
-}
-.sel-btn.active{background:var(--green);border-color:var(--green);color:var(--dkgreen);font-weight:700}
-.sel-divider{width:1px;height:20px;background:rgba(255,255,255,0.1);flex-shrink:0}
-.sel-year{
+.sel-label{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,0.5);
+  text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+.sel-divider{width:1px;height:18px;background:rgba(255,255,255,0.15);flex-shrink:0}
+.sel-year,.sel-month{
   font-family:'Space Mono',monospace;font-size:10px;
   background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
-  border-radius:6px;color:var(--white);padding:4px 8px;outline:none;
-  cursor:pointer;
+  border-radius:6px;color:var(--white);padding:5px 8px;outline:none;cursor:pointer;flex:1;
 }
-.sel-month{
-  font-family:'Space Mono',monospace;font-size:10px;
-  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
-  border-radius:6px;color:var(--white);padding:4px 8px;outline:none;
-  cursor:pointer;
-}
-.sel-go{
-  font-family:'Space Mono',monospace;font-size:9px;
+.sel-go{font-family:'Space Mono',monospace;font-size:9px;
   background:var(--green);color:var(--dkgreen);font-weight:700;
-  border:none;border-radius:6px;padding:5px 12px;cursor:pointer;
-  transition:background .2s;
-}
-.sel-go:hover{background:var(--white)}
+  border:none;border-radius:6px;padding:6px 14px;cursor:pointer;white-space:nowrap}
 
-/* LEGEND */
-.legend{
-  position:absolute;bottom:10px;left:10px;z-index:10;
+.legend{position:absolute;bottom:10px;left:10px;z-index:10;
   background:rgba(13,43,18,0.88);backdrop-filter:blur(8px);
-  border-radius:8px;padding:8px 12px;
-}
-.legend-title{font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
-.legend-bar{width:120px;height:8px;border-radius:4px;background:linear-gradient(to right,#e04030,#e07820,#28b858);margin-bottom:4px}
-.legend-labels{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5)}
+  border-radius:8px;padding:8px 12px;}
+.legend-title{font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.legend-bar{width:120px;height:8px;border-radius:4px;
+  background:linear-gradient(to right,#e04030,#e07820,#28b858);margin-bottom:4px}
+.legend-labels{display:flex;justify-content:space-between;
+  font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5)}
 
 /* BOTTOM PANEL */
-.bottom-panel{
-  background:var(--white);border-top:1px solid var(--border);
-  padding:16px 20px;flex-shrink:0;max-height:45vh;overflow-y:auto;
-}
+.bottom-panel{background:var(--white);border-top:1px solid var(--border);
+  padding:16px 20px 24px;flex-shrink:0;max-height:48vh;overflow-y:auto}
 
-/* FARM INFO ROW */
-.farm-info-row{
-  display:flex;align-items:center;gap:12px;
-  margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);
+/* FARM SELECTION PROMPT */
+.farm-select-prompt{
+  background:var(--ltgreen);border:1.5px solid var(--green);border-radius:12px;
+  padding:16px;margin-bottom:16px;
 }
-.farm-badge{
-  background:var(--ltgreen);border:1.5px solid var(--green);
-  border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;
+.farm-select-prompt p{font-size:13px;color:var(--dkgreen);margin-bottom:12px;line-height:1.5}
+.btn-select-farm{
+  width:100%;padding:12px;background:var(--green);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;
+  border:none;border-radius:40px;cursor:pointer;transition:background .2s;
 }
+.btn-select-farm:hover{background:var(--dkgreen)}
+
+/* FARM INFO */
+.farm-info-row{display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.farm-badge{background:var(--ltgreen);border:1.5px solid var(--green);
+  border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0}
 .farm-badge-num{font-weight:700;font-size:18px;color:var(--dkgreen);line-height:1}
-.farm-badge-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:'Space Mono',monospace}
+.farm-badge-label{font-size:9px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.1em;font-family:'Space Mono',monospace}
 .farm-meta{flex:1}
 .farm-name{font-weight:700;font-size:15px;color:var(--dkgreen);margin-bottom:2px}
 .farm-details{font-size:11px;color:var(--muted)}
+.btn-change-farm{font-size:11px;color:var(--green);background:none;border:none;
+  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;padding:0;margin-top:4px;display:block}
 
-/* NDVI STATUS */
-.ndvi-status{
-  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;
-}
-.status-card{
-  background:var(--offwhite);border-radius:10px;
-  padding:12px 14px;border:1px solid var(--border);
-}
-.status-card-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+/* STATUS CARDS */
+.ndvi-status{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.status-card{background:var(--offwhite);border-radius:10px;
+  padding:12px 14px;border:1px solid var(--border)}
+.status-card-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
 .status-card-val{font-weight:700;font-size:20px;color:var(--dkgreen);line-height:1;margin-bottom:2px}
 .status-card-desc{font-size:11px}
 .status-healthy{color:var(--green)}
 .status-moderate{color:var(--orange)}
 .status-stressed{color:var(--red)}
 
-/* TREND CHART */
+/* TREND */
 .trend-section{margin-bottom:16px}
-.trend-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.trend-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
 .trend-bars{display:flex;align-items:flex-end;gap:4px;height:60px}
 .trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.trend-bar{
-  width:100%;border-radius:3px 3px 0 0;
-  transition:height .4s ease;min-height:3px;
-}
-.trend-bar-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center;white-space:nowrap}
+.trend-bar{width:100%;border-radius:3px 3px 0 0;transition:height .4s ease;min-height:3px}
+.trend-bar-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center}
 .trend-bar-val{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center}
 
 /* ADVISORY */
-.advisory{
-  background:var(--ltgreen);border:1px solid rgba(40,184,88,0.3);
-  border-radius:10px;padding:14px 16px;
-}
-.advisory-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.advisory-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:blink 2s infinite}
+.advisory{background:var(--ltgreen);border:1px solid rgba(40,184,88,0.3);
+  border-radius:10px;padding:14px 16px}
+.advisory-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--green);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;
+  display:flex;align-items:center;gap:6px}
+.advisory-label::before{content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--green);animation:blink 2s infinite;flex-shrink:0}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .advisory-text{font-size:13px;color:var(--dkgreen);line-height:1.65}
-.advisory-loading{font-size:12px;color:var(--muted);font-style:italic}
+
+/* MAP PICKER */
+.map-picker{display:none;position:fixed;inset:0;z-index:200;flex-direction:column;background:var(--offwhite)}
+.map-picker.show{display:flex}
+.picker-nav{background:var(--dkgreen);padding:0 20px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.picker-nav-title{font-weight:700;font-size:15px;color:var(--white)}
+.picker-close{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.7);
+  background:none;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:.1em}
+.picker-close:hover{color:var(--green)}
+.picker-controls{background:var(--white);border-bottom:1px solid var(--border);
+  padding:12px 16px;flex-shrink:0}
+.picker-hint{font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center}
+.picker-id-row{display:flex;gap:8px}
+.picker-id-input{flex:1;background:var(--offwhite);border:1.5px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:14px;padding:10px 12px;outline:none}
+.picker-id-input:focus{border-color:var(--green)}
+.picker-id-btn{background:var(--green);color:var(--white);font-family:'DM Sans',sans-serif;
+  font-weight:700;font-size:13px;padding:0 18px;border:none;border-radius:8px;
+  cursor:pointer;white-space:nowrap;transition:background .2s}
+.picker-id-btn:hover{background:var(--dkgreen)}
+#picker-map{flex:1;width:100%}
+.picker-bottom{background:var(--white);border-top:1px solid var(--border);
+  padding:16px 20px;flex-shrink:0}
+.picker-farm-info{font-size:13px;color:var(--muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px}
+.picker-farm-info.has-farm{color:var(--dkgreen)}
+.picker-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
+.picker-dot.active{background:var(--green)}
+.btn-confirm-farm{width:100%;padding:14px;background:var(--green);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  border:none;border-radius:40px;cursor:pointer;transition:background .2s}
+.btn-confirm-farm:disabled{opacity:.4;cursor:not-allowed}
+.btn-confirm-farm:not(:disabled):hover{background:var(--dkgreen)}
 
 /* LOADING */
-.loading{
-  position:fixed;inset:0;background:rgba(247,250,247,0.9);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:300;gap:14px;
-}
-.loading.hidden{display:none}
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+.loading{position:fixed;inset:0;background:rgba(247,250,247,0.88);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:400}
+.loading.show{display:flex}
+.spinner{width:32px;height:32px;border:3px solid var(--border);
+  border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
 
-<div class="loading hidden" id="loading">
+<div class="loading" id="loading">
   <div class="spinner"></div>
   <div class="loading-text" id="loading-text">Loading…</div>
 </div>
@@ -191,7 +201,7 @@ nav{
 <div class="app">
   <nav>
     <a href="index.html" class="nav-logo">Savannah<span>IQ</span> / My Farm</a>
-    <span class="nav-farmer" id="nav-farmer"></span>
+    <span class="nav-right" id="nav-name"></span>
   </nav>
 
   <div class="body">
@@ -206,22 +216,18 @@ nav{
           <input type="tel" id="login-phone" placeholder="e.g. 0712 345 678" autocomplete="tel">
         </div>
         <button class="btn-login" onclick="login()">View my farm →</button>
-        <div class="login-err" id="login-err">Phone number not found. Have you registered your farm?</div>
-        <div style="margin-top:20px;font-size:12px;color:var(--muted)">
-          Not registered yet? <a href="shamba.html" style="color:var(--green);font-weight:700;text-decoration:none">Register your farm →</a>
-        </div>
+        <div class="login-err" id="login-err">Phone number not found. Have you registered?</div>
+        <div class="login-reg">Not registered yet? <a href="shamba.html">Register your farm →</a></div>
       </div>
     </div>
 
     <!-- DASHBOARD -->
     <div class="dash-page hidden" id="dash-page">
 
-      <!-- MAP -->
       <div class="map-wrap">
         <div id="map"></div>
 
-        <!-- SELECTOR BAR -->
-        <div class="selector-bar">
+        <div class="selector-bar" id="selector-bar" style="display:none">
           <span class="sel-label">NDVI</span>
           <div class="sel-divider"></div>
           <select class="sel-year" id="sel-year"></select>
@@ -236,24 +242,24 @@ nav{
           <button class="sel-go" onclick="loadSnapshotAndTrend()">Go</button>
         </div>
 
-        <!-- LEGEND -->
-        <div class="legend" id="legend">
-          <div class="legend-title" id="legend-title">NDVI — Vegetation Health</div>
-          <div class="legend-bar" id="legend-bar"></div>
-          <div class="legend-labels" id="legend-labels">
-            <span>Low</span><span>High</span>
-          </div>
+        <div class="legend" id="legend" style="display:none">
+          <div class="legend-title">NDVI — Vegetation Health</div>
+          <div class="legend-bar"></div>
+          <div class="legend-labels"><span>Low</span><span>High</span></div>
         </div>
-
       </div>
 
       <!-- BOTTOM PANEL -->
-      <div class="bottom-panel" id="bottom-panel">
+      <div class="bottom-panel">
 
-        <!-- SELECTOR ROW IN BOTTOM - REMOVED, NOW ON MAP -->
+        <!-- FARM SELECTION PROMPT — shown when no farm selected -->
+        <div class="farm-select-prompt" id="farm-select-prompt">
+          <p>Select your farm to see its satellite health data, crop trends and personalised advice.</p>
+          <button class="btn-select-farm" onclick="openPicker()">📍 Select my farm →</button>
+        </div>
 
-        <!-- FARM INFO -->
-        <div class="farm-info-row" id="farm-info-row">
+        <!-- FARM INFO — shown after farm selected -->
+        <div class="farm-info-row" id="farm-info-row" style="display:none">
           <div class="farm-badge">
             <div class="farm-badge-num" id="farm-size">—</div>
             <div class="farm-badge-label">Hectares</div>
@@ -261,36 +267,34 @@ nav{
           <div class="farm-meta">
             <div class="farm-name" id="farm-farmer-name">—</div>
             <div class="farm-details" id="farm-details">—</div>
+            <button class="btn-change-farm" onclick="openPicker()">Change farm →</button>
           </div>
         </div>
 
-        <!-- NDVI STATUS CARDS -->
-        <div class="ndvi-status">
-          <div class="status-card">
-            <div class="status-card-label">Crop Health</div>
-            <div class="status-card-val" id="ndvi-val">—</div>
-            <div class="status-card-desc" id="ndvi-label">Loading…</div>
+        <div id="farm-data" style="display:none">
+          <div class="ndvi-status">
+            <div class="status-card">
+              <div class="status-card-label">Crop Health</div>
+              <div class="status-card-val" id="ndvi-val">—</div>
+              <div class="status-card-desc" id="ndvi-label">Loading…</div>
+            </div>
+            <div class="status-card">
+              <div class="status-card-label">5yr Trend</div>
+              <div class="status-card-val" id="trend-val">—</div>
+              <div class="status-card-desc" id="trend-label">Loading…</div>
+            </div>
           </div>
-          <div class="status-card">
-            <div class="status-card-label">5yr Trend</div>
-            <div class="status-card-val" id="trend-val">—</div>
-            <div class="status-card-desc" id="trend-label">Loading…</div>
-          </div>
-        </div>
 
-        <!-- TREND CHART -->
-        <div class="trend-section">
-          <div class="trend-title">NDVI — Last 5 years (same month)</div>
-          <div class="trend-bars" id="trend-bars">
-            <div style="font-size:11px;color:var(--muted);padding:8px">Loading trend data…</div>
+          <div class="trend-section">
+            <div class="trend-title">NDVI — Last 5 years (same month)</div>
+            <div class="trend-bars" id="trend-bars">
+              <div style="font-size:11px;color:var(--muted)">Loading…</div>
+            </div>
           </div>
-        </div>
 
-        <!-- ADVISORY -->
-        <div class="advisory">
-          <div class="advisory-label">Farm Advisory</div>
-          <div class="advisory-text" id="advisory-text">
-            <span class="advisory-loading">Generating advisory based on your farm data…</span>
+          <div class="advisory">
+            <div class="advisory-label">Farm Advisory</div>
+            <div class="advisory-text" id="advisory-text">Analysing your farm data…</div>
           </div>
         </div>
 
@@ -299,364 +303,415 @@ nav{
   </div>
 </div>
 
+<!-- MAP PICKER -->
+<div class="map-picker" id="map-picker">
+  <div class="picker-nav">
+    <div class="picker-nav-title">Select your farm</div>
+    <button class="picker-close" onclick="closePicker()">✕ Cancel</button>
+  </div>
+  <div class="picker-controls">
+    <div class="picker-hint">Enter your Farm ID to find your farm, or use GPS</div>
+    <div class="picker-id-row">
+      <input type="number" class="picker-id-input" id="picker-id-input"
+        min="0" max="38359" placeholder="Farm ID (0 – 38,359)">
+      <button class="picker-id-btn" onclick="fetchByFarmId()">Find →</button>
+    </div>
+  </div>
+  <div id="picker-map"></div>
+  <div class="picker-bottom">
+    <div class="picker-farm-info" id="picker-farm-info">
+      <div class="picker-dot" id="picker-dot"></div>
+      <span id="picker-farm-text">No farm selected</span>
+    </div>
+    <button class="btn-confirm-farm" id="btn-confirm-farm" disabled onclick="confirmFarm()">
+      Confirm this farm →
+    </button>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://alcsddfvcczxgjijnpwt.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsY3NkZGZ2Y2N6eGdqaWpucHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTE1NjUsImV4cCI6MjA5NjEyNzU2NX0.O37lDC45hlr9ul9q-6_1LEv91SZa8VuDTso83gVnjV4';
-const HEADERS = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' };
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsY3NkZGZ2Y2N6eGdqaWpucHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTE1NjUsImV4cCI6MjA5NjEyNzU2NX0.O37lDC45hlr9ul9q-6_1LEv91SZa8VuDTso83gVnjV4';
+const HEADERS = {'apikey':ANON,'Authorization':'Bearer '+ANON,'Content-Type':'application/json'};
 const CLOUD_RUN = 'https://savannahiq-tiles-353411679165.europe-west1.run.app';
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 
 const $ = id => document.getElementById(id);
-let map, farmer, farmGeojson, currentIndex = 'ndvi';
-let trendData = {};
-
-function showLoading(t){ $('loading').classList.remove('hidden'); $('loading-text').textContent = t; }
-function hideLoading(){ $('loading').classList.add('hidden'); }
-
-// Auto-login only if coming directly from registration
-const savedPhone = sessionStorage.getItem('farmer_phone');
-if(savedPhone){
-  window.addEventListener('DOMContentLoaded', ()=>{
-    $('login-phone').value = savedPhone;
-    sessionStorage.removeItem('farmer_phone');
-    login();
-  });
-} else {
-  hideLoading();
-}
-
-// Populate year selector — current year back 5 years
+let map, pickerMap, pickerMapInit = false;
+let farmer, farmGeojson, selectedFarm = null;
 const now = new Date();
+
+function showLoading(t){ $('loading').classList.add('show'); $('loading-text').textContent=t; }
+function hideLoading(){ $('loading').classList.remove('show'); }
+
+// Year selector
 const yearSel = $('sel-year');
-for(let y = now.getFullYear(); y >= now.getFullYear()-5; y--){
-  const o = document.createElement('option');
-  o.value = y; o.textContent = y;
-  yearSel.appendChild(o);
+for(let y=now.getFullYear();y>=now.getFullYear()-5;y--){
+  const o=document.createElement('option'); o.value=y; o.textContent=y; yearSel.appendChild(o);
 }
 $('sel-month').value = String(now.getMonth()+1).padStart(2,'0');
 
-// LOGIN
+// Auto login from sessionStorage
+const savedPhone = sessionStorage.getItem('farmer_phone');
+if(savedPhone){ window.addEventListener('DOMContentLoaded',()=>{ $('login-phone').value=savedPhone; sessionStorage.removeItem('farmer_phone'); login(); }); }
+
+$('login-phone').addEventListener('keydown',e=>{ if(e.key==='Enter') login(); });
+
 async function login(){
   const phone = $('login-phone').value.trim();
-  if(!phone){ return; }
-  showLoading('Looking up your farm…');
-  $('login-err').style.display = 'none';
+  if(!phone) return;
+  showLoading('Looking up your account…');
+  $('login-err').style.display='none';
   try{
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/farmers?phone=eq.${encodeURIComponent(phone)}&select=*`,
-      { headers: HEADERS }
-    );
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/farmers?phone=eq.${encodeURIComponent(phone)}&select=*`,{ headers:HEADERS });
     const data = await res.json();
-    if(!data||!data.length){
-      hideLoading();
-      $('login-err').style.display = 'block';
-      return;
-    }
+    hideLoading();
+    if(!data||!data.length){ $('login-err').style.display='block'; return; }
     farmer = data[0];
-    await loadFarmGeojson();
-  } catch(e){
-    hideLoading();
-    alert('Network error. Please try again.');
-  }
+    $('nav-name').textContent = farmer.name;
+    $('login-page').classList.add('hidden');
+    $('dash-page').classList.remove('hidden');
+    initMainMap();
+
+    // If farmer already has a farm_id saved, load it
+    if(farmer.farm_id){
+      await loadSavedFarm(farmer.farm_id);
+    }
+  } catch(e){ hideLoading(); alert('Network error. Please try again.'); }
 }
 
-$('login-phone').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
-
-async function loadFarmGeojson(){
-  showLoading('Loading your farm…');
-  try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
-      method:'POST', headers:HEADERS,
-      body:JSON.stringify({ fid: farmer.farm_id })
-    });
-    const data = await res.json();
-    if(!data||!data.length){ hideLoading(); alert('Farm not found.'); return; }
-    farmGeojson = JSON.parse(data[0].geojson);
-    initDashboard();
-  } catch(e){
-    hideLoading();
-    alert('Error loading farm data.');
-  }
-}
-
-function initDashboard(){
-  $('login-page').classList.add('hidden');
-  $('dash-page').classList.remove('hidden');
-  $('nav-farmer').textContent = farmer.name;
-  $('farm-farmer-name').textContent = farmer.name;
-  $('farm-size').textContent = farmer.area_ha ? farmer.area_ha.toFixed(2) : '—';
-  $('farm-details').textContent = `Farm #${farmer.farm_id} · ${farmer.primary_crop} · Bungoma`;
-
-  initMap();
-  loadSnapshot();
-  loadTrend();
-}
-
-function initMap(){
-  const coords = farmGeojson.coordinates[0];
-  const lngs = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
-  const cLng = (Math.min(...lngs)+Math.max(...lngs))/2;
-  const cLat = (Math.min(...lats)+Math.max(...lats))/2;
-
+function initMainMap(){
   map = new maplibregl.Map({
     container:'map',
     style:{
       version:8,
-      sources:{
-        satellite:{
-          type:'raster',
-          tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-          tileSize:256
-        }
-      },
+      sources:{ satellite:{ type:'raster',
+        tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize:256 }},
       layers:[{ id:'satellite', type:'raster', source:'satellite' }]
     },
-    center:[cLng, cLat], zoom:17
+    center:[34.56, 0.57], zoom:12
   });
+}
 
-  map.on('load',()=>{
-    // Farm polygon source
-    map.addSource('farm',{ type:'geojson', data:{ type:'Feature', geometry:farmGeojson } });
-
-    // Add farm polygon as a fill — NDVI will only show inside this
-    map.addLayer({
-      id:'farm-fill',
-      type:'fill',
-      source:'farm',
-      paint:{ 'fill-color':'rgba(0,0,0,0)', 'fill-opacity':1 }
+async function loadSavedFarm(farmId){
+  showLoading('Loading your farm…');
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
+      method:'POST', headers:HEADERS, body:JSON.stringify({ fid: farmId })
     });
-
-    // Fit map to farm bounds
-    const bounds = [
-      [Math.min(...lngs), Math.min(...lats)],
-      [Math.max(...lngs), Math.max(...lats)]
-    ];
-    map.fitBounds(bounds, { padding: 80, maxZoom: 17 });
-  });
+    const data = await res.json();
+    if(!data||!data.length){ hideLoading(); return; }
+    const farm = data[0];
+    farmGeojson = JSON.parse(farm.geojson);
+    selectedFarm = { id:farm.id, farmId:farm.farm_id, areaHa:farm.area_ha, geojson:farmGeojson };
+    hideLoading();
+    showFarmOnDashboard();
+  } catch(e){ hideLoading(); }
 }
 
-function loadSnapshotAndTrend(){
-  loadSnapshot();
-  loadTrend();
+function showFarmOnDashboard(){
+  // Hide prompt, show info
+  $('farm-select-prompt').style.display = 'none';
+  $('farm-info-row').style.display = 'flex';
+  $('farm-data').style.display = 'block';
+  $('selector-bar').style.display = 'flex';
+  $('legend').style.display = 'block';
+
+  $('farm-farmer-name').textContent = farmer.name;
+  $('farm-size').textContent = selectedFarm.areaHa ? selectedFarm.areaHa.toFixed(2) : '—';
+  $('farm-details').textContent = `Farm #${selectedFarm.farmId} · ${farmer.primary_crop} · Bungoma`;
+
+  // Zoom map to farm
+  const coords = farmGeojson.coordinates[0];
+  const lngs = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
+  const bounds = [[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]];
+
+  if(map.loaded()){
+    map.fitBounds(bounds,{ padding:60, maxZoom:17 });
+  } else {
+    map.on('load',()=> map.fitBounds(bounds,{ padding:60, maxZoom:17 }));
+  }
+
+  loadSnapshotAndTrend();
 }
+
+// ── SNAPSHOT ──
+function loadSnapshotAndTrend(){ loadSnapshot(); loadTrend(); }
 
 async function loadSnapshot(){
-  const year  = $('sel-year').value;
-  const month = $('sel-month').value;
-  const start = `${year}-${month}-01`;
-  const end   = `${year}-${month}-28`;
-
-  showLoading(`Loading ${currentIndex.toUpperCase()} for ${month}/${year}…`);
-
+  if(!farmGeojson) return;
+  const year=$('sel-year').value, month=$('sel-month').value;
+  const start=`${year}-${month}-01`, end=`${year}-${month}-28`;
+  showLoading(`Loading NDVI ${month}/${year}…`);
   try{
     const res = await fetch(`${CLOUD_RUN}/tiles?start=${start}&end=${end}`);
     const data = await res.json();
-    if(data.status !== 'ok'){ hideLoading(); return; }
+    if(data.status!=='ok'){ hideLoading(); return; }
 
-    const tileUrl = data.tiles[currentIndex];
+    const tileUrl = data.tiles['ndvi'];
     if(!tileUrl){ hideLoading(); return; }
 
-    // Remove old layers
-    if(map.getLayer('outside-mask')) map.removeLayer('outside-mask');
-    if(map.getLayer('index-clip')) map.removeLayer('index-clip');
-    if(map.getLayer('index-layer')) map.removeLayer('index-layer');
-    if(map.getSource('outside-mask-src')) map.removeSource('outside-mask-src');
-    if(map.getSource('index-source')) map.removeSource('index-source');
+    if(map.getLayer('ndvi-layer')) map.removeLayer('ndvi-layer');
+    if(map.getSource('ndvi-source')) map.removeSource('ndvi-source');
+    if(map.getLayer('mask-layer')) map.removeLayer('mask-layer');
+    if(map.getSource('mask-source')) map.removeSource('mask-source');
+    if(map.getLayer('farm-source-layer')) map.removeLayer('farm-source-layer');
+    if(map.getSource('farm-geom')) map.removeSource('farm-geom');
 
-    map.addSource('index-source',{ type:'raster', tiles:[tileUrl], tileSize:256 });
-
-    // Add NDVI raster below farm polygon
-    map.addLayer({ id:'index-layer', type:'raster', source:'index-source',
-      paint:{ 'raster-opacity': 0.85 }
-    }, 'farm-fill');
-
-    // Mask everything outside farm polygon with satellite
-    // by adding a white/opaque fill over the world minus the farm
-    const outerRing = [[-180,-90],[-180,90],[180,90],[180,-90],[-180,-90]];
-    const farmRing  = farmGeojson.coordinates[0];
-    const maskFeature = {
-      type:'Feature',
-      geometry:{ type:'Polygon', coordinates:[outerRing, farmRing] }
-    };
-    map.addSource('outside-mask-src',{ type:'geojson', data:maskFeature });
-    map.addLayer({
-      id:'outside-mask',
-      type:'fill',
-      source:'outside-mask-src',
-      paint:{ 'fill-color':'rgba(0,0,0,0)', 'fill-opacity':1 }
+    // Add NDVI tiles
+    map.addSource('ndvi-source',{ type:'raster', tiles:[tileUrl], tileSize:256 });
+    map.addLayer({ id:'ndvi-layer', type:'raster', source:'ndvi-source',
+      paint:{ 'raster-opacity':0.85 }
     });
 
-    // Re-add satellite on top of NDVI outside farm
-    if(!map.getSource('sat2')){
-      map.addSource('sat2',{
-        type:'raster',
-        tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-        tileSize:256
-      });
-    }
-    if(!map.getLayer('sat2-layer')){
-      map.addLayer({ id:'sat2-layer', type:'raster', source:'sat2',
-        paint:{ 'raster-opacity':1 }
-      }, 'index-layer');
-    }
+    // Add farm polygon source
+    map.addSource('farm-geom',{ type:'geojson', data:{ type:'Feature', geometry:farmGeojson }});
 
-    updateLegend(currentIndex);
-
-    // Also fetch NDVI value for this snapshot
-    if(currentIndex === 'ndvi'){
-      fetchNdviValue(start, end);
-    }
+    // Mask everything outside farm — inverse polygon
+    const outerRing = [[-180,-90],[-180,90],[180,90],[180,-90],[-180,-90]];
+    const farmRing  = farmGeojson.coordinates[0];
+    const maskFeature = { type:'Feature', geometry:{ type:'Polygon', coordinates:[outerRing, farmRing] }};
+    map.addSource('mask-source',{ type:'geojson', data:maskFeature });
+    map.addLayer({ id:'mask-layer', type:'fill', source:'mask-source',
+      paint:{ 'fill-color':'rgba(247,250,247,0.92)', 'fill-opacity':1 }
+    });
 
     hideLoading();
-  } catch(e){
-    hideLoading();
-    console.error(e);
-  }
+    fetchNdviValue(start, end);
+  } catch(e){ hideLoading(); console.error(e); }
 }
 
 async function fetchNdviValue(start, end){
   try{
     const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body:JSON.stringify({ geometry: farmGeojson, start: start, end: end })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ geometry:farmGeojson, start, end })
     });
     const data = await res.json();
     if(data.status==='ok'){
-      const ndvi = data.indices.ndvi;
-      const label = data.indices.ndvi_label;
+      const ndvi=data.indices.ndvi, label=data.indices.ndvi_label;
       $('ndvi-val').textContent = ndvi ? ndvi.toFixed(2) : '—';
       const cls = label==='Healthy'?'status-healthy':label==='Moderate'?'status-moderate':'status-stressed';
-      $('ndvi-label').textContent = label || '—';
-      $('ndvi-label').className = 'status-card-desc ' + cls;
-      trendData[`${start.slice(0,7)}`] = ndvi;
+      $('ndvi-label').textContent = label||'—';
+      $('ndvi-label').className = 'status-card-desc '+cls;
     }
   } catch(e){ console.error(e); }
 }
 
+// ── TREND ──
 async function loadTrend(){
-  // Load NDVI for same month across last 5 years
-  const month = $('sel-month').value;
-  const currentYear = now.getFullYear();
-  const years = [];
-  for(let y=currentYear-4; y<=currentYear; y++) years.push(y);
+  if(!farmGeojson) return;
+  const month=$('sel-month').value;
+  const years=[];
+  for(let y=now.getFullYear()-4;y<=now.getFullYear();y++) years.push(y);
 
-  const promises = years.map(async y => {
-    const start = `${y}-${month}-01`;
-    const end   = `${y}-${month}-28`;
+  const results = await Promise.all(years.map(async y=>{
     try{
       const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body:JSON.stringify({ geometry: farmGeojson, start: start, end: end })
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ geometry:farmGeojson, start:`${y}-${month}-01`, end:`${y}-${month}-28` })
       });
       const data = await res.json();
-      return { year: y, ndvi: data.status==='ok' ? data.indices.ndvi : null };
-    } catch(e){ return { year: y, ndvi: null }; }
-  });
+      return { year:y, ndvi: data.status==='ok'?data.indices.ndvi:null };
+    } catch(e){ return { year:y, ndvi:null }; }
+  }));
 
-  const results = await Promise.all(promises);
   renderTrendChart(results);
   computeTrendSummary(results);
   generateAdvisory(results);
 }
 
 function renderTrendChart(results){
-  const bars = $('trend-bars');
-  bars.innerHTML = '';
-  const vals = results.map(r=>r.ndvi).filter(v=>v!==null);
-  const maxVal = vals.length ? Math.max(...vals) : 1;
-
+  const bars=$('trend-bars'); bars.innerHTML='';
+  const vals=results.map(r=>r.ndvi).filter(v=>v!==null);
+  const maxVal=vals.length?Math.max(...vals):1;
   results.forEach(r=>{
-    const pct = r.ndvi ? (r.ndvi / maxVal)*100 : 5;
-    const color = r.ndvi
-      ? (r.ndvi>=0.6?'#28b858':r.ndvi>=0.4?'#e07820':'#e04030')
-      : '#c8dcc8';
-    const wrap = document.createElement('div');
-    wrap.className = 'trend-bar-wrap';
-    wrap.innerHTML = `
-      <div class="trend-bar-val">${r.ndvi ? r.ndvi.toFixed(2) : '—'}</div>
+    const pct=r.ndvi?(r.ndvi/maxVal)*100:5;
+    const color=r.ndvi?(r.ndvi>=0.6?'#28b858':r.ndvi>=0.4?'#e07820':'#e04030'):'#c8dcc8';
+    const wrap=document.createElement('div'); wrap.className='trend-bar-wrap';
+    wrap.innerHTML=`<div class="trend-bar-val">${r.ndvi?r.ndvi.toFixed(2):'—'}</div>
       <div class="trend-bar" style="height:${pct}%;background:${color}"></div>
-      <div class="trend-bar-label">${r.year}</div>
-    `;
+      <div class="trend-bar-label">${r.year}</div>`;
     bars.appendChild(wrap);
   });
 }
 
 function computeTrendSummary(results){
-  const valid = results.filter(r=>r.ndvi!==null);
-  if(valid.length < 2){ $('trend-val').textContent='—'; $('trend-label').textContent='Not enough data'; return; }
-
-  const first = valid[0].ndvi;
-  const last  = valid[valid.length-1].ndvi;
-  const change = ((last-first)/first*100).toFixed(1);
-  const improving = last > first;
-
-  $('trend-val').textContent = (improving?'+':'')+change+'%';
-  $('trend-label').textContent = improving ? 'Improving over 5yrs' : 'Declining over 5yrs';
-  $('trend-val').style.color = improving ? 'var(--green)' : 'var(--red)';
+  const valid=results.filter(r=>r.ndvi!==null);
+  if(valid.length<2){ $('trend-val').textContent='—'; $('trend-label').textContent='Not enough data'; return; }
+  const change=((valid[valid.length-1].ndvi-valid[0].ndvi)/valid[0].ndvi*100).toFixed(1);
+  const up=parseFloat(change)>0;
+  $('trend-val').textContent=(up?'+':'')+change+'%';
+  $('trend-val').style.color=up?'var(--green)':'var(--red)';
+  $('trend-label').textContent=up?'Improving over 5yrs':'Declining over 5yrs';
 }
 
-function generateAdvisory(trendResults){
-  $('advisory-text').innerHTML = '<span class="advisory-loading">Analysing your farm data…</span>';
-
-  const valid = trendResults.filter(r=>r.ndvi!==null);
-  if(!valid.length){
-    $('advisory-text').textContent = 'Not enough satellite data yet. Check back after your first growing season on SavannahIQ.';
-    return;
-  }
-
-  const latestNdvi = valid[valid.length-1].ndvi;
-  const firstNdvi  = valid[0].ndvi;
-  const change     = ((latestNdvi - firstNdvi) / firstNdvi) * 100;
-  const trend      = change > 5 ? 'improving' : change < -5 ? 'declining' : 'stable';
-
-  setTimeout(()=> fallbackAdvisory(trend, latestNdvi, change), 800);
-}
-
-function fallbackAdvisory(trend, ndvi, change){
-  const crop = farmer.primary_crop || 'your crop';
-  const changeAbs = Math.abs(change).toFixed(0);
-
-  let text = '';
-
-  if(trend === 'declining'){
-    if(ndvi < 0.3){
-      text = `Your farm's crop health is critically low and has dropped ${changeAbs}% over 5 years. This points to serious soil degradation. Stop planting ${crop} alone — rotate with beans or cowpeas for at least one season to restore nitrogen. Add compost or manure before the next planting and consider contacting your local extension officer.`;
-    } else {
-      text = `Your farm's crop health has declined ${changeAbs}% over the past 5 years. To reverse this, try intercropping ${crop} with legumes like beans which fix nitrogen back into the soil. Vary your planting positions each season and avoid leaving the soil bare between seasons.`;
-    }
-  } else if(trend === 'improving'){
-    text = `Your farm is improving — crop health is up ${changeAbs}% over 5 years. Keep up your current practices. To maintain this momentum, continue with timely planting at the onset of rains and consider adding a second crop variety alongside ${crop} to reduce risk if one fails.`;
+function generateAdvisory(results){
+  const valid=results.filter(r=>r.ndvi!==null);
+  if(!valid.length){ $('advisory-text').textContent='Not enough data yet.'; return; }
+  const latest=valid[valid.length-1].ndvi, first=valid[0].ndvi;
+  const change=((latest-first)/first)*100;
+  const trend=change>5?'improving':change<-5?'declining':'stable';
+  const changeAbs=Math.abs(change).toFixed(0);
+  const crop=farmer.primary_crop||'your crop';
+  let text='';
+  if(trend==='declining'){
+    if(latest<0.3) text=`Your farm's crop health is critically low and has dropped ${changeAbs}% over 5 years. Rotate with beans or cowpeas for at least one season to restore soil nitrogen. Add compost before the next planting and consider consulting your local extension officer.`;
+    else text=`Your farm's crop health has declined ${changeAbs}% over 5 years. Try intercropping ${crop} with legumes like beans which fix nitrogen back into the soil. Vary your planting positions each season.`;
+  } else if(trend==='improving'){
+    text=`Your farm is improving — crop health is up ${changeAbs}% over 5 years. Keep up your current practices and consider adding a second variety alongside ${crop} to reduce risk if one fails.`;
   } else {
-    if(ndvi >= 0.6){
-      text = `Your farm is healthy and stable. To push yields higher, try intercropping ${crop} with beans or cowpeas which add nitrogen to the soil naturally. Ensure you plant at the right time and maintain consistent spacing for better sunlight and airflow.`;
-    } else {
-      text = `Your farm health is stable but there is room to improve. Consider intercropping ${crop} with drought-tolerant varieties and apply organic matter before planting. Consistent timing with the rains and proper spacing will help lift your yields this season.`;
+    text=latest>=0.6
+      ?`Your farm is healthy and stable. To push yields higher, try intercropping ${crop} with beans which add nitrogen naturally. Ensure timely planting at the onset of rains.`
+      :`Your farm health is stable but there is room to improve. Apply organic matter before planting and ensure proper spacing for better airflow and sunlight.`;
+  }
+  $('advisory-text').textContent=text;
+}
+
+// ── FARM PICKER ──
+function openPicker(){
+  $('map-picker').classList.add('show');
+  document.body.style.overflow='hidden';
+  if(!pickerMapInit) initPickerMap();
+}
+
+function closePicker(){
+  $('map-picker').classList.remove('show');
+  document.body.style.overflow='';
+}
+
+function initPickerMap(){
+  pickerMapInit=true;
+  pickerMap = new maplibregl.Map({
+    container:'picker-map',
+    style:{
+      version:8,
+      sources:{ satellite:{ type:'raster',
+        tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize:256 }},
+      layers:[{ id:'satellite', type:'raster', source:'satellite' }]
+    },
+    center:[34.56, 0.57], zoom:11
+  });
+
+  pickerMap.on('load',()=>{
+    pickerMap.addSource('farms',{ type:'geojson', data:{ type:'FeatureCollection', features:[] }});
+    pickerMap.addLayer({ id:'farms-fill', type:'fill', source:'farms',
+      paint:{ 'fill-color':['case',['==',['get','selected'],true],'#28b858','#e8f5ec'],
+              'fill-opacity':['case',['==',['get','selected'],true],0.7,0.4] }
+    });
+    pickerMap.addLayer({ id:'farms-outline', type:'line', source:'farms',
+      paint:{ 'line-color':'#28b858',
+              'line-width':['case',['==',['get','selected'],true],2.5,1] }
+    });
+
+    pickerMap.on('click','farms-fill',e=>{
+      if(!e.features.length) return;
+      const f=e.features[0];
+      selectPickerFarm(f.properties.id, f.properties.farm_id, f.properties.area_ha, null);
+    });
+    pickerMap.on('mouseenter','farms-fill',()=>pickerMap.getCanvas().style.cursor='pointer');
+    pickerMap.on('mouseleave','farms-fill',()=>pickerMap.getCanvas().style.cursor='');
+
+    // Try GPS
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const lat=pos.coords.latitude, lng=pos.coords.longitude;
+        pickerMap.flyTo({ center:[lng,lat], zoom:16 });
+        loadNearbyFarms(lat, lng);
+      },()=>{});
+    }
+  });
+}
+
+async function loadNearbyFarms(lat,lng){
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farms_near_location`,{
+      method:'POST', headers:HEADERS,
+      body:JSON.stringify({ lat, lng, radius_meters:800 })
+    });
+    const data = await res.json();
+    if(!data.length) return;
+    const features=data.map(f=>({ type:'Feature', geometry:JSON.parse(f.geojson),
+      properties:{ id:f.id, farm_id:f.farm_id, area_ha:f.area_ha, selected:false }
+    }));
+    pickerMap.getSource('farms').setData({ type:'FeatureCollection', features });
+  } catch(e){ console.error(e); }
+}
+
+async function fetchByFarmId(){
+  const val=parseInt($('picker-id-input').value);
+  if(isNaN(val)||val<0||val>38359){ alert('Enter a Farm ID between 0 and 38,359'); return; }
+  showLoading('Finding farm…');
+  try{
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
+      method:'POST', headers:HEADERS, body:JSON.stringify({ fid:val })
+    });
+    const data=await res.json();
+    hideLoading();
+    if(!data||!data.length){ alert(`Farm ID ${val} not found.`); return; }
+    const farm=data[0];
+    const parsed=JSON.parse(farm.geojson);
+    const coords=parsed.coordinates[0];
+    const lngs=coords.map(c=>c[0]), lats=coords.map(c=>c[1]);
+    const cLng=(Math.min(...lngs)+Math.max(...lngs))/2;
+    const cLat=(Math.min(...lats)+Math.max(...lats))/2;
+    pickerMap.flyTo({ center:[cLng,cLat], zoom:17, speed:1.4 });
+    pickerMap.getSource('farms').setData({ type:'FeatureCollection', features:[{
+      type:'Feature', geometry:parsed,
+      properties:{ id:farm.id, farm_id:farm.farm_id, area_ha:farm.area_ha, selected:false }
+    }]});
+    selectPickerFarm(farm.id, farm.farm_id, farm.area_ha, farm.geojson);
+  } catch(e){ hideLoading(); alert('Error finding farm.'); }
+}
+
+function selectPickerFarm(id, farmId, areaHa, geojson){
+  selectedFarm={ id, farmId, areaHa, geojsonStr:geojson };
+  const src=pickerMap.getSource('farms');
+  if(src){
+    const d=src._data;
+    if(d&&d.features){
+      d.features=d.features.map(f=>({ ...f, properties:{ ...f.properties, selected:f.properties.id===id }}));
+      src.setData(d);
     }
   }
-
-  $('advisory-text').textContent = text;
+  $('picker-farm-info').classList.add('has-farm');
+  $('picker-dot').classList.add('active');
+  $('picker-farm-text').textContent=`Farm #${farmId} · ${areaHa?areaHa.toFixed(2)+' ha':'—'}`;
+  $('btn-confirm-farm').disabled=false;
 }
 
-function setIndex(index, btn){
-  currentIndex = index;
-  document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  loadSnapshot();
-}
+async function confirmFarm(){
+  if(!selectedFarm) return;
+  showLoading('Saving your farm…');
 
-function updateLegend(index){
-  const legends = {
-    ndvi:     { title:'NDVI — Vegetation Health', gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Low', high:'High' },
-    drought:  { title:'Drought Score', gradient:'linear-gradient(to right,#28b858,#e07820,#e04030)', low:'Stable', high:'Critical' },
-    rainfall: { title:'Rainfall (mm)', gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Dry', high:'Wet' },
-    soil:     { title:'Soil Moisture', gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Dry', high:'Moist' },
-  };
-  const l = legends[index] || legends.ndvi;
-  $('legend-title').textContent = l.title;
-  $('legend-bar').style.background = l.gradient;
-  $('legend-labels').innerHTML = `<span>${l.low}</span><span>${l.high}</span>`;
+  // Fetch full geojson if we only have id
+  let geojson = selectedFarm.geojsonStr;
+  if(!geojson){
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
+      method:'POST', headers:HEADERS, body:JSON.stringify({ fid:selectedFarm.id })
+    });
+    const data=await res.json();
+    if(data&&data.length) geojson=data[0].geojson;
+  }
+
+  farmGeojson=JSON.parse(geojson);
+
+  // Save farm_id to farmers table
+  try{
+    await fetch(`${SUPABASE_URL}/rest/v1/farmers?phone=eq.${encodeURIComponent(farmer.phone)}`,{
+      method:'PATCH',
+      headers:{ ...HEADERS, 'Prefer':'return=minimal' },
+      body:JSON.stringify({ farm_id:selectedFarm.id, area_ha:selectedFarm.areaHa })
+    });
+  } catch(e){ console.error('Could not save farm_id'); }
+
+  farmer.farm_id=selectedFarm.id;
+  farmer.area_ha=selectedFarm.areaHa;
+
+  hideLoading();
+  closePicker();
+  showFarmOnDashboard();
 }
 </script>
 </body>
