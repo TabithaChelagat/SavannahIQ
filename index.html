@@ -80,42 +80,60 @@ nav{
 .hero{
   position:relative;min-height:100vh;
   display:flex;flex-direction:column;
-  align-items:flex-start;justify-content:flex-end;
-  padding:0 0 80px 0;overflow:hidden;
+  align-items:center;justify-content:center;
+  text-align:center;
+  overflow:hidden;
   margin-top:64px;
 }
 .hero-img{
   position:absolute;inset:0;z-index:0;
-  background:linear-gradient(160deg,#1a3d1a 0%,#0d2b12 40%,#2d5a2d 100%);
-  /* REPLACE WITH: background-image:url('your-hero-image.jpg');background-size:cover;background-position:center; */
-  display:flex;align-items:center;justify-content:center;
-}
-.hero-img-placeholder{
-  font-family:'Space Mono',monospace;font-size:11px;
-  color:rgba(255,255,255,0.2);letter-spacing:0.2em;text-transform:uppercase;
 }
 .hero-img img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;
 }
 .hero-overlay{
   position:absolute;inset:0;z-index:1;
-  background:linear-gradient(to top,rgba(8,12,8,0.75) 0%,rgba(8,12,8,0.2) 60%,transparent 100%);
+  background:linear-gradient(to bottom,rgba(8,12,8,0.45) 0%,rgba(8,12,8,0.65) 100%);
 }
 .hero-inner{
   position:relative;z-index:2;
-  padding:0 32px;max-width:700px;
+  padding:0 32px;width:100%;max-width:900px;
 }
 .hero-headline{
   font-family:'DM Sans',sans-serif;font-weight:700;
-  font-size:clamp(52px,10vw,88px);
-  line-height:1;color:var(--white);
-  margin-bottom:20px;letter-spacing:-0.02em;
+  font-size:clamp(56px,9vw,112px);
+  line-height:0.95;color:var(--white);
+  margin-bottom:28px;letter-spacing:-0.03em;
+  text-align:center;
 }
 .hero-tagline{
-  font-size:clamp(15px,2.5vw,18px);line-height:1.6;
-  color:rgba(255,255,255,0.85);max-width:520px;
-  font-weight:400;
+  font-size:clamp(16px,2vw,22px);line-height:1.5;
+  color:rgba(255,255,255,0.88);
+  font-weight:300;max-width:680px;margin:0 auto 48px;
+  text-align:center;
 }
+.hero-btns{
+  display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+}
+
+.hero-btns{
+  display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+}
+.btn-farmer{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  background:var(--green);color:var(--black);
+  padding:16px 36px;border-radius:40px;text-decoration:none;
+  transition:all 0.2s;
+}
+.btn-farmer:hover{background:var(--white)}
+.btn-org{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  background:transparent;color:var(--white);
+  padding:16px 36px;border-radius:40px;text-decoration:none;
+  border:2px solid rgba(255,255,255,0.5);
+  transition:all 0.2s;
+}
+.btn-org:hover{border-color:var(--white);background:rgba(255,255,255,0.1)}
 
 /* TWO AUDIENCE CARDS */
 .audience{
@@ -335,24 +353,24 @@ footer{
 .about-back:hover{color:var(--green)}
 
 .about-hero{
-  padding:48px 32px 64px;border-bottom:1px solid #e0ebe0;
+  padding:80px 48px 64px;border-bottom:1px solid #e0ebe0;
   background:var(--offwhite);
 }
-.about-hero-inner{max-width:800px;margin:0 auto}
+.about-hero-inner{max-width:900px;margin:0 auto}
 .about-tag{
   font-family:'Space Mono',monospace;font-size:10px;color:var(--green);
   text-transform:uppercase;letter-spacing:0.2em;margin-bottom:20px;
 }
 .about-title{
   font-family:'DM Sans',sans-serif;font-weight:700;
-  font-size:clamp(48px,8vw,80px);
-  color:var(--text);line-height:0.95;margin-bottom:20px;
+  font-size:clamp(56px,7vw,96px);
+  color:var(--text);line-height:0.95;margin-bottom:24px;letter-spacing:-0.02em;
 }
 .about-title span{color:var(--green)}
 .about-sub{
-  font-size:17px;color:#3a5a3a;line-height:1.75;max-width:560px;
+  font-size:18px;color:#3a5a3a;line-height:1.7;max-width:640px;
 }
-.about-body{max-width:800px;margin:0 auto;padding:64px 32px}
+.about-body{max-width:900px;margin:0 auto;padding:72px 48px}
 .about-section{margin-bottom:56px}
 .about-section-label{
   font-family:'Space Mono',monospace;font-size:10px;color:var(--green);
@@ -424,50 +442,25 @@ footer{
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-img" id="hero-img">
-      <img src="img-kenya-ndvi.png" alt="Kenya NDVI satellite view">
+    <div class="hero-img">
+      <img src="img-hero-farm.png" alt="African farmland from satellite">
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-inner">
-      <h1 class="hero-headline" style="text-align:center">Land<br>Surveillance<br>for Africa</h1>
-      <p class="hero-tagline" style="text-align:center">
+      <h1 class="hero-headline">Land<br>Surveillance<br>for Africa</h1>
+      <p class="hero-tagline">
         From space to the shamba — satellite intelligence that tells farmers what their land needs and tells organisations where to act
       </p>
+      <div class="hero-btns">
+        <a href="shamba.html" class="btn-farmer">I'm a Farmer →</a>
+        <a href="dashboard.html" class="btn-org">I'm an Organisation →</a>
+      </div>
     </div>
   </section>
 
-  <!-- TWO AUDIENCE CARDS -->
-  <div class="audience">
-
-    <a href="shamba.html" class="aud-card">
-      <div class="aud-farmer-img" id="farmer-img">
-      </div>
-      <div class="aud-farmer-overlay"></div>
-      <div class="aud-inner">
-        <div class="aud-label">For smallholder farmers</div>
-        <div class="aud-title">I'm a Farmer</div>
-        <p class="aud-desc">Get satellite intelligence for your specific farm — crop health, soil moisture and personalised advice every season.</p>
-        <div class="aud-btn">Register your farm →</div>
-      </div>
-    </a>
-
-    <a href="dashboard.html" class="aud-card">
-      <div class="aud-org-img" id="org-img">
-      </div>
-      <div class="aud-org-overlay"></div>
-      <div class="aud-inner">
-        <div class="aud-label">For governments, NGOs & research</div>
-        <div class="aud-title">I'm an Organisation</div>
-        <p class="aud-desc">Land intelligence across all 47 counties of Kenya — monitor drought, vegetation health and crop stress updated every 30 days from satellite data.</p>
-        <div class="aud-btn">Open dashboard →</div>
-      </div>
-    </a>
-
-  </div>
-
-  <!-- BETWEEN PHOTO -->
-  <div class="between-photo" id="between-photo">
-    <img src="img-lulc.png" alt="Kenya land cover classification">
+  <!-- NDVI IMAGE after hero -->
+  <div class="between-photo">
+    <img src="img-trans-nzoia.png" alt="Trans Nzoia NDVI satellite view">
   </div>
 
   <!-- WHAT WE DO -->
@@ -507,16 +500,14 @@ footer{
     </div>
   </div>
 
-  <!-- COUNTY IMAGE -->
+  <!-- LULC IMAGE before founder quote -->
   <div class="between-photo" style="aspect-ratio:16/8">
-    <img src="img-trans-nzoia.png" alt="County satellite intelligence">
+    <img src="img-lulc-kenya.png" alt="Kenya land cover classification">
   </div>
 
   <!-- FOUNDER QUOTE -->
   <section class="founder">
-    <div class="founder-bg" id="founder-bg">
-      <img src="img-isiolo-rain.png" alt="Isiolo rainfall intelligence">
-    </div>
+    <div class="founder-bg" style="background:linear-gradient(135deg,#0d2b12 0%,#1a4a2a 50%,#0d2b12 100%)"></div>
     <div class="founder-overlay"></div>
     <div class="founder-inner">
       <span class="founder-quote-mark">"</span>
