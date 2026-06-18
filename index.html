@@ -425,13 +425,12 @@ footer{
   <!-- HERO -->
   <section class="hero">
     <div class="hero-img" id="hero-img">
-      <!-- REPLACE COMMENT BELOW WITH: <img src="hero-farm.jpg" alt="Aerial farm view"> -->
-      <div class="hero-img-placeholder">Hero image — aerial farm / satellite view</div>
+      <img src="img-kenya-ndvi.png" alt="Kenya NDVI satellite view">
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-inner">
-      <h1 class="hero-headline">Land<br>Surveillance<br>for Africa</h1>
-      <p class="hero-tagline">
+      <h1 class="hero-headline" style="text-align:center">Land<br>Surveillance<br>for Africa</h1>
+      <p class="hero-tagline" style="text-align:center">
         From space to the shamba — satellite intelligence that tells farmers what their land needs and tells organisations where to act
       </p>
     </div>
@@ -442,7 +441,6 @@ footer{
 
     <a href="shamba.html" class="aud-card">
       <div class="aud-farmer-img" id="farmer-img">
-        <!-- REPLACE WITH: <img src="farmer.jpg" alt="Farmer in field"> -->
       </div>
       <div class="aud-farmer-overlay"></div>
       <div class="aud-inner">
@@ -455,7 +453,6 @@ footer{
 
     <a href="dashboard.html" class="aud-card">
       <div class="aud-org-img" id="org-img">
-        <!-- REPLACE WITH: <img src="org.jpg" alt="Organisation team"> -->
       </div>
       <div class="aud-org-overlay"></div>
       <div class="aud-inner">
@@ -470,8 +467,7 @@ footer{
 
   <!-- BETWEEN PHOTO -->
   <div class="between-photo" id="between-photo">
-    <!-- REPLACE WITH: <img src="between.jpg" alt="Farms from above"> -->
-    <div class="between-photo-placeholder">Photo — farms / landscape / satellite view</div>
+    <img src="img-lulc.png" alt="Kenya land cover classification">
   </div>
 
   <!-- WHAT WE DO -->
@@ -511,11 +507,15 @@ footer{
     </div>
   </div>
 
+  <!-- COUNTY IMAGE -->
+  <div class="between-photo" style="aspect-ratio:16/8">
+    <img src="img-trans-nzoia.png" alt="County satellite intelligence">
+  </div>
+
   <!-- FOUNDER QUOTE -->
   <section class="founder">
     <div class="founder-bg" id="founder-bg">
-      <!-- REPLACE WITH: <img src="tabitha.jpg" alt="Tabitha Chelagat"> -->
-      <div class="founder-bg-placeholder">Founder photo — Tabitha Chelagat</div>
+      <img src="img-isiolo-rain.png" alt="Isiolo rainfall intelligence">
     </div>
     <div class="founder-overlay"></div>
     <div class="founder-inner">
@@ -566,13 +566,14 @@ footer{
       <h3>Decisions made in the dark</h3>
       <p>Africa's governments, food agencies and agricultural organisations are making decisions worth hundreds of billions of dollars based on data that is coarse, delayed and incomplete. Drought declarations come weeks after crops fail. Aid arrives after hunger sets in.</p>
       <p>At the farm level it is worse. By the time a smallholder farmer knows something is wrong, the window to act has already closed. The land was sending signals weeks earlier — but nobody was reading them.</p>
+      <p>Agricultural insurers face the same blindness from a different angle. A farmer files a drought claim months after the event and there is no independent record of what actually happened on that land during that period. Insurers either pay out on faith or reject claims they cannot verify. Both erode the business — and neither serves the farmer.</p>
     </div>
 
     <div class="about-section">
       <div class="about-section-label">What we built</div>
       <h3>Intelligence at every scale</h3>
       <p>SavannahIQ processes Sentinel-2 satellite data at 10-metre resolution — updated every 30 days — and delivers it as six actionable intelligence layers: vegetation health, land cover, drought score, rainfall, soil moisture and crop classification.</p>
-      <p>For organisations, this means early warning at county and sub-county level before a crisis. For farmers, this means knowing the health of their specific plot, how it has changed season by season, and what to do next.</p>
+      <p>For organisations, this means early warning at county and sub-county level before a crisis. For farmers, this means knowing the health of their specific plot, how it has changed season by season, and what to do next. For insurers, every registered farm has a continuous satellite record — when a claim is filed, the data for that specific polygon during that specific period already exists.</p>
     </div>
 
     <div class="about-section">
@@ -580,6 +581,12 @@ footer{
       <h3>Bungoma first</h3>
       <p>We began in Bungoma County, Western Kenya — digitising 38,360 individual farm boundaries against high-resolution satellite imagery. Every farm boundary is now stored and ready for farm-level intelligence delivery through the Shamba Portal.</p>
       <p>Bungoma is the proof of concept. The methodology, pipeline and intelligence framework is built to replicate across every county in Kenya and ultimately across the continent.</p>
+      <div style="margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid #e0ebe0">
+        <img src="img-bungoma-farms.png" alt="38,360 farm boundaries digitised in Bungoma County" style="width:100%;display:block">
+        <div style="padding:10px 14px;background:var(--offwhite);font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">
+          38,360 farm boundaries digitised in Bungoma County · SavannahIQ 2026
+        </div>
+      </div>
     </div>
 
     <div class="about-section">
@@ -622,6 +629,7 @@ footer{
             <option>Research institution</option>
             <option>Development finance / Funder</option>
             <option>NGO / Field programme</option>
+            <option>Agricultural insurer</option>
             <option>Private sector</option>
             <option>Other</option>
           </select>
