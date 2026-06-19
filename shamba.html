@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SavannahIQ — Register</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -22,7 +24,6 @@ nav{
 .nav-logo span{color:var(--green);font-style:italic}
 .nav-back{font-size:11px;color:rgba(255,255,255,0.6);text-decoration:none;
   font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
-.nav-back:hover{color:var(--green)}
 
 .wrap{max-width:480px;margin:0 auto;padding:36px 24px 60px}
 .page-title{font-weight:700;font-size:26px;color:var(--dkgreen);margin-bottom:6px}
@@ -40,23 +41,73 @@ nav{
 .field select{appearance:none;cursor:pointer}
 .field input::placeholder{color:#b0c4b0}
 
-.btn-register{
+/* LOCATION FIELD */
+.location-field{
+  width:100%;background:var(--white);border:1.5px solid var(--border);
+  border-radius:10px;padding:13px 14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:border .2s;
+}
+.location-field:hover,.location-field.selected{border-color:var(--green)}
+.location-field.selected{background:var(--ltgreen)}
+.location-left{display:flex;align-items:center;gap:10px}
+.location-text{font-size:15px;color:#b0c4b0;font-family:'DM Sans',sans-serif}
+.location-text.selected{color:var(--dkgreen);font-weight:500}
+
+.btn-primary{
   width:100%;padding:16px;background:var(--green);color:var(--white);
   font-family:'DM Sans',sans-serif;font-weight:700;font-size:16px;
-  border:none;border-radius:40px;cursor:pointer;margin-top:8px;
-  transition:background .2s;
+  border:none;border-radius:40px;cursor:pointer;margin-top:8px;transition:background .2s;
 }
-.btn-register:hover{background:var(--dkgreen)}
-.btn-register:disabled{opacity:.4;cursor:not-allowed}
-
-.btn-login{
-  display:block;text-align:center;margin-top:14px;
-  padding:14px;background:transparent;border:1.5px solid var(--border);
-  border-radius:40px;color:var(--dkgreen);font-family:'DM Sans',sans-serif;
-  font-weight:700;font-size:15px;text-decoration:none;transition:border .2s;
+.btn-primary:hover{background:var(--dkgreen)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-outline{
+  display:block;text-align:center;margin-top:14px;padding:14px;
+  background:transparent;border:1.5px solid var(--border);border-radius:40px;
+  color:var(--dkgreen);font-family:'DM Sans',sans-serif;font-weight:700;
+  font-size:15px;text-decoration:none;transition:border .2s;
 }
-.btn-login:hover{border-color:var(--green)}
+.btn-outline:hover{border-color:var(--green)}
 
+/* MAP PICKER */
+.map-picker{display:none;position:fixed;inset:0;z-index:200;flex-direction:column;background:var(--offwhite)}
+.map-picker.show{display:flex}
+.picker-nav{background:var(--dkgreen);padding:0 20px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.picker-nav-title{font-weight:700;font-size:15px;color:var(--white)}
+.picker-close{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.7);
+  background:none;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:.1em}
+.picker-hint{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:12px 16px;font-size:12px;color:var(--muted);text-align:center;flex-shrink:0;
+  line-height:1.5;
+}
+.picker-hint strong{color:var(--dkgreen)}
+#picker-map{flex:1;width:100%}
+.picker-bottom{
+  background:var(--white);border-top:1px solid var(--border);
+  padding:16px 20px;flex-shrink:0;
+}
+.picker-info{font-size:13px;color:var(--muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px}
+.picker-info.has-pin{color:var(--dkgreen);font-weight:500}
+.picker-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
+.picker-dot.active{background:var(--green)}
+.btn-confirm{width:100%;padding:14px;background:var(--green);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+  border:none;border-radius:40px;cursor:pointer;transition:background .2s}
+.btn-confirm:disabled{opacity:.4;cursor:not-allowed}
+.btn-confirm:not(:disabled):hover{background:var(--dkgreen)}
+
+/* GPS BTN */
+.btn-gps{
+  width:100%;padding:12px;background:var(--dkgreen);color:var(--white);
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;
+  border:none;border-radius:8px;cursor:pointer;margin-bottom:12px;transition:background .2s;
+}
+.btn-gps:hover{background:var(--green)}
+
+/* SUCCESS */
 .success-wrap{display:none;text-align:center;padding:48px 0}
 .success-wrap.show{display:block}
 .success-icon{width:72px;height:72px;border-radius:50%;background:var(--ltgreen);
@@ -64,11 +115,9 @@ nav{
   font-size:32px;margin:0 auto 20px}
 .success-title{font-weight:700;font-size:26px;color:var(--dkgreen);margin-bottom:10px}
 .success-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px}
-.btn-dashboard{
-  display:inline-block;padding:14px 32px;background:var(--green);color:var(--white);
+.btn-dashboard{display:inline-block;padding:14px 32px;background:var(--green);color:var(--white);
   font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
-  border-radius:40px;text-decoration:none;transition:background .2s;
-}
+  border-radius:40px;text-decoration:none;transition:background .2s}
 .btn-dashboard:hover{background:var(--dkgreen)}
 
 .loading{position:fixed;inset:0;background:rgba(247,250,247,0.9);
@@ -78,13 +127,15 @@ nav{
   border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:13px;color:var(--muted)}
+.err-msg{display:none;margin-top:16px;padding:14px;background:#fff3f3;
+  border:1px solid #ffcccc;border-radius:10px;font-size:13px;color:var(--red)}
 </style>
 </head>
 <body>
 
 <div class="loading" id="loading">
   <div class="spinner"></div>
-  <div class="loading-text" id="loading-text">Registering…</div>
+  <div class="loading-text" id="loading-text">Loading…</div>
 </div>
 
 <nav>
@@ -123,73 +174,190 @@ nav{
       </select>
     </div>
 
-    <button class="btn-register" id="btn-register" onclick="register()">
+    <div class="field">
+      <label>Farm Location</label>
+      <div class="location-field" id="location-field" onclick="openPicker()">
+        <div class="location-left">
+          <span style="font-size:18px">📍</span>
+          <span class="location-text" id="location-text">Tap to pin your farm on the map</span>
+        </div>
+        <span style="color:var(--muted);font-size:14px">›</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-register" disabled onclick="register()">
       Register Farm
     </button>
-
-    <a href="farmer-dashboard.html" class="btn-login">Already registered? Log in →</a>
-
-    <div id="err-msg" style="display:none;margin-top:16px;padding:14px;background:#fff3f3;
-      border:1px solid #ffcccc;border-radius:10px;font-size:13px;color:var(--red)"></div>
+    <a href="farmer-dashboard.html" class="btn-outline">Already registered? Log in →</a>
+    <div class="err-msg" id="err-msg"></div>
   </div>
 
   <div class="success-wrap" id="success-wrap">
     <div class="success-icon">🌱</div>
     <div class="success-title">You're registered!</div>
-    <div class="success-sub">Your account is ready. Now go to your farm dashboard to select your farm location and start getting satellite intelligence.</div>
+    <div class="success-sub">Your farm is on SavannahIQ. Go to your dashboard to see your land's satellite health data every season.</div>
     <a href="farmer-dashboard.html" class="btn-dashboard">Go to my farm dashboard →</a>
+    <a href="index.html" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--muted);text-decoration:none">Back to home</a>
   </div>
 
+</div>
+
+<!-- MAP PICKER -->
+<div class="map-picker" id="map-picker">
+  <div class="picker-nav">
+    <div class="picker-nav-title">Pin your farm location</div>
+    <button class="picker-close" onclick="closePicker()">✕ Cancel</button>
+  </div>
+  <div class="picker-hint">
+    <strong>Tap anywhere on the map</strong> to drop a pin on your farm, or use GPS to go to your location
+  </div>
+  <div id="picker-map"></div>
+  <div class="picker-bottom">
+    <button class="btn-gps" onclick="useGPS()">📍 Use my GPS location</button>
+    <div class="picker-info" id="picker-info">
+      <div class="picker-dot" id="picker-dot"></div>
+      <span id="picker-text">No location selected yet</span>
+    </div>
+    <button class="btn-confirm" id="btn-confirm" disabled onclick="confirmLocation()">
+      Confirm this location →
+    </button>
+  </div>
 </div>
 
 <script>
 const SUPABASE_URL = 'https://alcsddfvcczxgjijnpwt.supabase.co';
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsY3NkZGZ2Y2N6eGdqaWpucHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTE1NjUsImV4cCI6MjA5NjEyNzU2NX0.O37lDC45hlr9ul9q-6_1LEv91SZa8VuDTso83gVnjV4';
-const HEADERS = { 'apikey':ANON,'Authorization':'Bearer '+ANON,'Content-Type':'application/json','Prefer':'return=minimal' };
+const HEADERS = {'apikey':ANON,'Authorization':'Bearer '+ANON,'Content-Type':'application/json','Prefer':'return=minimal'};
 
-function showLoading(t){ document.getElementById('loading').classList.add('show'); document.getElementById('loading-text').textContent=t; }
-function hideLoading(){ document.getElementById('loading').classList.remove('show'); }
+const $ = id => document.getElementById(id);
+let pickerMap, pickerMapInit = false, pinMarker = null;
+let selectedLat = null, selectedLng = null;
+
+function showLoading(t){ $('loading').classList.add('show'); $('loading-text').textContent=t; }
+function hideLoading(){ $('loading').classList.remove('show'); }
+
+function checkReady(){
+  const name=$('f-name').value.trim(), phone=$('f-phone').value.trim(), crop=$('f-crop').value;
+  $('btn-register').disabled = !(name&&phone&&crop&&selectedLat);
+}
+['f-name','f-phone','f-crop'].forEach(id=>$(id).addEventListener('input',checkReady));
+
+// MAP PICKER
+function openPicker(){
+  $('map-picker').classList.add('show');
+  document.body.style.overflow='hidden';
+  if(!pickerMapInit) initPickerMap();
+}
+function closePicker(){
+  $('map-picker').classList.remove('show');
+  document.body.style.overflow='';
+}
+
+function initPickerMap(){
+  pickerMapInit=true;
+  pickerMap = new maplibregl.Map({
+    container:'picker-map',
+    style:{
+      version:8,
+      sources:{ satellite:{ type:'raster',
+        tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize:256 }},
+      layers:[{ id:'satellite', type:'raster', source:'satellite' }]
+    },
+    center:[34.56, 0.57], zoom:11
+  });
+
+  // Tap to drop pin
+  pickerMap.on('click', e=>{
+    const { lng, lat } = e.lngLat;
+    dropPin(lat, lng);
+  });
+
+  // Try GPS on open
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      pickerMap.flyTo({ center:[pos.coords.longitude, pos.coords.latitude], zoom:15 });
+    },()=>{});
+  }
+}
+
+function useGPS(){
+  if(!navigator.geolocation){ alert('GPS not available.'); return; }
+  showLoading('Getting your location…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    hideLoading();
+    const lat=pos.coords.latitude, lng=pos.coords.longitude;
+    pickerMap.flyTo({ center:[lng,lat], zoom:16 });
+    dropPin(lat, lng);
+  },()=>{ hideLoading(); alert('Could not get location. Tap your farm on the map instead.'); },
+  { enableHighAccuracy:true, timeout:10000 });
+}
+
+function dropPin(lat, lng){
+  selectedLat=lat; selectedLng=lng;
+
+  // Remove existing marker
+  if(pinMarker) pinMarker.remove();
+
+  // Add new marker
+  const el = document.createElement('div');
+  el.style.cssText='width:28px;height:28px;background:#28b858;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer';
+  pinMarker = new maplibregl.Marker({ element:el, anchor:'center' })
+    .setLngLat([lng, lat])
+    .addTo(pickerMap);
+
+  $('picker-info').classList.add('has-pin');
+  $('picker-dot').classList.add('active');
+  $('picker-text').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  $('btn-confirm').disabled = false;
+}
+
+function confirmLocation(){
+  if(!selectedLat) return;
+  closePicker();
+  $('location-field').classList.add('selected');
+  $('location-text').classList.add('selected');
+  $('location-text').textContent = `${selectedLat.toFixed(4)}, ${selectedLng.toFixed(4)} · confirmed`;
+  checkReady();
+}
 
 async function register(){
-  const name  = document.getElementById('f-name').value.trim();
-  const phone = document.getElementById('f-phone').value.trim();
-  const crop  = document.getElementById('f-crop').value;
-  const err   = document.getElementById('err-msg');
+  const name=$('f-name').value.trim(), phone=$('f-phone').value.trim(), crop=$('f-crop').value;
+  const err=$('err-msg');
+  err.style.display='none';
 
-  err.style.display = 'none';
-  if(!name||!phone||!crop){ err.textContent='Please fill in all fields.'; err.style.display='block'; return; }
-  if(phone.length < 9){ err.textContent='Please enter a valid phone number.'; err.style.display='block'; return; }
+  if(!name||!phone||!crop||!selectedLat){ err.textContent='Please fill in all fields and pin your location.'; err.style.display='block'; return; }
+  if(phone.length<9){ err.textContent='Please enter a valid phone number.'; err.style.display='block'; return; }
 
   showLoading('Registering your farm…');
-  document.getElementById('btn-register').disabled = true;
+  $('btn-register').disabled=true;
 
   try{
     const res = await fetch(`${SUPABASE_URL}/rest/v1/farmers`,{
       method:'POST', headers:HEADERS,
-      body:JSON.stringify({ name, phone, primary_crop:crop })
+      body:JSON.stringify({ name, phone, primary_crop:crop, lat:selectedLat, lng:selectedLng })
     });
-
     hideLoading();
 
     if(res.ok||res.status===201){
       sessionStorage.setItem('farmer_phone', phone);
-      document.getElementById('form-wrap').style.display = 'none';
-      document.getElementById('success-wrap').classList.add('show');
+      $('form-wrap').style.display='none';
+      $('success-wrap').classList.add('show');
     } else {
-      const e = await res.json();
+      const e=await res.json();
       if(e.code==='23505'){
-        err.innerHTML = 'This phone number is already registered. <a href="farmer-dashboard.html" style="color:var(--green);font-weight:700;text-decoration:none">Log in instead →</a>';
+        err.innerHTML='This phone number is already registered. <a href="farmer-dashboard.html" style="color:var(--green);font-weight:700;text-decoration:none">Log in instead →</a>';
       } else {
-        err.textContent = 'Registration failed. Please try again.';
+        err.textContent='Registration failed. Please try again.';
       }
-      err.style.display = 'block';
-      document.getElementById('btn-register').disabled = false;
+      err.style.display='block';
+      $('btn-register').disabled=false;
     }
   } catch(e){
     hideLoading();
-    err.textContent = 'Network error. Please try again.';
-    err.style.display = 'block';
-    document.getElementById('btn-register').disabled = false;
+    err.textContent='Network error. Please try again.';
+    err.style.display='block';
+    $('btn-register').disabled=false;
   }
 }
 </script>
