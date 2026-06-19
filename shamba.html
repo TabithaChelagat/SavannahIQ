@@ -246,7 +246,11 @@ function checkReady(){
 function openPicker(){
   $('map-picker').classList.add('show');
   document.body.style.overflow='hidden';
-  if(!pickerMapInit) initPickerMap();
+  // Delay map init to ensure overlay is rendered first
+  setTimeout(()=>{
+    if(!pickerMapInit) initPickerMap();
+    else pickerMap.resize();
+  }, 150);
 }
 function closePicker(){
   $('map-picker').classList.remove('show');
@@ -272,25 +276,31 @@ function initPickerMap(){
     const { lng, lat } = e.lngLat;
     dropPin(lat, lng);
   });
-
-  // Try GPS on open
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      pickerMap.flyTo({ center:[pos.coords.longitude, pos.coords.latitude], zoom:15 });
-    },()=>{});
-  }
 }
 
 function useGPS(){
-  if(!navigator.geolocation){ alert('GPS not available.'); return; }
-  showLoading('Getting your location…');
-  navigator.geolocation.getCurrentPosition(pos=>{
-    hideLoading();
-    const lat=pos.coords.latitude, lng=pos.coords.longitude;
-    pickerMap.flyTo({ center:[lng,lat], zoom:16 });
-    dropPin(lat, lng);
-  },()=>{ hideLoading(); alert('Could not get location. Tap your farm on the map instead.'); },
-  { enableHighAccuracy:true, timeout:10000 });
+  if(!navigator.geolocation){
+    alert('GPS is not available on this device. Please tap your farm location on the map.');
+    return;
+  }
+  showLoading('Waiting for GPS — please allow location access…');
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      hideLoading();
+      const lat=pos.coords.latitude, lng=pos.coords.longitude;
+      pickerMap.flyTo({ center:[lng,lat], zoom:16 });
+      dropPin(lat, lng);
+    },
+    err=>{
+      hideLoading();
+      if(err.code===1){
+        alert('Location access was denied. Please enable location permissions in your browser settings, then try again. Or tap your farm location on the map.');
+      } else {
+        alert('Could not get your location. Please tap your farm on the map instead.');
+      }
+    },
+    { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
+  );
 }
 
 function dropPin(lat, lng){
