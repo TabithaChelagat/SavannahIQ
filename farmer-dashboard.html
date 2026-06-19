@@ -16,7 +16,6 @@
 }
 html,body{height:100%;background:var(--offwhite);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
 
-/* NAV */
 nav{background:var(--dkgreen);padding:0 20px;height:52px;
   display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:100}
 .nav-logo{font-weight:700;font-size:16px;color:var(--white);text-decoration:none}
@@ -24,9 +23,9 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 .nav-right{font-size:11px;color:rgba(255,255,255,0.6);font-family:'Space Mono',monospace}
 
 .app{display:flex;flex-direction:column;height:100vh}
-.body{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.body{flex:1;display:flex;flex-direction:column;overflow:hidden}
 
-/* ── LOGIN PAGE ── */
+/* LOGIN */
 .login-page{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px}
 .login-page.hidden{display:none}
 .login-box{width:100%;max-width:400px}
@@ -46,7 +45,7 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 .login-reg{margin-top:16px;font-size:12px;color:var(--muted)}
 .login-reg a{color:var(--green);font-weight:700;text-decoration:none}
 
-/* ── DASHBOARD PAGE ── */
+/* DASHBOARD */
 .dash-page{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .dash-page.hidden{display:none}
 
@@ -66,7 +65,8 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 .sel-year,.sel-month{
   font-family:'Space Mono',monospace;font-size:10px;
   background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
-  border-radius:6px;color:var(--white);padding:5px 8px;outline:none;cursor:pointer;flex:1;
+  border-radius:6px;color:var(--white);padding:5px 8px;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
 }
 .sel-go{font-family:'Space Mono',monospace;font-size:9px;
   background:var(--green);color:var(--dkgreen);font-weight:700;
@@ -74,7 +74,7 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 
 .legend{position:absolute;bottom:10px;left:10px;z-index:10;
   background:rgba(13,43,18,0.88);backdrop-filter:blur(8px);
-  border-radius:8px;padding:8px 12px;}
+  border-radius:8px;padding:8px 12px}
 .legend-title{font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5);
   text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
 .legend-bar{width:120px;height:8px;border-radius:4px;
@@ -82,48 +82,47 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 .legend-labels{display:flex;justify-content:space-between;
   font-family:'Space Mono',monospace;font-size:8px;color:rgba(255,255,255,0.5)}
 
+/* LOCATION PIN ON MAP */
+.map-pin{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:5;pointer-events:none;display:none;
+}
+.map-pin-dot{
+  width:16px;height:16px;background:var(--green);border:3px solid var(--white);
+  border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+.map-pin-ring{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:60px;height:60px;border:2px solid rgba(40,184,88,0.4);
+  border-radius:50%;
+}
+
 /* BOTTOM PANEL */
 .bottom-panel{background:var(--white);border-top:1px solid var(--border);
   padding:16px 20px 24px;flex-shrink:0;max-height:48vh;overflow-y:auto}
-
-/* FARM SELECTION PROMPT */
-.farm-select-prompt{
-  background:var(--ltgreen);border:1.5px solid var(--green);border-radius:12px;
-  padding:16px;margin-bottom:16px;
-}
-.farm-select-prompt p{font-size:13px;color:var(--dkgreen);margin-bottom:12px;line-height:1.5}
-.btn-select-farm{
-  width:100%;padding:12px;background:var(--green);color:var(--white);
-  font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;
-  border:none;border-radius:40px;cursor:pointer;transition:background .2s;
-}
-.btn-select-farm:hover{background:var(--dkgreen)}
 
 /* FARM INFO */
 .farm-info-row{display:flex;align-items:center;gap:12px;
   margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .farm-badge{background:var(--ltgreen);border:1.5px solid var(--green);
   border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0}
-.farm-badge-num{font-weight:700;font-size:18px;color:var(--dkgreen);line-height:1}
+.farm-badge-num{font-weight:700;font-size:16px;color:var(--dkgreen);line-height:1}
 .farm-badge-label{font-size:9px;color:var(--muted);text-transform:uppercase;
   letter-spacing:.1em;font-family:'Space Mono',monospace}
 .farm-meta{flex:1}
 .farm-name{font-weight:700;font-size:15px;color:var(--dkgreen);margin-bottom:2px}
 .farm-details{font-size:11px;color:var(--muted)}
-.btn-change-farm{font-size:11px;color:var(--green);background:none;border:none;
+.btn-change{font-size:11px;color:var(--green);background:none;border:none;
   cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;padding:0;margin-top:4px;display:block}
 
 /* STATUS CARDS */
-.ndvi-status{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.status-card{background:var(--offwhite);border-radius:10px;
-  padding:12px 14px;border:1px solid var(--border)}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.status-card{background:var(--offwhite);border-radius:10px;padding:12px 14px;border:1px solid var(--border)}
 .status-card-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);
   text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
 .status-card-val{font-weight:700;font-size:20px;color:var(--dkgreen);line-height:1;margin-bottom:2px}
 .status-card-desc{font-size:11px}
-.status-healthy{color:var(--green)}
-.status-moderate{color:var(--orange)}
-.status-stressed{color:var(--red)}
+.s-healthy{color:var(--green)}.s-moderate{color:var(--orange)}.s-stressed{color:var(--red)}
 
 /* TREND */
 .trend-section{margin-bottom:16px}
@@ -135,6 +134,9 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 .trend-bar-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center}
 .trend-bar-val{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center}
 
+/* OTHER INDEX CARDS */
+.index-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+
 /* ADVISORY */
 .advisory{background:var(--ltgreen);border:1px solid rgba(40,184,88,0.3);
   border-radius:10px;padding:14px 16px}
@@ -145,41 +147,6 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
   background:var(--green);animation:blink 2s infinite;flex-shrink:0}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .advisory-text{font-size:13px;color:var(--dkgreen);line-height:1.65}
-
-/* MAP PICKER */
-.map-picker{display:none;position:fixed;inset:0;z-index:200;flex-direction:column;background:var(--offwhite)}
-.map-picker.show{display:flex}
-.picker-nav{background:var(--dkgreen);padding:0 20px;height:52px;
-  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.picker-nav-title{font-weight:700;font-size:15px;color:var(--white)}
-.picker-close{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.7);
-  background:none;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:.1em}
-.picker-close:hover{color:var(--green)}
-.picker-controls{background:var(--white);border-bottom:1px solid var(--border);
-  padding:12px 16px;flex-shrink:0}
-.picker-hint{font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center}
-.picker-id-row{display:flex;gap:8px}
-.picker-id-input{flex:1;background:var(--offwhite);border:1.5px solid var(--border);
-  border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;
-  font-size:14px;padding:10px 12px;outline:none}
-.picker-id-input:focus{border-color:var(--green)}
-.picker-id-btn{background:var(--green);color:var(--white);font-family:'DM Sans',sans-serif;
-  font-weight:700;font-size:13px;padding:0 18px;border:none;border-radius:8px;
-  cursor:pointer;white-space:nowrap;transition:background .2s}
-.picker-id-btn:hover{background:var(--dkgreen)}
-#picker-map{flex:1;width:100%}
-.picker-bottom{background:var(--white);border-top:1px solid var(--border);
-  padding:16px 20px;flex-shrink:0}
-.picker-farm-info{font-size:13px;color:var(--muted);margin-bottom:12px;
-  display:flex;align-items:center;gap:8px}
-.picker-farm-info.has-farm{color:var(--dkgreen)}
-.picker-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
-.picker-dot.active{background:var(--green)}
-.btn-confirm-farm{width:100%;padding:14px;background:var(--green);color:var(--white);
-  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
-  border:none;border-radius:40px;cursor:pointer;transition:background .2s}
-.btn-confirm-farm:disabled{opacity:.4;cursor:not-allowed}
-.btn-confirm-farm:not(:disabled):hover{background:var(--dkgreen)}
 
 /* LOADING */
 .loading{position:fixed;inset:0;background:rgba(247,250,247,0.88);
@@ -227,7 +194,13 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
       <div class="map-wrap">
         <div id="map"></div>
 
-        <div class="selector-bar" id="selector-bar" style="display:none">
+        <!-- Pin indicator at center -->
+        <div class="map-pin" id="map-pin">
+          <div class="map-pin-ring"></div>
+          <div class="map-pin-dot"></div>
+        </div>
+
+        <div class="selector-bar">
           <span class="sel-label">NDVI</span>
           <div class="sel-divider"></div>
           <select class="sel-year" id="sel-year"></select>
@@ -242,7 +215,7 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
           <button class="sel-go" onclick="loadSnapshotAndTrend()">Go</button>
         </div>
 
-        <div class="legend" id="legend" style="display:none">
+        <div class="legend">
           <div class="legend-title">NDVI — Vegetation Health</div>
           <div class="legend-bar"></div>
           <div class="legend-labels"><span>Low</span><span>High</span></div>
@@ -252,80 +225,57 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
       <!-- BOTTOM PANEL -->
       <div class="bottom-panel">
 
-        <!-- FARM SELECTION PROMPT — shown when no farm selected -->
-        <div class="farm-select-prompt" id="farm-select-prompt">
-          <p>Select your farm to see its satellite health data, crop trends and personalised advice.</p>
-          <button class="btn-select-farm" onclick="openPicker()">📍 Select my farm →</button>
-        </div>
-
-        <!-- FARM INFO — shown after farm selected -->
-        <div class="farm-info-row" id="farm-info-row" style="display:none">
+        <div class="farm-info-row">
           <div class="farm-badge">
-            <div class="farm-badge-num" id="farm-size">—</div>
-            <div class="farm-badge-label">Hectares</div>
+            <div class="farm-badge-num" id="farm-crop">—</div>
+            <div class="farm-badge-label">Crop</div>
           </div>
           <div class="farm-meta">
-            <div class="farm-name" id="farm-farmer-name">—</div>
+            <div class="farm-name" id="farm-name">—</div>
             <div class="farm-details" id="farm-details">—</div>
-            <button class="btn-change-farm" onclick="openPicker()">Change farm →</button>
           </div>
         </div>
 
-        <div id="farm-data" style="display:none">
-          <div class="ndvi-status">
-            <div class="status-card">
-              <div class="status-card-label">Crop Health</div>
-              <div class="status-card-val" id="ndvi-val">—</div>
-              <div class="status-card-desc" id="ndvi-label">Loading…</div>
-            </div>
-            <div class="status-card">
-              <div class="status-card-label">5yr Trend</div>
-              <div class="status-card-val" id="trend-val">—</div>
-              <div class="status-card-desc" id="trend-label">Loading…</div>
-            </div>
+        <div class="status-grid">
+          <div class="status-card">
+            <div class="status-card-label">Crop Health (NDVI)</div>
+            <div class="status-card-val" id="ndvi-val">—</div>
+            <div class="status-card-desc" id="ndvi-label">Loading…</div>
           </div>
+          <div class="status-card">
+            <div class="status-card-label">5yr Trend</div>
+            <div class="status-card-val" id="trend-val">—</div>
+            <div class="status-card-desc" id="trend-label">Loading…</div>
+          </div>
+        </div>
 
-          <div class="trend-section">
-            <div class="trend-title">NDVI — Last 5 years (same month)</div>
-            <div class="trend-bars" id="trend-bars">
-              <div style="font-size:11px;color:var(--muted)">Loading…</div>
-            </div>
+        <div class="index-row">
+          <div class="status-card">
+            <div class="status-card-label">Rainfall (90d)</div>
+            <div class="status-card-val" id="rain-val">—</div>
+            <div class="status-card-desc" id="rain-label" style="color:var(--muted)">mm</div>
           </div>
+          <div class="status-card">
+            <div class="status-card-label">Soil Moisture</div>
+            <div class="status-card-val" id="soil-val">—</div>
+            <div class="status-card-desc" id="soil-label">Loading…</div>
+          </div>
+        </div>
 
-          <div class="advisory">
-            <div class="advisory-label">Farm Advisory</div>
-            <div class="advisory-text" id="advisory-text">Analysing your farm data…</div>
+        <div class="trend-section">
+          <div class="trend-title">NDVI — Last 5 years (same month)</div>
+          <div class="trend-bars" id="trend-bars">
+            <div style="font-size:11px;color:var(--muted)">Loading…</div>
           </div>
+        </div>
+
+        <div class="advisory">
+          <div class="advisory-label">Farm Advisory</div>
+          <div class="advisory-text" id="advisory-text">Analysing your farm data…</div>
         </div>
 
       </div>
     </div>
-  </div>
-</div>
-
-<!-- MAP PICKER -->
-<div class="map-picker" id="map-picker">
-  <div class="picker-nav">
-    <div class="picker-nav-title">Select your farm</div>
-    <button class="picker-close" onclick="closePicker()">✕ Cancel</button>
-  </div>
-  <div class="picker-controls">
-    <div class="picker-hint">Enter your Farm ID to find your farm, or use GPS</div>
-    <div class="picker-id-row">
-      <input type="number" class="picker-id-input" id="picker-id-input"
-        min="0" max="38359" placeholder="Farm ID (0 – 38,359)">
-      <button class="picker-id-btn" onclick="fetchByFarmId()">Find →</button>
-    </div>
-  </div>
-  <div id="picker-map"></div>
-  <div class="picker-bottom">
-    <div class="picker-farm-info" id="picker-farm-info">
-      <div class="picker-dot" id="picker-dot"></div>
-      <span id="picker-farm-text">No farm selected</span>
-    </div>
-    <button class="btn-confirm-farm" id="btn-confirm-farm" disabled onclick="confirmFarm()">
-      Confirm this farm →
-    </button>
   </div>
 </div>
 
@@ -336,8 +286,7 @@ const HEADERS = {'apikey':ANON,'Authorization':'Bearer '+ANON,'Content-Type':'ap
 const CLOUD_RUN = 'https://savannahiq-tiles-353411679165.europe-west1.run.app';
 
 const $ = id => document.getElementById(id);
-let map, pickerMap, pickerMapInit = false;
-let farmer, farmGeojson, selectedFarm = null;
+let map, farmer;
 const now = new Date();
 
 function showLoading(t){ $('loading').classList.add('show'); $('loading-text').textContent=t; }
@@ -352,34 +301,53 @@ $('sel-month').value = String(now.getMonth()+1).padStart(2,'0');
 
 // Auto login from sessionStorage
 const savedPhone = sessionStorage.getItem('farmer_phone');
-if(savedPhone){ window.addEventListener('DOMContentLoaded',()=>{ $('login-phone').value=savedPhone; sessionStorage.removeItem('farmer_phone'); login(); }); }
+if(savedPhone){
+  window.addEventListener('DOMContentLoaded',()=>{
+    $('login-phone').value=savedPhone;
+    sessionStorage.removeItem('farmer_phone');
+    login();
+  });
+}
 
 $('login-phone').addEventListener('keydown',e=>{ if(e.key==='Enter') login(); });
 
 async function login(){
-  const phone = $('login-phone').value.trim();
+  const phone=$('login-phone').value.trim();
   if(!phone) return;
   showLoading('Looking up your account…');
   $('login-err').style.display='none';
   try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/farmers?phone=eq.${encodeURIComponent(phone)}&select=*`,{ headers:HEADERS });
-    const data = await res.json();
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/farmers?phone=eq.${encodeURIComponent(phone)}&select=*`,{ headers:HEADERS });
+    const data=await res.json();
     hideLoading();
     if(!data||!data.length){ $('login-err').style.display='block'; return; }
-    farmer = data[0];
-    $('nav-name').textContent = farmer.name;
-    $('login-page').classList.add('hidden');
-    $('dash-page').classList.remove('hidden');
-    initMainMap();
-
-    // If farmer already has a farm_id saved, load it
-    if(farmer.farm_id){
-      await loadSavedFarm(farmer.farm_id);
-    }
+    farmer=data[0];
+    initDashboard();
   } catch(e){ hideLoading(); alert('Network error. Please try again.'); }
 }
 
-function initMainMap(){
+function initDashboard(){
+  $('login-page').classList.add('hidden');
+  $('dash-page').classList.remove('hidden');
+  $('nav-name').textContent = farmer.name;
+  $('farm-name').textContent = farmer.name;
+  $('farm-crop').textContent = farmer.primary_crop ? farmer.primary_crop.charAt(0).toUpperCase()+farmer.primary_crop.slice(1) : '—';
+  $('farm-details').textContent = `${farmer.primary_crop} · Bungoma · SavannahIQ`;
+
+  if(!farmer.lat || !farmer.lng){
+    // Old registration without location — show prompt
+    $('advisory-text').textContent = 'Your account was registered without a location. Please re-register to get farm intelligence.';
+    initMap(34.56, 0.57, 11);
+    loadSnapshotOnly();
+    return;
+  }
+
+  initMap(farmer.lng, farmer.lat, 15);
+  $('map-pin').style.display='block';
+  loadSnapshotAndTrend();
+}
+
+function initMap(lng, lat, zoom){
   map = new maplibregl.Map({
     container:'map',
     style:{
@@ -389,139 +357,106 @@ function initMainMap(){
         tileSize:256 }},
       layers:[{ id:'satellite', type:'raster', source:'satellite' }]
     },
-    center:[34.56, 0.57], zoom:12
+    center:[lng, lat], zoom:zoom
   });
 }
 
-async function loadSavedFarm(farmId){
-  showLoading('Loading your farm…');
-  try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
-      method:'POST', headers:HEADERS, body:JSON.stringify({ fid: farmId })
-    });
-    const data = await res.json();
-    if(!data||!data.length){ hideLoading(); return; }
-    const farm = data[0];
-    farmGeojson = JSON.parse(farm.geojson);
-    selectedFarm = { id:farm.id, farmId:farm.farm_id, areaHa:farm.area_ha, geojson:farmGeojson };
-    hideLoading();
-    showFarmOnDashboard();
-  } catch(e){ hideLoading(); }
-}
-
-function showFarmOnDashboard(){
-  // Hide prompt, show info
-  $('farm-select-prompt').style.display = 'none';
-  $('farm-info-row').style.display = 'flex';
-  $('farm-data').style.display = 'block';
-  $('selector-bar').style.display = 'flex';
-  $('legend').style.display = 'block';
-
-  $('farm-farmer-name').textContent = farmer.name;
-  $('farm-size').textContent = selectedFarm.areaHa ? selectedFarm.areaHa.toFixed(2) : '—';
-  $('farm-details').textContent = `Farm #${selectedFarm.farmId} · ${farmer.primary_crop} · Bungoma`;
-
-  // Zoom map to farm
-  const coords = farmGeojson.coordinates[0];
-  const lngs = coords.map(c=>c[0]), lats = coords.map(c=>c[1]);
-  const bounds = [[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]];
-
-  if(map.loaded()){
-    map.fitBounds(bounds,{ padding:60, maxZoom:17 });
-  } else {
-    map.on('load',()=> map.fitBounds(bounds,{ padding:60, maxZoom:17 }));
+// Build a small buffer polygon around the farmer's lat/lng (~500m)
+function buildBufferGeometry(lat, lng, radiusDeg=0.005){
+  const steps=16;
+  const coords=[];
+  for(let i=0;i<=steps;i++){
+    const angle=(i/steps)*2*Math.PI;
+    coords.push([lng+radiusDeg*Math.cos(angle), lat+radiusDeg*Math.sin(angle)]);
   }
-
-  loadSnapshotAndTrend();
+  return { type:'Polygon', coordinates:[coords] };
 }
 
-// ── SNAPSHOT ──
 function loadSnapshotAndTrend(){ loadSnapshot(); loadTrend(); }
+function loadSnapshotOnly(){ loadSnapshot(); }
 
 async function loadSnapshot(){
-  if(!farmGeojson) return;
   const year=$('sel-year').value, month=$('sel-month').value;
   const start=`${year}-${month}-01`, end=`${year}-${month}-28`;
   showLoading(`Loading NDVI ${month}/${year}…`);
   try{
-    const res = await fetch(`${CLOUD_RUN}/tiles?start=${start}&end=${end}`);
-    const data = await res.json();
+    const res=await fetch(`${CLOUD_RUN}/tiles?start=${start}&end=${end}`);
+    const data=await res.json();
     if(data.status!=='ok'){ hideLoading(); return; }
 
-    const tileUrl = data.tiles['ndvi'];
+    const tileUrl=data.tiles['ndvi'];
     if(!tileUrl){ hideLoading(); return; }
 
     if(map.getLayer('ndvi-layer')) map.removeLayer('ndvi-layer');
     if(map.getSource('ndvi-source')) map.removeSource('ndvi-source');
-    if(map.getLayer('mask-layer')) map.removeLayer('mask-layer');
-    if(map.getSource('mask-source')) map.removeSource('mask-source');
-    if(map.getLayer('farm-source-layer')) map.removeLayer('farm-source-layer');
-    if(map.getSource('farm-geom')) map.removeSource('farm-geom');
 
-    // Add NDVI tiles
     map.addSource('ndvi-source',{ type:'raster', tiles:[tileUrl], tileSize:256 });
     map.addLayer({ id:'ndvi-layer', type:'raster', source:'ndvi-source',
-      paint:{ 'raster-opacity':0.85 }
-    });
-
-    // Add farm polygon source
-    map.addSource('farm-geom',{ type:'geojson', data:{ type:'Feature', geometry:farmGeojson }});
-
-    // Mask everything outside farm — inverse polygon
-    const outerRing = [[-180,-90],[-180,90],[180,90],[180,-90],[-180,-90]];
-    const farmRing  = farmGeojson.coordinates[0];
-    const maskFeature = { type:'Feature', geometry:{ type:'Polygon', coordinates:[outerRing, farmRing] }};
-    map.addSource('mask-source',{ type:'geojson', data:maskFeature });
-    map.addLayer({ id:'mask-layer', type:'fill', source:'mask-source',
-      paint:{ 'fill-color':'rgba(247,250,247,0.92)', 'fill-opacity':1 }
+      paint:{ 'raster-opacity':0.82 }
     });
 
     hideLoading();
-    fetchNdviValue(start, end);
+
+    // Fetch indices using buffer around farmer location
+    if(farmer.lat && farmer.lng){
+      fetchIndices(start, end);
+    }
   } catch(e){ hideLoading(); console.error(e); }
 }
 
-async function fetchNdviValue(start, end){
+async function fetchIndices(start, end){
   try{
-    const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
+    const geom = buildBufferGeometry(farmer.lat, farmer.lng, 0.0045); // ~500m
+    const res=await fetch(`${CLOUD_RUN}/farm-indices`,{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ geometry:farmGeojson, start, end })
+      body:JSON.stringify({ geometry:geom, start, end })
     });
-    const data = await res.json();
+    const data=await res.json();
     if(data.status==='ok'){
-      const ndvi=data.indices.ndvi, label=data.indices.ndvi_label;
+      const i=data.indices;
+
+      // NDVI
+      const ndvi=i.ndvi, label=i.ndvi_label;
       $('ndvi-val').textContent = ndvi ? ndvi.toFixed(2) : '—';
-      const cls = label==='Healthy'?'status-healthy':label==='Moderate'?'status-moderate':'status-stressed';
+      const cls = label==='Healthy'?'s-healthy':label==='Moderate'?'s-moderate':'s-stressed';
       $('ndvi-label').textContent = label||'—';
       $('ndvi-label').className = 'status-card-desc '+cls;
+
+      // Rainfall
+      $('rain-val').textContent = i.rainfall_mm ? Math.round(i.rainfall_mm) : '—';
+
+      // Soil
+      $('soil-val').textContent = i.soil_moisture ? i.soil_moisture.toFixed(2) : '—';
+      $('soil-label').textContent = i.soil_label||'—';
     }
   } catch(e){ console.error(e); }
 }
 
-// ── TREND ──
 async function loadTrend(){
-  if(!farmGeojson) return;
+  if(!farmer.lat||!farmer.lng) return;
   const month=$('sel-month').value;
   const years=[];
   for(let y=now.getFullYear()-4;y<=now.getFullYear();y++) years.push(y);
 
-  const results = await Promise.all(years.map(async y=>{
+  const geom=buildBufferGeometry(farmer.lat, farmer.lng, 0.0045);
+
+  const results=await Promise.all(years.map(async y=>{
     try{
-      const res = await fetch(`${CLOUD_RUN}/farm-indices`,{
+      const res=await fetch(`${CLOUD_RUN}/farm-indices`,{
         method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ geometry:farmGeojson, start:`${y}-${month}-01`, end:`${y}-${month}-28` })
+        body:JSON.stringify({ geometry:geom, start:`${y}-${month}-01`, end:`${y}-${month}-28` })
       });
-      const data = await res.json();
-      return { year:y, ndvi: data.status==='ok'?data.indices.ndvi:null };
+      const data=await res.json();
+      return { year:y, ndvi:data.status==='ok'?data.indices.ndvi:null };
     } catch(e){ return { year:y, ndvi:null }; }
   }));
 
-  renderTrendChart(results);
+  renderTrend(results);
   computeTrendSummary(results);
   generateAdvisory(results);
 }
 
-function renderTrendChart(results){
+function renderTrend(results){
   const bars=$('trend-bars'); bars.innerHTML='';
   const vals=results.map(r=>r.ndvi).filter(v=>v!==null);
   const maxVal=vals.length?Math.max(...vals):1;
@@ -556,162 +491,16 @@ function generateAdvisory(results){
   const crop=farmer.primary_crop||'your crop';
   let text='';
   if(trend==='declining'){
-    if(latest<0.3) text=`Your farm's crop health is critically low and has dropped ${changeAbs}% over 5 years. Rotate with beans or cowpeas for at least one season to restore soil nitrogen. Add compost before the next planting and consider consulting your local extension officer.`;
-    else text=`Your farm's crop health has declined ${changeAbs}% over 5 years. Try intercropping ${crop} with legumes like beans which fix nitrogen back into the soil. Vary your planting positions each season.`;
+    if(latest<0.3) text=`Vegetation health in your area has dropped ${changeAbs}% over 5 years and is now critical. Rotate ${crop} with beans or cowpeas to restore soil nitrogen. Add compost before the next season and consider consulting your local extension officer.`;
+    else text=`Vegetation health in your area has declined ${changeAbs}% over 5 years. Try intercropping ${crop} with legumes like beans which fix nitrogen back into the soil. Vary your planting each season.`;
   } else if(trend==='improving'){
-    text=`Your farm is improving — crop health is up ${changeAbs}% over 5 years. Keep up your current practices and consider adding a second variety alongside ${crop} to reduce risk if one fails.`;
+    text=`Your area is improving — vegetation health is up ${changeAbs}% over 5 years. Keep up your current practices and consider adding a second crop variety alongside ${crop} to reduce risk.`;
   } else {
     text=latest>=0.6
-      ?`Your farm is healthy and stable. To push yields higher, try intercropping ${crop} with beans which add nitrogen naturally. Ensure timely planting at the onset of rains.`
-      :`Your farm health is stable but there is room to improve. Apply organic matter before planting and ensure proper spacing for better airflow and sunlight.`;
+      ?`Vegetation in your area is healthy and stable. To push yields higher, try intercropping ${crop} with beans which add nitrogen naturally. Ensure timely planting at the onset of rains.`
+      :`Vegetation health is stable but there is room to improve. Apply organic matter before planting and ensure proper spacing for better airflow and sunlight.`;
   }
   $('advisory-text').textContent=text;
-}
-
-// ── FARM PICKER ──
-function openPicker(){
-  $('map-picker').classList.add('show');
-  document.body.style.overflow='hidden';
-  if(!pickerMapInit) initPickerMap();
-}
-
-function closePicker(){
-  $('map-picker').classList.remove('show');
-  document.body.style.overflow='';
-}
-
-function initPickerMap(){
-  pickerMapInit=true;
-  pickerMap = new maplibregl.Map({
-    container:'picker-map',
-    style:{
-      version:8,
-      sources:{ satellite:{ type:'raster',
-        tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-        tileSize:256 }},
-      layers:[{ id:'satellite', type:'raster', source:'satellite' }]
-    },
-    center:[34.56, 0.57], zoom:11
-  });
-
-  pickerMap.on('load',()=>{
-    pickerMap.addSource('farms',{ type:'geojson', data:{ type:'FeatureCollection', features:[] }});
-    pickerMap.addLayer({ id:'farms-fill', type:'fill', source:'farms',
-      paint:{ 'fill-color':['case',['==',['get','selected'],true],'#28b858','#e8f5ec'],
-              'fill-opacity':['case',['==',['get','selected'],true],0.7,0.4] }
-    });
-    pickerMap.addLayer({ id:'farms-outline', type:'line', source:'farms',
-      paint:{ 'line-color':'#28b858',
-              'line-width':['case',['==',['get','selected'],true],2.5,1] }
-    });
-
-    pickerMap.on('click','farms-fill',e=>{
-      if(!e.features.length) return;
-      const f=e.features[0];
-      selectPickerFarm(f.properties.id, f.properties.farm_id, f.properties.area_ha, null);
-    });
-    pickerMap.on('mouseenter','farms-fill',()=>pickerMap.getCanvas().style.cursor='pointer');
-    pickerMap.on('mouseleave','farms-fill',()=>pickerMap.getCanvas().style.cursor='');
-
-    // Try GPS
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(pos=>{
-        const lat=pos.coords.latitude, lng=pos.coords.longitude;
-        pickerMap.flyTo({ center:[lng,lat], zoom:16 });
-        loadNearbyFarms(lat, lng);
-      },()=>{});
-    }
-  });
-}
-
-async function loadNearbyFarms(lat,lng){
-  try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/farms_near_location`,{
-      method:'POST', headers:HEADERS,
-      body:JSON.stringify({ lat, lng, radius_meters:800 })
-    });
-    const data = await res.json();
-    if(!data.length) return;
-    const features=data.map(f=>({ type:'Feature', geometry:JSON.parse(f.geojson),
-      properties:{ id:f.id, farm_id:f.farm_id, area_ha:f.area_ha, selected:false }
-    }));
-    pickerMap.getSource('farms').setData({ type:'FeatureCollection', features });
-  } catch(e){ console.error(e); }
-}
-
-async function fetchByFarmId(){
-  const val=parseInt($('picker-id-input').value);
-  if(isNaN(val)||val<0||val>38359){ alert('Enter a Farm ID between 0 and 38,359'); return; }
-  showLoading('Finding farm…');
-  try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
-      method:'POST', headers:HEADERS, body:JSON.stringify({ fid:val })
-    });
-    const data=await res.json();
-    hideLoading();
-    if(!data||!data.length){ alert(`Farm ID ${val} not found.`); return; }
-    const farm=data[0];
-    const parsed=JSON.parse(farm.geojson);
-    const coords=parsed.coordinates[0];
-    const lngs=coords.map(c=>c[0]), lats=coords.map(c=>c[1]);
-    const cLng=(Math.min(...lngs)+Math.max(...lngs))/2;
-    const cLat=(Math.min(...lats)+Math.max(...lats))/2;
-    pickerMap.flyTo({ center:[cLng,cLat], zoom:17, speed:1.4 });
-    pickerMap.getSource('farms').setData({ type:'FeatureCollection', features:[{
-      type:'Feature', geometry:parsed,
-      properties:{ id:farm.id, farm_id:farm.farm_id, area_ha:farm.area_ha, selected:false }
-    }]});
-    selectPickerFarm(farm.id, farm.farm_id, farm.area_ha, farm.geojson);
-  } catch(e){ hideLoading(); alert('Error finding farm.'); }
-}
-
-function selectPickerFarm(id, farmId, areaHa, geojson){
-  selectedFarm={ id, farmId, areaHa, geojsonStr:geojson };
-  const src=pickerMap.getSource('farms');
-  if(src){
-    const d=src._data;
-    if(d&&d.features){
-      d.features=d.features.map(f=>({ ...f, properties:{ ...f.properties, selected:f.properties.id===id }}));
-      src.setData(d);
-    }
-  }
-  $('picker-farm-info').classList.add('has-farm');
-  $('picker-dot').classList.add('active');
-  $('picker-farm-text').textContent=`Farm #${farmId} · ${areaHa?areaHa.toFixed(2)+' ha':'—'}`;
-  $('btn-confirm-farm').disabled=false;
-}
-
-async function confirmFarm(){
-  if(!selectedFarm) return;
-  showLoading('Saving your farm…');
-
-  // Fetch full geojson if we only have id
-  let geojson = selectedFarm.geojsonStr;
-  if(!geojson){
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/farm_by_id`,{
-      method:'POST', headers:HEADERS, body:JSON.stringify({ fid:selectedFarm.id })
-    });
-    const data=await res.json();
-    if(data&&data.length) geojson=data[0].geojson;
-  }
-
-  farmGeojson=JSON.parse(geojson);
-
-  // Save farm_id to farmers table
-  try{
-    await fetch(`${SUPABASE_URL}/rest/v1/farmers?phone=eq.${encodeURIComponent(farmer.phone)}`,{
-      method:'PATCH',
-      headers:{ ...HEADERS, 'Prefer':'return=minimal' },
-      body:JSON.stringify({ farm_id:selectedFarm.id, area_ha:selectedFarm.areaHa })
-    });
-  } catch(e){ console.error('Could not save farm_id'); }
-
-  farmer.farm_id=selectedFarm.id;
-  farmer.area_ha=selectedFarm.areaHa;
-
-  hideLoading();
-  closePicker();
-  showFarmOnDashboard();
 }
 </script>
 </body>
