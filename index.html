@@ -475,10 +475,10 @@ footer{
       </svg>
       <h2 class="what-title">What do we do?</h2>
       <p class="what-body">
-        We give farmers and organisations the intelligence to make better decisions about land. Using satellite data updated every 30 days, SavannahIQ monitors every farm, every county and every season — turning what was once only visible from space into practical guidance on the ground.
+        We turn satellite data into decisions. For governments and organisations, SavannahIQ monitors every county in Kenya — drought, vegetation, rainfall and soil — updated every 30 days. For farmers, we provide area-level crop intelligence so you know how your land is performing this season compared to the last five years.
       </p>
       <p class="what-body" style="margin-top:16px">
-        From a smallholder in Bungoma knowing when to plant, to a government agency knowing where drought is coming before it arrives.
+        Today, farmers on SavannahIQ can view satellite indices for their area — crop health, rainfall and soil moisture updated monthly. Our end goal is per-farm intelligence: every smallholder farmer in Africa monitoring their specific plot from space.
       </p>
       <a href="#" class="btn-learn" onclick="showAbout();window.scrollTo(0,0);return false;">Learn more</a>
     </div>
@@ -487,16 +487,16 @@ footer{
   <!-- NUMBERS -->
   <div class="numbers">
     <div class="number-item">
-      <span class="number-val">38k</span>
-      <span class="number-label">Farm boundaries<br>mapped · Bungoma</span>
-    </div>
-    <div class="number-item">
       <span class="number-val">47</span>
       <span class="number-label">Kenya counties<br>monitored</span>
     </div>
     <div class="number-item">
       <span class="number-val">30d</span>
       <span class="number-label">Satellite update<br>cycle</span>
+    </div>
+    <div class="number-item">
+      <span class="number-val">38k</span>
+      <span class="number-label">Farm boundaries<br>ready · Bungoma</span>
     </div>
   </div>
 
@@ -558,24 +558,36 @@ footer{
       <p>Africa's governments, food agencies and agricultural organisations are making decisions worth hundreds of billions of dollars based on data that is coarse, delayed and incomplete. Drought declarations come weeks after crops fail. Aid arrives after hunger sets in.</p>
       <p>At the farm level it is worse. By the time a smallholder farmer knows something is wrong, the window to act has already closed. The land was sending signals weeks earlier — but nobody was reading them.</p>
       <p>Agricultural insurers face the same blindness from a different angle. A farmer files a drought claim months after the event and there is no independent record of what actually happened on that land during that period. Insurers either pay out on faith or reject claims they cannot verify. Both erode the business — and neither serves the farmer.</p>
+      <p>SavannahIQ changes this. Every registered farmer has a continuous satellite record for their area — NDVI crop health scores, rainfall and vegetation trends updated every 30 days and stored historically. When a farmer files a claim, the data for that location during that specific period already exists. Did vegetation health drop below the stress threshold? Did rainfall fall critically short? The satellite record confirms or contradicts the claim in seconds, no field visit required.</p>
+      <p>Beyond claims, SavannahIQ enables smarter underwriting. Before insuring a farmer, assess five years of vegetation history for their area — is this land productive and stable or has it been degrading season by season? Price the premium to reflect actual land health, not just crop type or location.</p>
+      <p>As SavannahIQ expands to precision per-farm intelligence — with exact farm boundaries and higher resolution satellite data — parametric insurance becomes possible: automatic payouts triggered when satellite data crosses a stress threshold for a specific farm, with no paperwork and no disputes.</p>
     </div>
 
     <div class="about-section">
       <div class="about-section-label">What we built</div>
       <h3>Intelligence at every scale</h3>
       <p>SavannahIQ processes Sentinel-2 satellite data at 10-metre resolution — updated every 30 days — and delivers it as six actionable intelligence layers: vegetation health, land cover, drought score, rainfall, soil moisture and crop classification.</p>
-      <p>For organisations, this means early warning at county and sub-county level before a crisis. For farmers, this means knowing the health of their specific plot, how it has changed season by season, and what to do next. For insurers, every registered farm has a continuous satellite record — when a claim is filed, the data for that specific polygon during that specific period already exists.</p>
+      <p>For governments, NGOs and research institutions, the analyst dashboard monitors all 47 counties simultaneously. Click any county to see a detailed breakdown — drought score, NDVI, rainfall and soil moisture — with an AI-generated advisory and time series snapshots going back months. Early warning before a drought is officially declared. Evidence before aid is deployed. Data before a policy is written.</p>
+      <p>For farmers, this means area-level satellite intelligence — crop health, rainfall and soil moisture for their location, updated monthly, with five years of history and a seasonal advisory. Our end goal is precision per-farm intelligence: every smallholder farmer monitoring their specific plot from space.</p>
     </div>
 
     <div class="about-section">
-      <div class="about-section-label">The pilot</div>
-      <h3>Bungoma first</h3>
-      <p>We began in Bungoma County, Western Kenya — digitising 38,360 individual farm boundaries against high-resolution satellite imagery. Every farm boundary is now stored and ready for farm-level intelligence delivery through the Shamba Portal.</p>
-      <p>Bungoma is the proof of concept. The methodology, pipeline and intelligence framework is built to replicate across every county in Kenya and ultimately across the continent.</p>
+      <div class="about-section-label">What is live</div>
+      <h3>Kenya — live now</h3>
+      <p>Any farmer in Kenya can register on SavannahIQ today, pin their location and access monthly satellite intelligence for their area — crop health, rainfall and soil moisture — with five years of history and a seasonal advisory. The analyst dashboard covers all 47 counties with six intelligence layers updated every 30 days.</p>
+      <p>This is not a pilot. Kenya is live.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="about-section-label">The next phase</div>
+      <h3>Bungoma — precision pilot</h3>
+      <p>Area-level intelligence is the foundation. The next phase is per-farm precision — every smallholder farmer monitoring their specific plot from space, down to the boundary line.</p>
+      <p>We began in Bungoma County — manually digitising 38,360 individual farm boundaries and training a field delineation model on Sentinel-2 imagery. The challenge is the land. Smallholder farms in Kenya average 0.2 hectares — at 10 metre resolution, a single pixel covers 100 square metres. Boundaries between neighbouring plots merge into the same pixel, making accurate delineation impossible. This is why PlanetScope at 3–5 metres is the unlock — at that resolution, individual farm boundaries are visible and separable.</p>
+      <p>The 38,360 Bungoma boundaries are stored and ready. Bungoma is the blueprint.</p>
       <div style="margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid #e0ebe0">
         <img src="img-bungoma-farms.png" alt="38,360 farm boundaries digitised in Bungoma County" style="width:100%;display:block">
         <div style="padding:10px 14px;background:var(--offwhite);font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">
-          38,360 farm boundaries digitised in Bungoma County · SavannahIQ 2026
+          38,360 farm boundaries · Bungoma County · SavannahIQ 2026
         </div>
       </div>
     </div>
