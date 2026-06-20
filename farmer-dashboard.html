@@ -200,19 +200,28 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
           <div class="map-pin-dot"></div>
         </div>
 
-        <div class="selector-bar">
-          <span class="sel-label">NDVI</span>
-          <div class="sel-divider"></div>
-          <select class="sel-year" id="sel-year"></select>
-          <select class="sel-month" id="sel-month">
-            <option value="01">Jan</option><option value="02">Feb</option>
-            <option value="03">Mar</option><option value="04">Apr</option>
-            <option value="05">May</option><option value="06">Jun</option>
-            <option value="07">Jul</option><option value="08">Aug</option>
-            <option value="09">Sep</option><option value="10">Oct</option>
-            <option value="11">Nov</option><option value="12">Dec</option>
-          </select>
-          <button class="sel-go" onclick="loadSnapshotAndTrend()">Go</button>
+        <div class="selector-bar" style="flex-direction:column;align-items:stretch;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="sel-label">NDVI</span>
+            <div class="sel-divider"></div>
+            <span class="sel-label" style="color:rgba(255,255,255,0.35)">Rainfall</span>
+            <div class="sel-divider"></div>
+            <span class="sel-label" style="color:rgba(255,255,255,0.35)">Soil</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="sel-label">Period</span>
+            <div class="sel-divider"></div>
+            <select class="sel-year" id="sel-year" style="flex:1"></select>
+            <select class="sel-month" id="sel-month" style="flex:1">
+              <option value="01">Jan</option><option value="02">Feb</option>
+              <option value="03">Mar</option><option value="04">Apr</option>
+              <option value="05">May</option><option value="06">Jun</option>
+              <option value="07">Jul</option><option value="08">Aug</option>
+              <option value="09">Sep</option><option value="10">Oct</option>
+              <option value="11">Nov</option><option value="12">Dec</option>
+            </select>
+            <button class="sel-go" onclick="loadSnapshotAndTrend()">Go</button>
+          </div>
         </div>
 
         <div class="legend">
@@ -239,7 +248,10 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
         <div class="status-grid">
           <div class="status-card">
             <div class="status-card-label">Crop Health (NDVI)</div>
-            <div class="status-card-val" id="ndvi-val">—</div>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <div class="status-card-val" id="ndvi-val">—</div>
+              <div id="ndvi-arrow" style="font-size:12px;font-weight:700"></div>
+            </div>
             <div class="status-card-desc" id="ndvi-label">Loading…</div>
           </div>
           <div class="status-card">
@@ -251,13 +263,19 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 
         <div class="index-row">
           <div class="status-card">
-            <div class="status-card-label">Rainfall (90d)</div>
-            <div class="status-card-val" id="rain-val">—</div>
+            <div class="status-card-label">Rainfall (30d)</div>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <div class="status-card-val" id="rain-val">—</div>
+              <div id="rain-arrow" style="font-size:12px;font-weight:700"></div>
+            </div>
             <div class="status-card-desc" id="rain-label" style="color:var(--muted)">mm</div>
           </div>
           <div class="status-card">
             <div class="status-card-label">Soil Moisture</div>
-            <div class="status-card-val" id="soil-val">—</div>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <div class="status-card-val" id="soil-val">—</div>
+              <div id="soil-arrow" style="font-size:12px;font-weight:700"></div>
+            </div>
             <div class="status-card-desc" id="soil-label">Loading…</div>
           </div>
         </div>
@@ -404,39 +422,76 @@ async function loadSnapshot(){
   } catch(e){ hideLoading(); console.error(e); }
 }
 
+function setArrow(elId, current, previous){
+  const el = $(elId);
+  if(!current||!previous){ el.textContent=''; return; }
+  const up = current > previous;
+  const pct = Math.abs(((current-previous)/previous)*100).toFixed(1);
+  el.textContent = up ? `▲ ${pct}%` : `▼ ${pct}%`;
+  el.style.color = up ? 'var(--green)' : 'var(--red)';
+}
+
 async function fetchIndices(start, end){
   try{
-    const geom = buildBufferGeometry(farmer.lat, farmer.lng, 0.0045); // ~500m
-    const res=await fetch(`${CLOUD_RUN}/farm-indices`,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ geometry:geom, start, end })
-    });
-    const data=await res.json();
-    if(data.status==='ok'){
-      const i=data.indices;
+    const geom = buildBufferGeometry(farmer.lat, farmer.lng, 0.0045);
 
-      // NDVI
+    // 30d window for rainfall
+    const endDate = new Date(end);
+    const startRain = new Date(endDate);
+    startRain.setDate(startRain.getDate()-30);
+    const rainStart = startRain.toISOString().slice(0,10);
+
+    // Previous month window for arrow comparison
+    const prevEnd = new Date(start);
+    prevEnd.setDate(prevEnd.getDate()-1);
+    const prevStart = new Date(prevEnd);
+    prevStart.setDate(prevStart.getDate()-30);
+    const prevStartStr = prevStart.toISOString().slice(0,10);
+    const prevEndStr = prevEnd.toISOString().slice(0,10);
+
+    // Fetch current and previous in parallel
+    const [resCurr, resPrev] = await Promise.all([
+      fetch(`${CLOUD_RUN}/farm-indices`,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ geometry:geom, start:rainStart, end })
+      }),
+      fetch(`${CLOUD_RUN}/farm-indices`,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ geometry:geom, start:prevStartStr, end:prevEndStr })
+      })
+    ]);
+
+    const [curr, prev] = await Promise.all([resCurr.json(), resPrev.json()]);
+
+    if(curr.status==='ok'){
+      const i=curr.indices;
       const ndvi=i.ndvi, label=i.ndvi_label;
       $('ndvi-val').textContent = ndvi ? ndvi.toFixed(2) : '—';
       const cls = label==='Healthy'?'s-healthy':label==='Moderate'?'s-moderate':'s-stressed';
       $('ndvi-label').textContent = label||'—';
       $('ndvi-label').className = 'status-card-desc '+cls;
-
-      // Rainfall
       $('rain-val').textContent = i.rainfall_mm ? Math.round(i.rainfall_mm) : '—';
-
-      // Soil
       $('soil-val').textContent = i.soil_moisture ? i.soil_moisture.toFixed(2) : '—';
       $('soil-label').textContent = i.soil_label||'—';
+
+      // Set arrows vs previous month
+      if(prev.status==='ok'){
+        const p=prev.indices;
+        setArrow('ndvi-arrow', i.ndvi, p.ndvi);
+        setArrow('rain-arrow', i.rainfall_mm, p.rainfall_mm);
+        setArrow('soil-arrow', i.soil_moisture, p.soil_moisture);
+      }
     }
   } catch(e){ console.error(e); }
 }
 
 async function loadTrend(){
   if(!farmer.lat||!farmer.lng) return;
+  // Always use the selected month but fixed to last 5 actual years
   const month=$('sel-month').value;
+  const currentYear = now.getFullYear();
   const years=[];
-  for(let y=now.getFullYear()-4;y<=now.getFullYear();y++) years.push(y);
+  for(let y=currentYear-4;y<=currentYear;y++) years.push(y);
 
   const geom=buildBufferGeometry(farmer.lat, farmer.lng, 0.0045);
 
@@ -453,7 +508,37 @@ async function loadTrend(){
 
   renderTrend(results);
   computeTrendSummary(results);
-  generateAdvisory(results);
+
+  // Fetch 1 month ago and 3 months ago for advisory comparison
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth()-1);
+  const m1 = String(oneMonthAgo.getMonth()+1).padStart(2,'0');
+  const y1 = oneMonthAgo.getFullYear();
+
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth()-3);
+  const m3 = String(threeMonthsAgo.getMonth()+1).padStart(2,'0');
+  const y3 = threeMonthsAgo.getFullYear();
+
+  try{
+    const [res1, res3] = await Promise.all([
+      fetch(`${CLOUD_RUN}/farm-indices`,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ geometry:geom, start:`${y1}-${m1}-01`, end:`${y1}-${m1}-28` })
+      }),
+      fetch(`${CLOUD_RUN}/farm-indices`,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ geometry:geom, start:`${y3}-${m3}-01`, end:`${y3}-${m3}-28` })
+      })
+    ]);
+    const [d1, d3] = await Promise.all([res1.json(), res3.json()]);
+    const ndvi1m = d1.status==='ok' ? d1.indices.ndvi : null;
+    const ndvi3m = d3.status==='ok' ? d3.indices.ndvi : null;
+    const currentNdvi = results[results.length-1].ndvi;
+    generateAdvisory(results, currentNdvi, ndvi1m, ndvi3m);
+  } catch(e){
+    generateAdvisory(results, null, null, null);
+  }
 }
 
 function renderTrend(results){
@@ -474,6 +559,7 @@ function renderTrend(results){
 function computeTrendSummary(results){
   const valid=results.filter(r=>r.ndvi!==null);
   if(valid.length<2){ $('trend-val').textContent='—'; $('trend-label').textContent='Not enough data'; return; }
+  // Always compare first year vs last year in the 5yr window
   const change=((valid[valid.length-1].ndvi-valid[0].ndvi)/valid[0].ndvi*100).toFixed(1);
   const up=parseFloat(change)>0;
   $('trend-val').textContent=(up?'+':'')+change+'%';
@@ -481,26 +567,64 @@ function computeTrendSummary(results){
   $('trend-label').textContent=up?'Improving over 5yrs':'Declining over 5yrs';
 }
 
-function generateAdvisory(results){
-  const valid=results.filter(r=>r.ndvi!==null);
-  if(!valid.length){ $('advisory-text').textContent='Not enough data yet.'; return; }
-  const latest=valid[valid.length-1].ndvi, first=valid[0].ndvi;
-  const change=((latest-first)/first)*100;
-  const trend=change>5?'improving':change<-5?'declining':'stable';
-  const changeAbs=Math.abs(change).toFixed(0);
-  const crop=farmer.primary_crop||'your crop';
-  let text='';
-  if(trend==='declining'){
-    if(latest<0.3) text=`Vegetation health in your area has dropped ${changeAbs}% over 5 years and is now critical. Rotate ${crop} with beans or cowpeas to restore soil nitrogen. Add compost before the next season and consider consulting your local extension officer.`;
-    else text=`Vegetation health in your area has declined ${changeAbs}% over 5 years. Try intercropping ${crop} with legumes like beans which fix nitrogen back into the soil. Vary your planting each season.`;
-  } else if(trend==='improving'){
-    text=`Your area is improving — vegetation health is up ${changeAbs}% over 5 years. Keep up your current practices and consider adding a second crop variety alongside ${crop} to reduce risk.`;
-  } else {
-    text=latest>=0.6
-      ?`Vegetation in your area is healthy and stable. To push yields higher, try intercropping ${crop} with beans which add nitrogen naturally. Ensure timely planting at the onset of rains.`
-      :`Vegetation health is stable but there is room to improve. Apply organic matter before planting and ensure proper spacing for better airflow and sunlight.`;
+function generateAdvisory(results, currentNdvi, ndvi1MonthAgo, ndvi3MonthsAgo){
+  const crop = farmer.primary_crop || 'your crop';
+  const valid = results.filter(r=>r.ndvi!==null);
+  let parts = [];
+
+  // 1 month comparison
+  if(currentNdvi && ndvi1MonthAgo){
+    const change1m = ((currentNdvi - ndvi1MonthAgo) / ndvi1MonthAgo * 100).toFixed(1);
+    const up1m = parseFloat(change1m) > 0;
+    const abs1m = Math.abs(parseFloat(change1m));
+    if(abs1m > 2){
+      parts.push(up1m
+        ? `Compared to last month, vegetation health has improved by ${Math.abs(change1m)}% — a positive sign for the current season.`
+        : `Vegetation health has dropped ${Math.abs(change1m)}% since last month — conditions in your area may be deteriorating.`
+      );
+    } else {
+      parts.push(`Conditions in your area are stable compared to last month.`);
+    }
   }
-  $('advisory-text').textContent=text;
+
+  // 3 month comparison
+  if(currentNdvi && ndvi3MonthsAgo){
+    const change3m = ((currentNdvi - ndvi3MonthsAgo) / ndvi3MonthsAgo * 100).toFixed(1);
+    const up3m = parseFloat(change3m) > 0;
+    const abs3m = Math.abs(parseFloat(change3m));
+    if(abs3m > 3){
+      parts.push(up3m
+        ? `Over the last 3 months the trend is positive — up ${Math.abs(change3m)}%.`
+        : `Over the last 3 months vegetation health is down ${Math.abs(change3m)}% — watch closely heading into the next planting window.`
+      );
+    }
+  }
+
+  // 5yr long term advice
+  if(valid.length >= 2){
+    const latest = valid[valid.length-1].ndvi;
+    const first = valid[0].ndvi;
+    const change5yr = ((latest - first) / first * 100);
+    const trend = change5yr > 5 ? 'improving' : change5yr < -5 ? 'declining' : 'stable';
+    const abs5yr = Math.abs(change5yr).toFixed(0);
+
+    if(trend === 'declining'){
+      if(latest < 0.3){
+        parts.push(`Over 5 years vegetation health has dropped ${abs5yr}% and is now critical. Rotate ${crop} with beans or cowpeas to restore soil nitrogen and add compost before the next planting.`);
+      } else {
+        parts.push(`Over 5 years the trend is declining by ${abs5yr}%. Try intercropping ${crop} with legumes like beans which restore soil nitrogen between seasons.`);
+      }
+    } else if(trend === 'improving'){
+      parts.push(`The 5-year trend is positive — up ${abs5yr}%. Keep up your current practices and consider a second crop variety alongside ${crop} to reduce seasonal risk.`);
+    } else {
+      parts.push(latest >= 0.6
+        ? `Vegetation health is healthy and stable over 5 years. To push yields higher, try intercropping ${crop} with beans and ensure timely planting at the onset of rains.`
+        : `Vegetation health is stable over 5 years but there is room to improve. Apply organic matter before planting and ensure proper crop spacing.`
+      );
+    }
+  }
+
+  $('advisory-text').textContent = parts.length ? parts.join(' ') : 'Not enough data to generate an advisory yet.';
 }
 </script>
 </body>
