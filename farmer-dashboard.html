@@ -68,7 +68,14 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
   border-radius:6px;color:var(--white);padding:5px 8px;outline:none;cursor:pointer;
   -webkit-appearance:none;appearance:none;
 }
-.sel-go{font-family:'Space Mono',monospace;font-size:9px;
+.sel-tab{
+  font-family:'Space Mono',monospace;font-size:9px;
+  padding:5px 12px;border-radius:20px;cursor:pointer;
+  border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);
+  background:transparent;transition:all .2s;text-transform:uppercase;letter-spacing:.08em;
+}
+.sel-tab.active{background:var(--green);border-color:var(--green);color:var(--dkgreen);font-weight:700}
+.sel-tab:hover:not(.active){border-color:rgba(255,255,255,0.5);color:var(--white)}
   background:var(--green);color:var(--dkgreen);font-weight:700;
   border:none;border-radius:6px;padding:6px 14px;cursor:pointer;white-space:nowrap}
 
@@ -202,11 +209,9 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 
         <div class="selector-bar" style="flex-direction:column;align-items:stretch;gap:6px">
           <div style="display:flex;align-items:center;gap:8px">
-            <span class="sel-label">NDVI</span>
-            <div class="sel-divider"></div>
-            <span class="sel-label" style="color:rgba(255,255,255,0.35)">Rainfall</span>
-            <div class="sel-divider"></div>
-            <span class="sel-label" style="color:rgba(255,255,255,0.35)">Soil</span>
+            <button class="sel-tab active" id="tab-ndvi" onclick="setIndex('ndvi')">NDVI</button>
+            <button class="sel-tab" id="tab-rainfall" onclick="setIndex('rainfall')">Rainfall</button>
+            <button class="sel-tab" id="tab-soil" onclick="setIndex('soil')">Soil</button>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="sel-label">Period</span>
@@ -225,9 +230,9 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
         </div>
 
         <div class="legend">
-          <div class="legend-title">NDVI — Vegetation Health</div>
-          <div class="legend-bar"></div>
-          <div class="legend-labels"><span>Low</span><span>High</span></div>
+          <div class="legend-title" id="legend-title">NDVI — Vegetation Health</div>
+          <div class="legend-bar" id="legend-bar" style="background:linear-gradient(to right,#e04030,#e07820,#28b858)"></div>
+          <div class="legend-labels" id="legend-labels"><span>Low</span><span>High</span></div>
         </div>
       </div>
 
@@ -305,7 +310,29 @@ const CLOUD_RUN = 'https://savannahiq-tiles-353411679165.europe-west1.run.app';
 
 const $ = id => document.getElementById(id);
 let map, farmer;
+let currentIndex = 'ndvi';
 const now = new Date();
+
+const LEGENDS = {
+  ndvi:     { title:'NDVI — Vegetation Health',  gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Low', high:'High' },
+  rainfall: { title:'Rainfall (30d mm)',          gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Dry', high:'Wet' },
+  soil:     { title:'Soil Moisture',              gradient:'linear-gradient(to right,#e04030,#e07820,#28b858)', low:'Dry', high:'Moist' },
+};
+
+function setIndex(index){
+  currentIndex = index;
+  // Update tab styles
+  ['ndvi','rainfall','soil'].forEach(i=>{
+    $(`tab-${i}`).classList.toggle('active', i===index);
+  });
+  // Update legend
+  const l = LEGENDS[index];
+  $('legend-title').textContent = l.title;
+  $('legend-bar').style.background = l.gradient;
+  $('legend-labels').innerHTML = `<span>${l.low}</span><span>${l.high}</span>`;
+  // Reload map and cards
+  loadSnapshot();
+}
 
 function showLoading(t){ $('loading').classList.add('show'); $('loading-text').textContent=t; }
 function hideLoading(){ $('loading').classList.remove('show'); }
@@ -396,29 +423,26 @@ function loadSnapshotOnly(){ loadSnapshot(); }
 async function loadSnapshot(){
   const year=$('sel-year').value, month=$('sel-month').value;
   const start=`${year}-${month}-01`, end=`${year}-${month}-28`;
-  showLoading(`Loading NDVI ${month}/${year}…`);
+  showLoading(`Loading ${currentIndex.toUpperCase()} ${month}/${year}…`);
   try{
     const res=await fetch(`${CLOUD_RUN}/tiles?start=${start}&end=${end}`);
     const data=await res.json();
     if(data.status!=='ok'){ hideLoading(); return; }
 
-    const tileUrl=data.tiles['ndvi'];
+    // Use currentIndex for tile — rainfall maps to 'rainfall', soil to 'soil'
+    const tileKey = currentIndex === 'soil' ? 'soil' : currentIndex === 'rainfall' ? 'rainfall' : 'ndvi';
+    const tileUrl=data.tiles[tileKey];
     if(!tileUrl){ hideLoading(); return; }
 
-    if(map.getLayer('ndvi-layer')) map.removeLayer('ndvi-layer');
-    if(map.getSource('ndvi-source')) map.removeSource('ndvi-source');
-
-    map.addSource('ndvi-source',{ type:'raster', tiles:[tileUrl], tileSize:256 });
-    map.addLayer({ id:'ndvi-layer', type:'raster', source:'ndvi-source',
+    if(map.getLayer('index-layer')) map.removeLayer('index-layer');
+    if(map.getSource('index-source')) map.removeSource('index-source');
+    map.addSource('index-source',{ type:'raster', tiles:[tileUrl], tileSize:256 });
+    map.addLayer({ id:'index-layer', type:'raster', source:'index-source',
       paint:{ 'raster-opacity':0.82 }
     });
 
     hideLoading();
-
-    // Fetch indices using buffer around farmer location
-    if(farmer.lat && farmer.lng){
-      fetchIndices(start, end);
-    }
+    if(farmer.lat && farmer.lng) fetchIndices(start, end);
   } catch(e){ hideLoading(); console.error(e); }
 }
 
@@ -487,8 +511,8 @@ async function fetchIndices(start, end){
 
 async function loadTrend(){
   if(!farmer.lat||!farmer.lng) return;
-  // Always use the selected month but fixed to last 5 actual years
   const month=$('sel-month').value;
+  // ALWAYS use last 5 actual years — never changes with selected year
   const currentYear = now.getFullYear();
   const years=[];
   for(let y=currentYear-4;y<=currentYear;y++) years.push(y);
@@ -572,54 +596,59 @@ function generateAdvisory(results, currentNdvi, ndvi1MonthAgo, ndvi3MonthsAgo){
   const valid = results.filter(r=>r.ndvi!==null);
   let parts = [];
 
-  // 1 month comparison
-  if(currentNdvi && ndvi1MonthAgo){
-    const change1m = ((currentNdvi - ndvi1MonthAgo) / ndvi1MonthAgo * 100).toFixed(1);
-    const up1m = parseFloat(change1m) > 0;
-    const abs1m = Math.abs(parseFloat(change1m));
-    if(abs1m > 2){
-      parts.push(up1m
-        ? `Compared to last month, vegetation health has improved by ${Math.abs(change1m)}% — a positive sign for the current season.`
-        : `Vegetation health has dropped ${Math.abs(change1m)}% since last month — conditions in your area may be deteriorating.`
-      );
-    } else {
-      parts.push(`Conditions in your area are stable compared to last month.`);
+  if(currentIndex === 'rainfall'){
+    const rain = parseFloat($('rain-val').textContent);
+    const rainArrow = $('rain-arrow').textContent;
+    if(!isNaN(rain)){
+      if(rain < 30) parts.push(`Rainfall in your area is critically low at ${rain}mm over the last 30 days. Consider drought-tolerant varieties and avoid planting until rains improve.`);
+      else if(rain < 80) parts.push(`Rainfall is below average at ${rain}mm. Supplement with irrigation if available and plant drought-resistant varieties alongside ${crop}.`);
+      else if(rain > 200) parts.push(`Rainfall is high at ${rain}mm — watch for waterlogging and fungal disease in ${crop}. Ensure good drainage around your plot.`);
+      else parts.push(`Rainfall is adequate at ${rain}mm. Conditions are suitable for ${crop} planting and growth this period.`);
     }
-  }
+    if(rainArrow.includes('▼')) parts.push(`Rainfall has dropped compared to last month — monitor soil moisture closely as the season progresses.`);
+    else if(rainArrow.includes('▲')) parts.push(`Rainfall has increased compared to last month — a positive sign for the current growing season.`);
 
-  // 3 month comparison
-  if(currentNdvi && ndvi3MonthsAgo){
-    const change3m = ((currentNdvi - ndvi3MonthsAgo) / ndvi3MonthsAgo * 100).toFixed(1);
-    const up3m = parseFloat(change3m) > 0;
-    const abs3m = Math.abs(parseFloat(change3m));
-    if(abs3m > 3){
-      parts.push(up3m
+  } else if(currentIndex === 'soil'){
+    const soilLabel = $('soil-label').textContent;
+    const soilArrow = $('soil-arrow').textContent;
+    if(soilLabel === 'Dry') parts.push(`Soil moisture is critically low in your area. Delay planting until moisture improves or use mulching to conserve what remains.`);
+    else if(soilLabel === 'Adequate') parts.push(`Soil moisture is adequate for ${crop} growth. Maintain good ground cover and avoid over-tillage to preserve moisture.`);
+    else if(soilLabel === 'Well hydrated') parts.push(`Soil is well hydrated — good conditions for ${crop}. Monitor for waterlogging if rains continue.`);
+    if(soilArrow.includes('▼')) parts.push(`Soil moisture has dropped since last month. Consider mulching or cover crops to slow moisture loss.`);
+    else if(soilArrow.includes('▲')) parts.push(`Soil moisture has improved since last month — conditions are improving for planting.`);
+
+  } else {
+    // NDVI advisory
+    if(currentNdvi && ndvi1MonthAgo){
+      const change1m = ((currentNdvi-ndvi1MonthAgo)/ndvi1MonthAgo*100).toFixed(1);
+      const abs1m = Math.abs(parseFloat(change1m));
+      if(abs1m>2) parts.push(parseFloat(change1m)>0
+        ? `Compared to last month, vegetation health has improved by ${Math.abs(change1m)}% — a positive sign for the current season.`
+        : `Vegetation health has dropped ${Math.abs(change1m)}% since last month — conditions may be deteriorating.`
+      );
+      else parts.push(`Conditions in your area are stable compared to last month.`);
+    }
+    if(currentNdvi && ndvi3MonthsAgo){
+      const change3m = ((currentNdvi-ndvi3MonthsAgo)/ndvi3MonthsAgo*100).toFixed(1);
+      const abs3m = Math.abs(parseFloat(change3m));
+      if(abs3m>3) parts.push(parseFloat(change3m)>0
         ? `Over the last 3 months the trend is positive — up ${Math.abs(change3m)}%.`
         : `Over the last 3 months vegetation health is down ${Math.abs(change3m)}% — watch closely heading into the next planting window.`
       );
     }
-  }
-
-  // 5yr long term advice
-  if(valid.length >= 2){
-    const latest = valid[valid.length-1].ndvi;
-    const first = valid[0].ndvi;
-    const change5yr = ((latest - first) / first * 100);
-    const trend = change5yr > 5 ? 'improving' : change5yr < -5 ? 'declining' : 'stable';
-    const abs5yr = Math.abs(change5yr).toFixed(0);
-
-    if(trend === 'declining'){
-      if(latest < 0.3){
-        parts.push(`Over 5 years vegetation health has dropped ${abs5yr}% and is now critical. Rotate ${crop} with beans or cowpeas to restore soil nitrogen and add compost before the next planting.`);
-      } else {
-        parts.push(`Over 5 years the trend is declining by ${abs5yr}%. Try intercropping ${crop} with legumes like beans which restore soil nitrogen between seasons.`);
-      }
-    } else if(trend === 'improving'){
-      parts.push(`The 5-year trend is positive — up ${abs5yr}%. Keep up your current practices and consider a second crop variety alongside ${crop} to reduce seasonal risk.`);
-    } else {
-      parts.push(latest >= 0.6
-        ? `Vegetation health is healthy and stable over 5 years. To push yields higher, try intercropping ${crop} with beans and ensure timely planting at the onset of rains.`
-        : `Vegetation health is stable over 5 years but there is room to improve. Apply organic matter before planting and ensure proper crop spacing.`
+    if(valid.length>=2){
+      const latest=valid[valid.length-1].ndvi, first=valid[0].ndvi;
+      const change5yr=((latest-first)/first*100);
+      const trend=change5yr>5?'improving':change5yr<-5?'declining':'stable';
+      const abs5yr=Math.abs(change5yr).toFixed(0);
+      if(trend==='declining') parts.push(latest<0.3
+        ? `Over 5 years vegetation health has dropped ${abs5yr}% and is now critical. Rotate ${crop} with beans or cowpeas to restore soil nitrogen.`
+        : `Over 5 years the trend is declining by ${abs5yr}%. Try intercropping ${crop} with legumes like beans which restore soil nitrogen.`
+      );
+      else if(trend==='improving') parts.push(`The 5-year trend is positive — up ${abs5yr}%. Keep up your current practices and consider a second crop variety alongside ${crop}.`);
+      else parts.push(latest>=0.6
+        ? `Vegetation health is stable and healthy over 5 years. To push yields higher, try intercropping ${crop} with beans and ensure timely planting.`
+        : `Vegetation health is stable over 5 years but there is room to improve. Apply organic matter before planting.`
       );
     }
   }
