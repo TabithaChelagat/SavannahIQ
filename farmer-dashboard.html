@@ -225,19 +225,24 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
               <option value="09">Sep</option><option value="10">Oct</option>
               <option value="11">Nov</option><option value="12">Dec</option>
             </select>
-            <button class="sel-go" onclick="loadSnapshotAndTrend()">Go</button>
+            <button class="sel-go" onclick="loadSnapshot()">Go</button>
           </div>
         </div>
 
-        <div class="legend">
-          <div class="legend-title" id="legend-title">NDVI — Vegetation Health</div>
-          <div class="legend-bar" id="legend-bar" style="background:linear-gradient(to right,#e04030,#e07820,#28b858)"></div>
-          <div class="legend-labels" id="legend-labels"><span>Low</span><span>High</span></div>
         </div>
       </div>
 
       <!-- BOTTOM PANEL -->
       <div class="bottom-panel">
+
+        <!-- LEGEND — inline in panel -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+          <div style="flex:1">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px" id="legend-title">NDVI — Vegetation Health</div>
+            <div id="legend-bar" style="height:6px;border-radius:3px;background:linear-gradient(to right,#e04030,#e07820,#28b858)"></div>
+            <div id="legend-labels" style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:3px"><span>Low</span><span>High</span></div>
+          </div>
+        </div>
 
         <div class="farm-info-row">
           <div class="farm-badge">
@@ -389,7 +394,8 @@ function initDashboard(){
 
   initMap(farmer.lng, farmer.lat, 15);
   $('map-pin').style.display='block';
-  loadSnapshotAndTrend();
+  loadSnapshot();
+  loadTrend(); // load once on login — fixed 5yr window, never reloads
 }
 
 function initMap(lng, lat, zoom){
@@ -417,7 +423,7 @@ function buildBufferGeometry(lat, lng, radiusDeg=0.005){
   return { type:'Polygon', coordinates:[coords] };
 }
 
-function loadSnapshotAndTrend(){ loadSnapshot(); loadTrend(); }
+function loadSnapshotAndTrend(){ loadSnapshot(); }
 function loadSnapshotOnly(){ loadSnapshot(); }
 
 async function loadSnapshot(){
@@ -505,6 +511,9 @@ async function fetchIndices(start, end){
         setArrow('rain-arrow', i.rainfall_mm, p.rainfall_mm);
         setArrow('soil-arrow', i.soil_moisture, p.soil_moisture);
       }
+
+      // Generate advisory immediately based on current index — uses live card data
+      generateAdvisory([], i.ndvi, null, null);
     }
   } catch(e){ console.error(e); }
 }
