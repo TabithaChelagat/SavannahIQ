@@ -311,6 +311,7 @@ const CLOUD_RUN = 'https://savannahiq-tiles-353411679165.europe-west1.run.app';
 const $ = id => document.getElementById(id);
 let map, farmer;
 let currentIndex = 'ndvi';
+let trendResults = []; // store globally so advisory can access them
 const now = new Date();
 
 const LEGENDS = {
@@ -377,7 +378,7 @@ function initDashboard(){
   $('nav-name').textContent = farmer.name;
   $('farm-name').textContent = farmer.name;
   $('farm-crop').textContent = farmer.primary_crop ? farmer.primary_crop.charAt(0).toUpperCase()+farmer.primary_crop.slice(1) : '—';
-  $('farm-details').textContent = `${farmer.primary_crop} · Bungoma · SavannahIQ`;
+  $('farm-details').textContent = `${farmer.primary_crop} · SavannahIQ`;
 
   if(!farmer.lat || !farmer.lng){
     // Old registration without location — show prompt
@@ -508,7 +509,7 @@ async function fetchIndices(start, end){
       }
 
       // Generate advisory immediately based on current index — uses live card data
-      generateAdvisory([], i.ndvi, null, null);
+      generateAdvisory(trendResults, i.ndvi, null, null);
     }
   } catch(e){ console.error(e); }
 }
@@ -536,6 +537,7 @@ async function loadTrend(){
 
   renderTrend(results);
   computeTrendSummary(results);
+  trendResults = results; // store globally for advisory
 
   // Fetch 1 month ago and 3 months ago for advisory comparison
   const oneMonthAgo = new Date();
@@ -562,10 +564,10 @@ async function loadTrend(){
     const [d1, d3] = await Promise.all([res1.json(), res3.json()]);
     const ndvi1m = d1.status==='ok' ? d1.indices.ndvi : null;
     const ndvi3m = d3.status==='ok' ? d3.indices.ndvi : null;
-    const currentNdvi = results[results.length-1].ndvi;
-    generateAdvisory(results, currentNdvi, ndvi1m, ndvi3m);
+    const currentNdvi = trendResults[trendResults.length-1]?.ndvi || null;
+    generateAdvisory(trendResults, currentNdvi, ndvi1m, ndvi3m);
   } catch(e){
-    generateAdvisory(results, null, null, null);
+    generateAdvisory(trendResults, null, null, null);
   }
 }
 
