@@ -146,7 +146,7 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 
 /* ADVISORY */
 .advisory{background:var(--ltgreen);border:1px solid rgba(40,184,88,0.3);
-  border-radius:10px;padding:14px 16px}
+  border-radius:10px;padding:14px 16px;max-height:160px;overflow-y:auto}
 .advisory-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--green);
   text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;
   display:flex;align-items:center;gap:6px}
@@ -311,7 +311,9 @@ const CLOUD_RUN = 'https://savannahiq-tiles-353411679165.europe-west1.run.app';
 const $ = id => document.getElementById(id);
 let map, farmer;
 let currentIndex = 'ndvi';
-let trendResults = []; // store globally so advisory can access them
+let trendResults = [];
+let ndvi1mGlobal = null;
+let ndvi3mGlobal = null;
 const now = new Date();
 
 const LEGENDS = {
@@ -509,7 +511,7 @@ async function fetchIndices(start, end){
       }
 
       // Generate advisory immediately based on current index — uses live card data
-      generateAdvisory(trendResults, i.ndvi, null, null);
+      generateAdvisory(trendResults, i.ndvi, ndvi1mGlobal, ndvi3mGlobal);
     }
   } catch(e){ console.error(e); }
 }
@@ -564,6 +566,8 @@ async function loadTrend(){
     const [d1, d3] = await Promise.all([res1.json(), res3.json()]);
     const ndvi1m = d1.status==='ok' ? d1.indices.ndvi : null;
     const ndvi3m = d3.status==='ok' ? d3.indices.ndvi : null;
+    ndvi1mGlobal = ndvi1m;
+    ndvi3mGlobal = ndvi3m;
     const currentNdvi = trendResults[trendResults.length-1]?.ndvi || null;
     generateAdvisory(trendResults, currentNdvi, ndvi1m, ndvi3m);
   } catch(e){
@@ -648,13 +652,13 @@ function generateAdvisory(results, currentNdvi, ndvi1MonthAgo, ndvi3MonthsAgo){
       const trend=change5yr>5?'improving':change5yr<-5?'declining':'stable';
       const abs5yr=Math.abs(change5yr).toFixed(0);
       if(trend==='declining') parts.push(latest<0.3
-        ? `Over 5 years vegetation health has dropped ${abs5yr}% and is now critical. Rotate ${crop} with beans or cowpeas to restore soil nitrogen.`
-        : `Over 5 years the trend is declining by ${abs5yr}%. Try intercropping ${crop} with legumes like beans which restore soil nitrogen.`
+        ? `Over 5 years vegetation health has dropped ${abs5yr}% and is now critical. Rotate ${crop} with legumes like beans or cowpeas to restore soil nitrogen. Add compost before the next planting.`
+        : `Over 5 years the trend is declining by ${abs5yr}%. Try intercropping ${crop} with legumes like beans or cowpeas which restore soil nitrogen between seasons.`
       );
-      else if(trend==='improving') parts.push(`The 5-year trend is positive — up ${abs5yr}%. Keep up your current practices and consider a second crop variety alongside ${crop}.`);
+      else if(trend==='improving') parts.push(`The 5-year trend is positive — up ${abs5yr}%. Keep up your current practices and consider a second crop variety alongside ${crop} to reduce seasonal risk.`);
       else parts.push(latest>=0.6
-        ? `Vegetation health is stable and healthy over 5 years. To push yields higher, try intercropping ${crop} with beans and ensure timely planting.`
-        : `Vegetation health is stable over 5 years but there is room to improve. Apply organic matter before planting.`
+        ? `Vegetation health is stable and healthy over 5 years. To push yields higher, intercrop ${crop} with beans and ensure timely planting at the onset of rains.`
+        : `Vegetation health is stable over 5 years but there is room to improve. Apply organic matter before planting and ensure proper crop spacing.`
       );
     }
   }
