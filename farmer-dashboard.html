@@ -54,9 +54,9 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 #map{width:100%;height:100%}
 
 .selector-bar{
-  position:absolute;top:10px;left:10px;right:10px;z-index:10;
-  background:rgba(13,43,18,0.92);backdrop-filter:blur(8px);
-  border-radius:10px;padding:10px 14px;
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  background:rgba(13,43,18,0.96);
+  padding:10px 14px;
   display:flex;align-items:center;gap:8px;
 }
 .sel-label{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,0.5);
@@ -200,13 +200,10 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
 
       <div class="map-wrap">
         <div id="map"></div>
-
-        <!-- Pin indicator at center -->
         <div class="map-pin" id="map-pin">
           <div class="map-pin-ring"></div>
           <div class="map-pin-dot"></div>
         </div>
-
         <div class="selector-bar" style="flex-direction:column;align-items:stretch;gap:6px">
           <div style="display:flex;align-items:center;gap:8px">
             <button class="sel-tab active" id="tab-ndvi" onclick="setIndex('ndvi')">NDVI</button>
@@ -227,8 +224,6 @@ nav{background:var(--dkgreen);padding:0 20px;height:52px;
             </select>
             <button class="sel-go" onclick="loadSnapshot()">Go</button>
           </div>
-        </div>
-
         </div>
       </div>
 
