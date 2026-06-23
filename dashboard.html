@@ -106,11 +106,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       <div id="hdr-date" style="font-size:11px;font-weight:600;color:var(--good)">—</div>
       <div>Sentinel-2 · 30-day</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:stretch;flex:1;gap:2px;min-width:180px">
-      <input type="range" id="snap-slider" min="0" max="0" value="0" step="1"
-        style="width:100%;accent-color:var(--good);height:14px;cursor:pointer"
-        oninput="onSnapSliderInput(this.value)" onchange="changeSnapshotTo(this.value)">
-      <div id="snap-ticks" style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted)"></div>
+    <div style="display:flex;align-items:center;gap:6px;flex:1">
+      <select id="period-year" style="background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:10px;padding:4px 6px;cursor:pointer;outline:none"></select>
+      <select id="period-month" style="background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:10px;padding:4px 6px;cursor:pointer;outline:none">
+        <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+        <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
+        <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
+        <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+      </select>
+      <button onclick="loadPeriod()" style="background:var(--green);color:var(--bg);font-family:var(--mono);font-size:10px;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-weight:700">Go</button>
     </div>
   </div>
 </div>
@@ -947,103 +951,76 @@ function updateBottomNational(){
     `<div class="aline" style="border-color:var(--orange);background:#0c1a10;font-size:9px;line-height:1.6">${natAI[activeIdx]||natAI.drought}</div>`;
 }
 
-// Highlight the active month tick
-function highlightActiveTick(){
-  const maxIdx = ALL_SNAPSHOTS.length - 1;
-  const chronoIdx = maxIdx - CURRENT_SNAP_IDX; // position in oldest-to-newest order
-  document.querySelectorAll('#snap-ticks span').forEach((el, i) => {
-    el.style.color = (i === chronoIdx) ? 'var(--good)' : 'var(--muted)';
-    el.style.fontWeight = (i === chronoIdx) ? '700' : '400';
-  });
-  const slider = document.getElementById('snap-slider');
-  if(slider) slider.value = chronoIdx;
-}
+// Load tiles and stats for selected year/month
+async function loadPeriod(){
+  const year  = document.getElementById('period-year').value;
+  const month = document.getElementById('period-month').value;
+  const start = `${year}-${month}-01`;
+  const end   = `${year}-${month}-28`;
 
-// Slider preview — update tick highlight as user drags, without reloading data
-function onSnapSliderInput(val){
-  const maxIdx = ALL_SNAPSHOTS.length - 1;
-  const idx = maxIdx - parseInt(val); // slider left=oldest(high idx), right=newest(idx 0)
-  document.querySelectorAll('#snap-ticks span').forEach((el, i) => {
-    el.style.color = (i === parseInt(val)) ? 'var(--good)' : 'var(--muted)';
-    el.style.fontWeight = (i === parseInt(val)) ? '700' : '400';
-  });
-}
+  document.getElementById('hdr-date').textContent = `${year}-${month}`;
+  document.getElementById('map-sub').textContent = 'Loading satellite data...';
 
-// Click a month tick directly
-function jumpToSnapshot(chronoIdx){
-  const maxIdx = ALL_SNAPSHOTS.length - 1;
-  const sliderVal = chronoIdx; // chronoIdx 0=oldest(leftmost), maxIdx=newest(rightmost)
-  document.getElementById('snap-slider').value = sliderVal;
-  changeSnapshotTo(sliderVal);
-}
-
-// Slider release — actually load that snapshot's data
-async function changeSnapshotTo(val){
-  const maxIdx = ALL_SNAPSHOTS.length - 1;
-  const newIdx = maxIdx - parseInt(val); // slider left=oldest, right=newest
-  if(newIdx === CURRENT_SNAP_IDX || !ALL_SNAPSHOTS[newIdx]) return;
-  CURRENT_SNAP_IDX = newIdx;
-  const snap = ALL_SNAPSHOTS[CURRENT_SNAP_IDX];
-
-  highlightActiveTick();
-
-
-  // Fetch county stats for this snapshot
-  const ctyResp = await fetch(
-    SUPABASE_URL + '/rest/v1/county_stats?snapshot_id=eq.' + snap.id + '&limit=50',
-    {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}
-  );
-  const counties = await ctyResp.json();
-  const natResp = await fetch(
-    SUPABASE_URL + '/rest/v1/national_stats?snapshot_id=eq.' + snap.id,
-    {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}
-  );
-  const natData = await natResp.json();
-  const nat = natData[0] || {};
-
-  // Update SIQ with this snapshot's data
-  SIQ = {
-    generated: snap.snapshot_date,
-    national: {
-      critical_counties: nat.critical_counties || 0,
-      moderate_counties: nat.moderate_counties || 0,
-      stable_counties:   nat.stable_counties   || 0,
-      avg_drought:       parseFloat(nat.avg_drought) || 0,
-      avg_ndvi:          parseFloat(nat.avg_ndvi)    || 0,
-    },
-    counties: counties.map(c => ({
-      county: c.county, county_code: c.county_code,
-      date: c.snapshot_date, drought: parseFloat(c.drought),
-      ndvi: parseFloat(c.ndvi),
-      rain: parseFloat(c.rain), soil: parseFloat(c.soil),
-      ipc: parseInt(c.ipc), pct_critical: parseFloat(c.pct_critical),
-      pct_moderate: parseFloat(c.pct_moderate), pct_good: parseFloat(c.pct_good),
-    }))
-  };
-  CD = {};
-  SIQ.counties.forEach(c => CD[c.county] = c);
-
-  // Update header date
-  document.getElementById('hdr-date').textContent = snap.snapshot_date;
-
-  // Reload tiles for this snapshot window
-  tilesReady = false;
-  try {
-    const tileResp = await fetch(
-      CLOUD_RUN + '/tiles?start=' + snap.window_start + '&end=' + snap.window_end
+  // Try Supabase first for stats matching this period
+  try{
+    const snapResp = await fetch(
+      SUPABASE_URL + '/rest/v1/snapshots?snapshot_date=gte.' + start + '&snapshot_date=lte.' + end + '&limit=1',
+      {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}
     );
+    const snaps = await snapResp.json();
+    if(snaps && snaps.length){
+      const snap = snaps[0];
+      const [natResp, ctyResp] = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/national_stats?snapshot_id=eq.' + snap.id, {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}),
+        fetch(SUPABASE_URL + '/rest/v1/county_stats?snapshot_id=eq.' + snap.id + '&limit=50', {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}})
+      ]);
+      const natData = await natResp.json();
+      const counties = await ctyResp.json();
+      const nat = natData[0] || {};
+      SIQ = {
+        generated: snap.snapshot_date,
+        national: {
+          critical_counties: nat.critical_counties || 0,
+          moderate_counties: nat.moderate_counties || 0,
+          stable_counties:   nat.stable_counties   || 0,
+          avg_drought:       parseFloat(nat.avg_drought) || 0,
+          avg_ndvi:          parseFloat(nat.avg_ndvi)    || 0,
+        },
+        counties: counties.map(c => ({
+          county: c.county, county_code: c.county_code,
+          date: c.snapshot_date, drought: parseFloat(c.drought),
+          ndvi: parseFloat(c.ndvi), rain: parseFloat(c.rain),
+          soil: parseFloat(c.soil), ipc: parseInt(c.ipc),
+          pct_critical: parseFloat(c.pct_critical),
+          pct_moderate: parseFloat(c.pct_moderate),
+          pct_good: parseFloat(c.pct_good),
+        }))
+      };
+      CD = {};
+      SIQ.counties.forEach(c => CD[c.county] = c);
+      document.getElementById('hdr-date').textContent = snap.snapshot_date;
+      loadKPIs();
+      if(activeView === 'national') updateBottomNational();
+      else if(activeCounty) updateBottomCounty(activeCounty);
+    }
+  } catch(e){ console.error('Supabase stats fetch failed:', e); }
+
+  // Always reload tiles from GEE for the selected period
+  tilesReady = false;
+  try{
+    const tileResp = await fetch(CLOUD_RUN + '/tiles?start=' + start + '&end=' + end);
     const tileData = await tileResp.json();
     if(tileData.status === 'ok' && tileData.tiles){
       Object.assign(TILE_URLS, tileData.tiles);
       tilesReady = true;
       swapTileLayer(activeIdx);
+      document.getElementById('map-sub').textContent =
+        `Showing: ${activeIdx} · ${year}-${month} · all 47 counties · click to explore`;
     }
-  } catch(err){ console.error('Tile reload failed:', err); }
-
-  // Update all panels
-  loadKPIs();
-  if(activeView === 'national') updateBottomNational();
-  else if(activeCounty) updateBottomCounty(activeCounty);
+  } catch(e){
+    console.error('Tile reload failed:', e);
+    document.getElementById('map-sub').textContent = 'Tile server unavailable — try refreshing';
+  }
 }
 
 
@@ -1115,24 +1092,18 @@ async function boot() {
     updateLegend('lulc');
     updateBottomNational();
     initMap(geojson);
-    // Set up snapshot slider — left=oldest, right=newest (latest selected by default)
-    // ALL_SNAPSHOTS is ordered newest-first, so reverse for chronological left-to-right
-    const slider = document.getElementById('snap-slider');
-    const maxIdx = Math.max(0, ALL_SNAPSHOTS.length - 1);
-    slider.max = maxIdx;
-    slider.value = maxIdx; // rightmost = newest = ALL_SNAPSHOTS[0], matches CURRENT_SNAP_IDX=0
 
-    // Render month tick labels, oldest (left) to newest (right), clickable
-    const ticksEl = document.getElementById('snap-ticks');
-    const chronological = [...ALL_SNAPSHOTS].reverse(); // oldest first
-    ticksEl.innerHTML = chronological.map((s, i) => {
-      const d = new Date(s.snapshot_date);
-      const label = d.toLocaleDateString('en-US', {month:'short'});
-      return `<span style="cursor:pointer;padding:1px 3px;border-radius:2px" `
-        + `onclick="jumpToSnapshot(${i})" `
-        + `id="tick-${i}">${label}</span>`;
-    }).join('');
-    highlightActiveTick();
+    // Populate year dropdown — current year back 5 years
+    const yearSel = document.getElementById('period-year');
+    const nowDate = new Date();
+    for(let y = nowDate.getFullYear(); y >= nowDate.getFullYear()-5; y--){
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      yearSel.appendChild(opt);
+    }
+    // Set month to current month
+    document.getElementById('period-month').value =
+      String(nowDate.getMonth()+1).padStart(2,'0');
 
   } catch(err) {
     console.error('Boot error:', err);
