@@ -62,7 +62,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 .leg{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted)}
 .leg-sq{width:10px;height:10px;border-radius:2px}
 #map-sub{margin-left:auto;font-size:9px;color:var(--muted)}
-.bottom{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;height:132px}
+.bottom{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;min-height:132px}
 .panel{padding:10px 12px;border-right:1px solid var(--border);overflow:hidden}
 .panel:last-child{border-right:none}
 .phdr{font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
@@ -956,20 +956,31 @@ async function loadPeriod(){
   const year  = document.getElementById('period-year').value;
   const month = document.getElementById('period-month').value;
   const start = `${year}-${month}-01`;
-  const end   = `${year}-${month}-28`;
+  // Bug 1 fix: compute real last day of the month (handles 28/29/30/31)
+  const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+  const end = `${year}-${month}-${String(lastDay).padStart(2,'0')}`;
 
   document.getElementById('hdr-date').textContent = `${year}-${month}`;
   document.getElementById('map-sub').textContent = 'Loading satellite data...';
 
+  // Track the snapshot window to pass to Cloud Run
+  let tileStart = start;
+  let tileEnd   = end;
+
   // Try Supabase first for stats matching this period
   try{
     const snapResp = await fetch(
-      SUPABASE_URL + '/rest/v1/snapshots?snapshot_date=gte.' + start + '&snapshot_date=lte.' + end + '&limit=1',
+      SUPABASE_URL + '/rest/v1/snapshots?snapshot_date=gte.' + start + '&snapshot_date=lte.' + end + '&order=snapshot_date.desc&limit=1',
       {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}
     );
     const snaps = await snapResp.json();
     if(snaps && snaps.length){
       const snap = snaps[0];
+
+      // Bug 2 fix: use the snapshot's actual window dates for tile fetch
+      if(snap.window_start) tileStart = snap.window_start;
+      if(snap.window_end)   tileEnd   = snap.window_end;
+
       const [natResp, ctyResp] = await Promise.all([
         fetch(SUPABASE_URL + '/rest/v1/national_stats?snapshot_id=eq.' + snap.id, {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}),
         fetch(SUPABASE_URL + '/rest/v1/county_stats?snapshot_id=eq.' + snap.id + '&limit=50', {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}})
@@ -1000,15 +1011,23 @@ async function loadPeriod(){
       SIQ.counties.forEach(c => CD[c.county] = c);
       document.getElementById('hdr-date').textContent = snap.snapshot_date;
       loadKPIs();
+      // Bug 3 fix: always call updateBottom after SIQ is refreshed
       if(activeView === 'national') updateBottomNational();
       else if(activeCounty) updateBottomCounty(activeCounty);
+    } else {
+      // No snapshot found for this period — show clear message
+      document.getElementById('map-sub').textContent =
+        `No snapshot found for ${year}-${month} — try another month`;
     }
-  } catch(e){ console.error('Supabase stats fetch failed:', e); }
+  } catch(e){
+    console.error('Supabase stats fetch failed:', e);
+    document.getElementById('map-sub').textContent = 'Stats unavailable — check connection';
+  }
 
-  // Always reload tiles from GEE for the selected period
+  // Always reload tiles from GEE using the correct window dates
   tilesReady = false;
   try{
-    const tileResp = await fetch(CLOUD_RUN + '/tiles?start=' + start + '&end=' + end);
+    const tileResp = await fetch(CLOUD_RUN + '/tiles?start=' + tileStart + '&end=' + tileEnd);
     const tileData = await tileResp.json();
     if(tileData.status === 'ok' && tileData.tiles){
       Object.assign(TILE_URLS, tileData.tiles);
