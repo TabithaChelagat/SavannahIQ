@@ -324,7 +324,7 @@ function loadKPIs(){
   document.getElementById('kpi-critical').textContent = n.critical_counties;
   document.getElementById('kpi-moderate').textContent = n.moderate_counties;
   document.getElementById('kpi-stable').textContent   = n.stable_counties;
-  document.getElementById('hdr-date').textContent     = SIQ.generated;
+  document.getElementById('hdr-date').textContent     = SIQ.generated ? SIQ.generated.slice(0,7) : '—';
 }
 
 function initMap(geojson){
@@ -898,7 +898,7 @@ function updateBottomNational(){
     const treeCounties = [...SIQ.counties].sort((a,b)=>b.ndvi-a.ndvi).slice(0,3).map(c=>c.county).join(', ');
     document.getElementById('p3-body').innerHTML =
       `<div class="aline" style="border-color:var(--orange);background:#0c1a10;font-size:9px;line-height:1.6">
-        <b>Kenya land cover ${new Date().getFullYear()}</b> — Live Dynamic World 10m. Highest vegetation density: <b>${treeCounties}</b> (NDVI >0.65). Most degraded/bare: <b>${bareCounties}</b> (NDVI <0.3). ${SIQ.counties.filter(c=>c.ndvi<0.25).length} counties showing critically sparse vegetation — arid and semi-arid zones. Cropland (orange) concentrated in highlands and western Kenya. Built areas visible around Nairobi, Mombasa, Kisumu. Data: ${SIQ.generated}.
+        <b>Kenya land cover ${SIQ.generated.slice(0,4)}</b> — Live Dynamic World 10m. Highest vegetation density: <b>${treeCounties}</b> (NDVI >0.65). Most degraded/bare: <b>${bareCounties}</b> (NDVI <0.3). ${SIQ.counties.filter(c=>c.ndvi<0.25).length} counties showing critically sparse vegetation — arid and semi-arid zones. Cropland (orange) concentrated in highlands and western Kenya. Built areas visible around Nairobi, Mombasa, Kisumu. Data: ${SIQ.generated}.
       </div>`;
     return;
   }
@@ -933,13 +933,13 @@ function updateBottomNational(){
     const healthyCrops  = [...SIQ.counties].sort((a,b)=>b.ndvi-a.ndvi).slice(0,3).map(c=>c.county).join(', ');
     document.getElementById('p3-body').innerHTML =
       `<div class="aline" style="border-color:#e49635;background:#0c1a10;font-size:9px;line-height:1.6">
-        <b>Cropland NDVI health — Kenya ${new Date().getFullYear()}</b>. Classification estimated from NDVI within Dynamic World class 4. Healthiest cropland: <b>${healthyCrops}</b> (NDVI >0.65 — likely tea/perennial). Most stressed cropland: <b>${stressedCrops}</b>. ${SIQ.counties.filter(c=>c.ndvi<0.35).length} counties with cropland NDVI below 0.35 — dryland cereals or fallow likely dominant. Methodology improving with each 30-day data collection. Data: ${SIQ.generated}.
+        <b>Cropland NDVI health — Kenya ${SIQ.generated.slice(0,4)}</b>. Classification estimated from NDVI within Dynamic World class 4. Healthiest cropland: <b>${healthyCrops}</b> (NDVI >0.65 — likely tea/perennial). Most stressed cropland: <b>${stressedCrops}</b>. ${SIQ.counties.filter(c=>c.ndvi<0.35).length} counties with cropland NDVI below 0.35 — dryland cereals or fallow likely dominant. Methodology improving with each 30-day data collection. Data: ${SIQ.generated}.
       </div>`;
     return;
   }
 
   // All other indexes — single AI block in panel 3
-  const yr = new Date().getFullYear();
+  const yr = SIQ.generated ? SIQ.generated.slice(0,4) : new Date().getFullYear();
   const topDrought = [...SIQ.counties].sort((a,b)=>b.drought-a.drought)[0];
   const natAI = {
     drought: `<b>National drought — Kenya ${yr}.</b> ${n.critical_counties} critical, ${n.moderate_counties} moderate, ${n.stable_counties} stable counties out of 47. National avg score: ${n.avg_drought}/100. Highest risk: <b>${topDrought.county}</b> (${topDrought.drought}/100). ${SIQ.counties.filter(c=>c.drought>=40).length>0?`Counties at moderate-critical risk: <b>${[...SIQ.counties].sort((a,b)=>b.drought-a.drought).filter(c=>c.drought>=40).map(c=>c.county+' ('+c.drought+')').join(', ')}</b>.`:'All counties within stable range.'} Composite of NDVI, soil moisture, rainfall anomaly. Data: ${SIQ.generated}.`,
@@ -1009,7 +1009,6 @@ async function loadPeriod(){
       };
       CD = {};
       SIQ.counties.forEach(c => CD[c.county] = c);
-      document.getElementById('hdr-date').textContent = snap.snapshot_date;
       loadKPIs();
       // Bug 3 fix: always call updateBottom after SIQ is refreshed
       if(activeView === 'national') updateBottomNational();
