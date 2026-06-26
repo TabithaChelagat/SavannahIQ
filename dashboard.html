@@ -648,13 +648,14 @@ function updateBottomCounty(name){
   // ── LULC county breakdown ──────────────────────────────────────────────────
   if(activeIdx === 'lulc'){
     const dwClasses = [
-      {name:'Water',    color:'#419bdf', pct:3},
-      {name:'Trees',    color:'#397d49', pct:c.ndvi>=0.6?35:c.ndvi>=0.45?20:8},
-      {name:'Grass',    color:'#88b053', pct:c.ndvi>=0.35&&c.ndvi<0.6?30:15},
-      {name:'Crops',    color:'#e49635', pct:c.ndvi>=0.25&&c.ndvi<0.55?25:10},
-      {name:'Shrub',    color:'#dfc35a', pct:12},
-      {name:'Built',    color:'#c4281b', pct:name==='NAIROBI'||name==='MOMBASA'?18:4},
-      {name:'Bare',     color:'#a59b8f', pct:c.ndvi<0.2?40:c.ndvi<0.3?20:5},
+      {name:'Water',       color:'#419bdf', pct: c.pct_water   || 0},
+      {name:'Trees',       color:'#397d49', pct: c.pct_trees   || 0},
+      {name:'Grass',       color:'#88b053', pct: c.pct_grass   || 0},
+      {name:'Flooded veg', color:'#7a87c6', pct: c.pct_flooded || 0},
+      {name:'Crops',       color:'#e49635', pct: c.pct_crops   || 0},
+      {name:'Shrub',       color:'#dfc35a', pct: c.pct_shrub   || 0},
+      {name:'Built',       color:'#c4281b', pct: c.pct_built   || 0},
+      {name:'Bare',        color:'#a59b8f', pct: c.pct_bare    || 0},
     ];
     const maxP = Math.max(...dwClasses.map(d=>d.pct));
     document.getElementById('p1-hdr').textContent = 'Land cover · '+name;
@@ -867,15 +868,17 @@ function updateBottomNational(){
 
   // Override panels 1+2 for lulc and crops with colour-matched distribution bars
   if(activeIdx === 'lulc'){
-    // DW class distribution across counties using available data proxies
+    // Average each DW class across all 47 counties using real stored pct_ values
+    const avg = key => Math.round(SIQ.counties.reduce((s,c)=>s+(c[key]||0),0) / SIQ.counties.length);
     const dwClasses = [
-      {name:'Water',    color:'#419bdf', pct:3},
-      {name:'Trees',    color:'#397d49', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.6).length/47*40)},
-      {name:'Grass',    color:'#88b053', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.35&&c.ndvi<0.6).length/47*35)},
-      {name:'Crops',    color:'#e49635', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.25&&c.ndvi<0.55).length/47*25)},
-      {name:'Shrub',    color:'#dfc35a', pct:12},
-      {name:'Built',    color:'#c4281b', pct:4},
-      {name:'Bare',     color:'#a59b8f', pct:Math.round(SIQ.counties.filter(c=>c.ndvi<0.2).length/47*30)},
+      {name:'Water',       color:'#419bdf', pct: avg('pct_water')},
+      {name:'Trees',       color:'#397d49', pct: avg('pct_trees')},
+      {name:'Grass',       color:'#88b053', pct: avg('pct_grass')},
+      {name:'Flooded veg', color:'#7a87c6', pct: avg('pct_flooded')},
+      {name:'Crops',       color:'#e49635', pct: avg('pct_crops')},
+      {name:'Shrub',       color:'#dfc35a', pct: avg('pct_shrub')},
+      {name:'Built',       color:'#c4281b', pct: avg('pct_built')},
+      {name:'Bare',        color:'#a59b8f', pct: avg('pct_bare')},
     ];
     const maxPct = Math.max(...dwClasses.map(d=>d.pct));
     document.getElementById('p1-hdr').textContent = 'Land cover classes';
@@ -893,12 +896,16 @@ function updateBottomNational(){
         <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
       </div>`).join('') +
       `<div style="font-size:8px;color:var(--muted);margin-top:4px">· Top 5 bare/degraded counties below</div>`;
-    // AI for lulc
-    const bareCounties = [...SIQ.counties].sort((a,b)=>a.ndvi-b.ndvi).slice(0,3).map(c=>c.county).join(', ');
-    const treeCounties = [...SIQ.counties].sort((a,b)=>b.ndvi-a.ndvi).slice(0,3).map(c=>c.county).join(', ');
+    // AI for lulc — using real DW class averages
+    const bareCounties  = [...SIQ.counties].sort((a,b)=>(b.pct_bare||0)-(a.pct_bare||0)).slice(0,3).map(c=>`${c.county} (${(c.pct_bare||0).toFixed(0)}%)`).join(', ');
+    const treeCounties  = [...SIQ.counties].sort((a,b)=>(b.pct_trees||0)-(a.pct_trees||0)).slice(0,3).map(c=>`${c.county} (${(c.pct_trees||0).toFixed(0)}%)`).join(', ');
+    const cropCounties  = [...SIQ.counties].sort((a,b)=>(b.pct_crops||0)-(a.pct_crops||0)).slice(0,3).map(c=>`${c.county} (${(c.pct_crops||0).toFixed(0)}%)`).join(', ');
+    const avgTrees = avg('pct_trees');
+    const avgCrops = avg('pct_crops');
+    const avgBare  = avg('pct_bare');
     document.getElementById('p3-body').innerHTML =
       `<div class="aline" style="border-color:var(--orange);background:#0c1a10;font-size:9px;line-height:1.6">
-        <b>Kenya land cover ${SIQ.generated.slice(0,4)}</b> — Live Dynamic World 10m. Highest vegetation density: <b>${treeCounties}</b> (NDVI >0.65). Most degraded/bare: <b>${bareCounties}</b> (NDVI <0.3). ${SIQ.counties.filter(c=>c.ndvi<0.25).length} counties showing critically sparse vegetation — arid and semi-arid zones. Cropland (orange) concentrated in highlands and western Kenya. Built areas visible around Nairobi, Mombasa, Kisumu. Data: ${SIQ.generated}.
+        <b>Kenya land cover ${SIQ.generated.slice(0,4)}</b> — Real Dynamic World 10m pixel counts. Avg national: Trees ${avgTrees}%, Crops ${avgCrops}%, Bare ${avgBare}%. Highest tree cover: <b>${treeCounties}</b>. Most cropland: <b>${cropCounties}</b>. Most bare/degraded: <b>${bareCounties}</b>. Data: ${SIQ.generated}.
       </div>`;
     return;
   }
@@ -1004,7 +1011,15 @@ async function loadPeriod(){
           soil: parseFloat(c.soil), ipc: parseInt(c.ipc),
           pct_critical: parseFloat(c.pct_critical),
           pct_moderate: parseFloat(c.pct_moderate),
-          pct_good: parseFloat(c.pct_good),
+          pct_good:     parseFloat(c.pct_good),
+          pct_water:    parseFloat(c.pct_water   || 0),
+          pct_trees:    parseFloat(c.pct_trees   || 0),
+          pct_grass:    parseFloat(c.pct_grass   || 0),
+          pct_flooded:  parseFloat(c.pct_flooded || 0),
+          pct_crops:    parseFloat(c.pct_crops   || 0),
+          pct_shrub:    parseFloat(c.pct_shrub   || 0),
+          pct_built:    parseFloat(c.pct_built   || 0),
+          pct_bare:     parseFloat(c.pct_bare    || 0),
         }))
       };
       CD = {};
