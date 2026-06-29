@@ -138,7 +138,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <div class="pill" data-idx="ndvi" onclick="setIdx('ndvi',this)">NDVI <span class="ptag" style="background:#103a10;color:var(--good)">VEG</span></div>
         <div class="pill" data-idx="rainfall" onclick="setIdx('rainfall',this)">Rainfall (30d mm) <span class="ptag" style="background:#102030;color:#6ac0e0">PRECIP</span></div>
         <div class="pill" data-idx="soil" onclick="setIdx('soil',this)">Soil moisture <span class="ptag" style="background:#102030;color:#6ac0e0">HYDRO</span></div>
-        <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#1a2a10;color:#a0d860">CLASS</span></div>
+        <div class="pill" data-idx="crops" onclick="setIdx('crops',this)">Crop types <span class="ptag" style="background:#2a2a10;color:#aaa">SOON</span></div>
         <select class="csel" id="crop-filter" onchange="onCropFilter(this.value)" style="margin-top:4px;margin-bottom:2px;display:none">
           <option value="">— All crop types —</option>
           <option value="maize">Maize</option>
@@ -204,14 +204,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       <!-- Crops legend — shown for crops pill -->
       <div id="leg-crops" style="display:none;gap:6px;align-items:center;flex-wrap:wrap">
         <div class="leg"><div class="leg-sq" style="background:#a59b8f"></div><span style="font-size:9px;color:var(--muted)">Fallow/bare</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#e04030"></div><span style="font-size:9px;color:var(--muted)">Very sparse</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#e07820"></div><span style="font-size:9px;color:var(--muted)">Dryland cereals</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#f5e642"></div><span style="font-size:9px;color:var(--muted)">Maize early</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#a0d860"></div><span style="font-size:9px;color:var(--muted)">Maize mid/wheat</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#4ec8e0"></div><span style="font-size:9px;color:var(--muted)">Maize peak/beans</span></div>
-        <div class="leg"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Sugarcane/rice</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#e04030"></div><span style="font-size:9px;color:var(--muted)">Dryland cereals</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#e07820"></div><span style="font-size:9px;color:var(--muted)">Sorghum/millet</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#f5e642"></div><span style="font-size:9px;color:var(--muted)">Maize</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#d4e157"></div><span style="font-size:9px;color:var(--muted)">Wheat</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#80deea"></div><span style="font-size:9px;color:var(--muted)">Rice</span></div>
+        <div class="leg"><div class="leg-sq" style="background:#419bdf"></div><span style="font-size:9px;color:var(--muted)">Sugarcane</span></div>
         <div class="leg"><div class="leg-sq" style="background:#2d6e28"></div><span style="font-size:9px;color:var(--muted)">Tea/coffee</span></div>
-        <span style="font-size:8px;color:var(--muted);font-style:italic">· Estimated</span>
+        <span style="font-size:8px;color:var(--good);font-style:italic">· 2021-2025 composite</span>
       </div>
       <!-- Index legend — shown for drought/ndvi/rainfall/soil -->
       <div id="leg-idx" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
@@ -295,6 +295,24 @@ let ALL_SNAPSHOTS = [];
 let CURRENT_SNAP_IDX = 0;
 let TILE_URLS = {};
 let tilesReady = false;
+let CROP_DATA = {};  // keyed by county name, value = crop_types row for active year
+
+// Fetch composite crop types (year=0 = 2021-2025 composite)
+async function fetchCropTypes(){
+  try {
+    const resp = await fetch(
+      SUPABASE_URL + '/rest/v1/crop_types?year=eq.0&limit=50',
+      {headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY}}
+    );
+    const rows = await resp.json();
+    CROP_DATA = {};
+    rows.forEach(r => { CROP_DATA[r.county] = r; });
+    console.log(`Crop types loaded: ${rows.length} counties (2021-2025 composite)`);
+  } catch(e) {
+    console.error('Crop types fetch failed:', e);
+    CROP_DATA = {};
+  }
+}
 
 const LEGENDS = {
   drought:  {crit:'≥70 · Critical',         mod:'40–69 · Moderate',        good:'<40 · Stable'},
@@ -458,7 +476,7 @@ function swapTileLayer(idx){
   map.getSource('siq-tiles').setTiles([url]);
   const labels = {
     lulc:    'Live 10m · Dynamic World · ',
-    crops:   'Live 10m · Estimated crop types · ',
+    crops:   'Crop type classification — coming soon · ',
     drought: 'Showing: drought · ',
     ndvi:    'Showing: NDVI · ',
     rainfall:'Showing: Rainfall 30d mm · ',
@@ -514,16 +532,16 @@ const DW_CLASSES = [
   {cls:8, color:'#b39fe1', name:'Snow / ice'},
 ];
 
-// Estimated crop classification — 8 NDVI classes within DW class 4
+// Crop type classes — 8-class 5-year composite (2021-2025) within DW class 4
 const CROP_CLASSES = [
-  {color:'#a59b8f', name:'Fallow / bare',          ha_key:'fallow_ha',   note:'NDVI <0.15'},
-  {color:'#e04030', name:'Very sparse / stressed',  ha_key:null,          note:'NDVI 0.15–0.25'},
-  {color:'#e07820', name:'Dryland cereals',         ha_key:'sorghum_ha',  note:'NDVI 0.25–0.35'},
-  {color:'#f5e642', name:'Maize early / stressed',  ha_key:null,          note:'NDVI 0.35–0.45'},
-  {color:'#a0d860', name:'Maize mid / wheat',       ha_key:'maize_ha',    note:'NDVI 0.45–0.55'},
-  {color:'#4ec8e0', name:'Maize peak / beans',      ha_key:null,          note:'NDVI 0.55–0.65'},
-  {color:'#419bdf', name:'Sugarcane / rice',        ha_key:'sugarcane_ha',note:'NDVI 0.65–0.75'},
-  {color:'#2d6e28', name:'Tea / coffee / perennial',ha_key:'tea_ha',      note:'NDVI >0.75'},
+  {color:'#a59b8f', name:'Fallow / bare',          col:'pct_fallow'},
+  {color:'#e04030', name:'Dryland cereals',         col:'pct_dryland'},
+  {color:'#e07820', name:'Sorghum / millet',        col:'pct_sorghum'},
+  {color:'#f5e642', name:'Maize',                   col:'pct_maize'},
+  {color:'#d4e157', name:'Wheat',                   col:'pct_wheat'},
+  {color:'#80deea', name:'Rice',                    col:'pct_rice'},
+  {color:'#419bdf', name:'Sugarcane',               col:'pct_sugarcane'},
+  {color:'#2d6e28', name:'Tea / coffee / perennial',col:'pct_perennial'},
 ];
 
 // Active DW filter class (null = all)
@@ -683,38 +701,25 @@ function updateBottomCounty(name){
 
   // ── Crops county breakdown ────────────────────────────────────────────────
   if(activeIdx === 'crops'){
-    const cropClasses = [
-      {name:'Fallow/bare',      color:'#a59b8f', pct:c.ndvi<0.15?60:c.ndvi<0.25?25:5},
-      {name:'Very sparse',      color:'#e04030', pct:c.ndvi>=0.15&&c.ndvi<0.25?45:c.ndvi<0.3?20:5},
-      {name:'Dryland cereals',  color:'#e07820', pct:c.ndvi>=0.25&&c.ndvi<0.35?50:c.ndvi<0.4?15:5},
-      {name:'Maize early',      color:'#f5e642', pct:c.ndvi>=0.35&&c.ndvi<0.45?45:10},
-      {name:'Maize mid/wheat',  color:'#a0d860', pct:c.ndvi>=0.45&&c.ndvi<0.55?45:10},
-      {name:'Maize peak/beans', color:'#4ec8e0', pct:c.ndvi>=0.55&&c.ndvi<0.65?45:8},
-      {name:'Sugarcane/rice',   color:'#419bdf', pct:c.ndvi>=0.65&&c.ndvi<0.75?35:5},
-      {name:'Tea/coffee',       color:'#2d6e28', pct:c.ndvi>=0.75?50:c.ndvi>=0.65?20:3},
-    ];
-    const maxC = Math.max(...cropClasses.map(d=>d.pct),1);
-    document.getElementById('p1-hdr').textContent = 'Crop classes · '+name;
-    document.getElementById('p1-body').innerHTML = cropClasses.slice(0,4).map(d=>
-      `<div class="irow active">
-        <div class="irow-name">${d.name}</div>
-        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxC*100)}%;background:${d.color}"></div></div>
-        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
-      </div>`).join('');
-    document.getElementById('p2-hdr').textContent = 'Crop classes continued';
-    document.getElementById('p2-body').innerHTML = cropClasses.slice(4).map(d=>
-      `<div class="irow active">
-        <div class="irow-name">${d.name}</div>
-        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxC*100)}%;background:${d.color}"></div></div>
-        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
-      </div>`).join('') +
-      `<div style="font-size:8px;color:var(--muted);margin-top:4px;font-style:italic">· Estimated from NDVI</div>`;
-    const dominantCrop = c.ndvi>=0.75?'tea/coffee (perennial)':c.ndvi>=0.65?'sugarcane/rice':c.ndvi>=0.55?'maize at peak/beans':c.ndvi>=0.45?'maize mid-season':c.ndvi>=0.35?'maize early stage':c.ndvi>=0.25?'dryland cereals (sorghum/millet)':'fallow or very sparse';
-    const cropStress = c.ndvi<0.3?'significant crop stress — subsistence farmers at risk':c.ndvi<0.45?'moderate stress — monitor crop development':'crop development within normal range';
-    const ipcText = c.ipc>=3?`IPC Phase ${c.ipc} — escalate immediately.`:c.ipc===2?`IPC Phase ${c.ipc} — alert county agriculture office.`:`IPC Phase ${c.ipc} — within acceptable range.`;
+    document.getElementById('p1-hdr').textContent = 'Crop types · Coming Soon';
+    document.getElementById('p1-body').innerHTML =
+      `<div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7">
+        🌱 Crop type classification is under development.<br>
+        We are building a 5-year Sentinel-2 time series classifier to map maize, tea, sugarcane, wheat, rice and more across Kenya's 47 counties.
+      </div>`;
+    document.getElementById('p2-hdr').textContent = 'What\'s coming';
+    document.getElementById('p2-body').innerHTML =
+      `<div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.8">
+        · Maize single &amp; double season<br>
+        · Tea / coffee / perennial<br>
+        · Sugarcane belt mapping<br>
+        · Wheat highlands<br>
+        · Rice irrigation schemes<br>
+        · Sorghum / millet ASAL zones
+      </div>`;
     document.getElementById('p3-body').innerHTML =
-      `<div class="aline" style="border-color:#e49635;background:#0c1a10;font-size:9px;line-height:1.6">
-        <b>${name} cropland</b> — dominant class: <b>${dominantCrop}</b>. NDVI ${c.ndvi.toFixed(2)} indicates ${cropStress}. Drought score ${c.drought}/100. ${ipcText} Soil ${c.soil.toFixed(3)} m³/m³. Classification estimated from NDVI within Dynamic World cropland pixels. Snapshot: ${c.date}.
+      `<div class="aline" style="border-color:var(--muted);background:#0c1a10;font-size:9px;line-height:1.6">
+        <b>Crop Intelligence — coming soon.</b> SavannahIQ is developing a pixel-level crop type classifier using 60 months of Sentinel-2 NDVI time series data within Dynamic World class 4 cropland pixels. Classification will cover Kenya's major crop types across all 47 counties. Check back soon.
       </div>`;
     return;
   }
@@ -911,36 +916,25 @@ function updateBottomNational(){
   }
 
   if(activeIdx === 'crops'){
-    const cropClasses = [
-      {name:'Fallow/bare',       color:'#a59b8f', pct:Math.round(SIQ.counties.filter(c=>c.ndvi<0.15).length/47*100)},
-      {name:'Very sparse',       color:'#e04030', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.15&&c.ndvi<0.25).length/47*100)},
-      {name:'Dryland cereals',   color:'#e07820', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.25&&c.ndvi<0.35).length/47*100)},
-      {name:'Maize early',       color:'#f5e642', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.35&&c.ndvi<0.45).length/47*100)},
-      {name:'Maize mid/wheat',   color:'#a0d860', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.45&&c.ndvi<0.55).length/47*100)},
-      {name:'Maize peak/beans',  color:'#4ec8e0', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.55&&c.ndvi<0.65).length/47*100)},
-      {name:'Sugarcane/rice',    color:'#419bdf', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.65&&c.ndvi<0.75).length/47*100)},
-      {name:'Tea/coffee',        color:'#2d6e28', pct:Math.round(SIQ.counties.filter(c=>c.ndvi>=0.75).length/47*100)},
-    ];
-    const maxCropPct = Math.max(...cropClasses.map(d=>d.pct),1);
-    document.getElementById('p1-hdr').textContent = 'Crop NDVI classes';
-    document.getElementById('p1-body').innerHTML = cropClasses.slice(0,4).map(d=>
-      `<div class="irow active">
-        <div class="irow-name">${d.name}</div>
-        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxCropPct*100)}%;background:${d.color}"></div></div>
-        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
-      </div>`).join('');
-    document.getElementById('p2-hdr').textContent = 'Crop classes continued';
-    document.getElementById('p2-body').innerHTML = cropClasses.slice(4).map(d=>
-      `<div class="irow active">
-        <div class="irow-name">${d.name}</div>
-        <div class="irow-bar"><div class="irow-fill" style="width:${Math.round(d.pct/maxCropPct*100)}%;background:${d.color}"></div></div>
-        <div class="irow-val" style="color:${d.color}">${d.pct}%</div>
-      </div>`).join('');
-    const stressedCrops = [...SIQ.counties].sort((a,b)=>a.ndvi-b.ndvi).slice(0,5).map(c=>`${c.county} (${c.ndvi.toFixed(2)})`).join(', ');
-    const healthyCrops  = [...SIQ.counties].sort((a,b)=>b.ndvi-a.ndvi).slice(0,3).map(c=>c.county).join(', ');
+    document.getElementById('p1-hdr').textContent = 'Crop types · Coming Soon';
+    document.getElementById('p1-body').innerHTML =
+      `<div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7">
+        🌱 Crop type classification is under development.<br>
+        We are building a 5-year Sentinel-2 time series classifier to map maize, tea, sugarcane, wheat, rice and more across Kenya's 47 counties.
+      </div>`;
+    document.getElementById('p2-hdr').textContent = 'What\'s coming';
+    document.getElementById('p2-body').innerHTML =
+      `<div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.8">
+        · Maize single &amp; double season<br>
+        · Tea / coffee / perennial<br>
+        · Sugarcane belt mapping<br>
+        · Wheat highlands<br>
+        · Rice irrigation schemes<br>
+        · Sorghum / millet ASAL zones
+      </div>`;
     document.getElementById('p3-body').innerHTML =
-      `<div class="aline" style="border-color:#e49635;background:#0c1a10;font-size:9px;line-height:1.6">
-        <b>Cropland NDVI health — Kenya ${SIQ.generated.slice(0,4)}</b>. Classification estimated from NDVI within Dynamic World class 4. Healthiest cropland: <b>${healthyCrops}</b> (NDVI >0.65 — likely tea/perennial). Most stressed cropland: <b>${stressedCrops}</b>. ${SIQ.counties.filter(c=>c.ndvi<0.35).length} counties with cropland NDVI below 0.35 — dryland cereals or fallow likely dominant. Methodology improving with each 30-day data collection. Data: ${SIQ.generated}.
+      `<div class="aline" style="border-color:var(--muted);background:#0c1a10;font-size:9px;line-height:1.6">
+        <b>Crop Intelligence — coming soon.</b> SavannahIQ is developing a pixel-level crop type classifier using 60 months of Sentinel-2 NDVI time series data within Dynamic World class 4 cropland pixels. Classification will cover Kenya's major crop types across all 47 counties. Check back soon.
       </div>`;
     return;
   }
@@ -1088,6 +1082,8 @@ async function boot() {
     CD  = {};
     SIQ.counties.forEach(c => CD[c.county] = c);
     window._geojson = geojson;
+
+    // Crop types coming soon — no fetch needed
 
     // Now fetch tile URLs from Cloud Run for the latest snapshot's exact window
     // (without this, Cloud Run defaults to "today minus 30 days to today",
